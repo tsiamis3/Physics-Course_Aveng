@@ -3,7 +3,7 @@
 // BOARD_URL: the address of the scoreboard Worker (see scoreboard-worker.js). Leave it '' to use
 // "local mode": scores are kept only in each student's own browser. With a URL, everyone shares one scoreboard.
 // Scores are reported by the browser, so a determined student can fake one. Use it for fun, not for grades.
-const BOARD_URL = '';
+const BOARD_URL = 'https://physq-board.tsiamis-angelos.workers.dev';
 
 // One object holds the nickname, the saved scores and the calls to the Worker.
 class Board {
