@@ -29,6 +29,7 @@ class Board {
     try {
       const r = await fetch(this.url + '/score', {method: 'POST', headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({nick: this.nick, lesson, correct, total})});
+      try { Object.keys(sessionStorage).filter(k => k.startsWith('physq-top:')).forEach(k => sessionStorage.removeItem(k)); } catch (e) {}
       return r.ok;
     } catch (e) { return false; }
   }
@@ -37,9 +38,15 @@ class Board {
   // Returns {shared: bool, rows: [{nick, correct, total}]}, best first.
   async top(lesson) {
     if (this.url) {
+      const ck = 'physq-top:' + lesson;                         // 60 s cache per browser tab: saves the Worker's free quota
+      try { const c = JSON.parse(sessionStorage.getItem(ck)); if (c && Date.now() - c.t < 60000) return c.v; } catch (e) {}
       try {
         const r = await fetch(this.url + (lesson ? '/top?lesson=' + encodeURIComponent(lesson) : '/overall'));
-        if (r.ok) return {shared: true, rows: (await r.json()).rows || []};
+        if (r.ok) {
+          const v = {shared: true, rows: (await r.json()).rows || []};
+          try { sessionStorage.setItem(ck, JSON.stringify({t: Date.now(), v})); } catch (e) {}
+          return v;
+        }
       } catch (e) { /* fall through to local mode */ }
     }
     const all = this.local(), me = this.nick || 'You';
