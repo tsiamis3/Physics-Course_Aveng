@@ -765,7 +765,7 @@ window.QUESTIONS = [
  },
  {
   "id": "G026",
-  "topic": "Other",
+  "topic": "Newton’s Laws & Forces",
   "difficulty": "easy",
   "units": "imperial",
   "keywords": [
@@ -784,7 +784,7 @@ window.QUESTIONS = [
  },
  {
   "id": "G027",
-  "topic": "Other",
+  "topic": "Newton’s Laws & Forces",
   "difficulty": "easy",
   "units": "imperial",
   "keywords": [
@@ -804,7 +804,7 @@ window.QUESTIONS = [
  },
  {
   "id": "G028",
-  "topic": "Other",
+  "topic": "Newton’s Laws & Forces",
   "difficulty": "easy",
   "units": "imperial",
   "keywords": [
@@ -824,7 +824,7 @@ window.QUESTIONS = [
  },
  {
   "id": "G029",
-  "topic": "Other",
+  "topic": "Newton’s Laws & Forces",
   "difficulty": "hard",
   "units": "imperial",
   "keywords": [
@@ -963,7 +963,7 @@ window.QUESTIONS = [
  },
  {
   "id": "G036",
-  "topic": "Other",
+  "topic": "Simple Machines",
   "difficulty": "easy",
   "units": "imperial",
   "keywords": [
@@ -1366,7 +1366,7 @@ window.QUESTIONS = [
  },
  {
   "id": "G056",
-  "topic": "Other",
+  "topic": "Simple Machines",
   "difficulty": "easy",
   "units": "imperial",
   "keywords": [
@@ -1386,7 +1386,7 @@ window.QUESTIONS = [
  },
  {
   "id": "G057",
-  "topic": "Other",
+  "topic": "Simple Machines",
   "difficulty": "hard",
   "units": "imperial",
   "keywords": [
@@ -1406,7 +1406,7 @@ window.QUESTIONS = [
  },
  {
   "id": "G058",
-  "topic": "Other",
+  "topic": "Simple Machines",
   "difficulty": "easy",
   "units": "imperial",
   "keywords": [
@@ -1426,7 +1426,7 @@ window.QUESTIONS = [
  },
  {
   "id": "G059",
-  "topic": "Other",
+  "topic": "Simple Machines",
   "difficulty": "hard",
   "units": "imperial",
   "keywords": [
@@ -1446,7 +1446,7 @@ window.QUESTIONS = [
  },
  {
   "id": "G060",
-  "topic": "Other",
+  "topic": "Simple Machines",
   "difficulty": "easy",
   "units": "imperial",
   "keywords": [
@@ -1465,7 +1465,7 @@ window.QUESTIONS = [
  },
  {
   "id": "G061",
-  "topic": "Other",
+  "topic": "Simple Machines",
   "difficulty": "easy",
   "units": "imperial",
   "keywords": [
@@ -1485,7 +1485,7 @@ window.QUESTIONS = [
  },
  {
   "id": "G062",
-  "topic": "Other",
+  "topic": "Work, Power, Energy, Torque and their relation",
   "difficulty": "hard",
   "units": "imperial",
   "keywords": [
@@ -1545,7 +1545,7 @@ window.QUESTIONS = [
  },
  {
   "id": "G065",
-  "topic": "Other",
+  "topic": "Work, Power, Energy, Torque and their relation",
   "difficulty": "hard",
   "units": "imperial",
   "keywords": [
@@ -1953,7 +1953,7 @@ window.QUESTIONS = [
  },
  {
   "id": "G085",
-  "topic": "Other",
+  "topic": "Units & Conversions",
   "difficulty": "hard",
   "units": "imperial",
   "keywords": [
@@ -1974,7 +1974,7 @@ window.QUESTIONS = [
  },
  {
   "id": "G086",
-  "topic": "Other",
+  "topic": "Atom and Matter",
   "difficulty": "easy",
   "units": "SI",
   "keywords": [
@@ -1994,7 +1994,7 @@ window.QUESTIONS = [
  },
  {
   "id": "G087",
-  "topic": "Other",
+  "topic": "Atom and Matter",
   "difficulty": "hard",
   "units": "SI",
   "keywords": [
@@ -2014,7 +2014,7 @@ window.QUESTIONS = [
  },
  {
   "id": "G088",
-  "topic": "Other",
+  "topic": "Atom and Matter",
   "difficulty": "easy",
   "units": "SI",
   "keywords": [
@@ -2034,7 +2034,7 @@ window.QUESTIONS = [
  },
  {
   "id": "G089",
-  "topic": "Other",
+  "topic": "Atom and Matter",
   "difficulty": "easy",
   "units": "SI",
   "keywords": [
