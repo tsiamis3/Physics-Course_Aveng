@@ -33,50 +33,80 @@ button{font:inherit;font-weight:600;padding:8px 14px;border:0;border-radius:4px;
 <section><h2>Constants</h2><ul>
 <li>g = 32.2 ft/s² (SI: 9.81 m/s²; standard 32.174 ft/s²)</li>
 <li>Water: 62.4 lb/ft³ (1000 kg/m³) · 1 atm = 14.7 psi (101 325 Pa)</li>
-<li>1 hp = 550 ft·lb/s · 1 BTU ≈ 778 ft·lb · 1 slug = 32.2 lb (mass)</li></ul></section>
+<li>1 hp = 550 ft·lb/s (745.7 W) · 1 BTU ≈ 778 ft·lb · 1 slug = 32.2 lb (mass)</li></ul></section>
 
 <section><h2>Kinematics</h2><ul>
-<li>v = v₀ + a·t</li><li>x = x₀ + v₀·t + ½·a·t²</li><li>v² = v₀² + 2·a·Δx</li>
+<li>Velocity: v = x/t · uniform motion: v = const, x = v·t</li>
+<li>Uniform acceleration: v = v₀ + a·t</li><li>x = x₀ + v₀·t + ½·a·t²</li><li>v² = v₀² + 2·a·Δx</li>
 <li>Free fall: a = g = 32.2 ft/s²</li></ul></section>
 
 <section><h2>Newton’s Laws &amp; Forces</h2><ul>
-<li>ΣF = m·a, with m = W/g (m in slugs, F in lb, a in ft/s²)</li>
-<li>Weight: W = m·g</li><li>Action–reaction: equal in size, opposite in direction</li></ul></section>
+<li>1st law (inertia): ΣF = 0 ⇔ constant velocity</li>
+<li>2nd law: ΣF = m·a, with m = W/g (m in slugs, F in lb, a in ft/s²)</li>
+<li>3rd law, action–reaction: equal in size, opposite in direction</li>
+<li>Weight: W = m·g</li></ul></section>
 
 <section><h2>Friction</h2><ul>
-<li>f = μ·N (μ = friction coefficient, N = normal force)</li>
+<li>Static friction: equal and opposite to the applied force, up to its maximum, the limiting friction</li>
+<li>Sliding (kinetic) friction: F_f = μ·N (a little smaller than the limiting friction; μ = friction coefficient, N = normal force)</li>
 <li>On a level surface N = W; on a slope N = W·cos θ</li></ul></section>
 
 <section><h2>Work, Power &amp; Energy</h2><ul>
-<li>Work: W = F·d·cos θ  [ft·lb]</li>
+<li>Work: W = F·x (force along the displacement x); in general W = F·x·cos θ  [ft·lb]</li>
 <li>Kinetic energy: KE = ½·m·v² = ½·(W/g)·v²</li>
-<li>Potential energy: PE = W·h</li>
-<li>Power: P = Work/t = F·v  [ft·lb/s; ÷ 550 for hp]</li></ul></section>
+<li>Potential energy (gravitational): PE = m·g·h = W·h</li>
+<li>Conservation of mechanical energy: E = KE + PE = const (no friction or heat losses)</li>
+<li>Power: P = Work/t = F·v  [ft·lb/s; ÷ 550 for hp; SI: W = J/s]</li></ul></section>
 
 <section><h2>Momentum &amp; Collisions</h2><ul>
 <li>p = m·v</li><li>Impulse: F·Δt = Δp</li>
 <li>Collisions: total momentum is conserved; kinetic energy only if elastic</li></ul></section>
 
 <section><h2>Torque &amp; Equilibrium</h2><ul>
-<li>τ = F·d (d perpendicular to the force)  [lb·ft or lb·in]</li>
-<li>Equilibrium: ΣF = 0 and Στ = 0</li>
-<li>Engine: torque [lb·ft] = hp × 5252 ÷ rpm</li></ul></section>
+<li>Torque: τ = F·d (d = perpendicular distance, the lever arm)  [lb·ft or lb·in; N·m]</li>
+<li>Equilibrium of a rigid body: ΣF = 0 and Στ = 0</li>
+<li>Work by a torque: W = τ·θ (θ in rad)</li>
+<li>Shaft power: P = τ·ω</li>
+<li>Engine: hp = τ [lb·ft] × n [rpm] ÷ 5252, so τ = hp × 5252 ÷ rpm. SI: P [kW] = τ [N·m] × n [rpm] ÷ 9549</li>
+<li>At constant power, higher rpm means lower torque</li>
+<li>Do not mix lb·ft (torque) with ft·lb (work), and rpm with rad/s</li></ul></section>
 
 <section><h2>Circular &amp; Rotational Motion</h2><ul>
 <li>ω = 2π·n/60 (n in rpm, ω in rad/s)</li><li>v = ω·r</li>
-<li>a_c = v²/r</li><li>F_c = m·v²/r = (W/g)·v²/r</li></ul></section>
+<li>a_c = v²/r</li><li>Centripetal force: F_c = m·v²/r = (W/g)·v²/r, always perpendicular to v, pointing to the centre</li>
+<li>Centrifugal force: a fictitious force, needed only in the rotating frame</li></ul></section>
 
 <section><h2>Oscillations &amp; Waves</h2><ul>
 <li>T = 1/f</li><li>v = f·λ</li>
 <li>Spring: F = k·x · T = 2π·√(m/k)</li>
-<li>Pendulum: T = 2π·√(L/g)</li></ul></section>
+<li>Pendulum (small oscillations): T = 2π·√(L/g); depends on length, not on mass</li>
+<li>Periodic motion: period T, frequency f, amplitude</li></ul></section>
+
+<section><h2>Stress</h2><ul>
+<li>σ = F/A (stress), units of pressure: psi (Pa = N/m²), but not the same quantity as pressure</li>
+<li>Types: tensile, compressive, shear</li></ul></section>
+
+<section><h2>Simple Machines</h2><ul>
+<li>A machine trades force for distance (or speed); it does not create work or energy</li>
+<li>Mechanical advantage: MA = F_load / F_effort</li>
+<li>Velocity ratio: VR = distance moved by the effort / distance moved by the load</li>
+<li>Ideal machine: MA = VR · real machine: efficiency = MA/VR = W_out/W_in</li>
+<li>Lever: F_e·L_e = F_l·L_l, ideal MA = L_e/L_l (effort arm / load arm)</li>
+<li>1st class: fulcrum between effort and load (seesaw, crowbar, pliers)</li>
+<li>2nd class: load between fulcrum and effort (wheelbarrow, nutcracker), MA &gt; 1</li>
+<li>3rd class: effort between fulcrum and load (tweezers, forearm), MA &lt; 1</li></ul></section>
 
 <section><h2>Fluids &amp; Pressure</h2><ul>
 <li>P = F/A  [psi = lb/in²]</li>
-<li>Pressure at depth: P = P₀ + γ·h (γ = weight density, water 62.4 lb/ft³)</li>
-<li>Buoyancy: F_b = γ_fluid · V_displaced</li></ul></section>
+<li>Static pressure of a liquid: P = ρ·g·h (depends only on depth and density); with the atmosphere P = P₀ + ρ·g·h = P₀ + γ·h (γ = weight density, water 62.4 lb/ft³)</li>
+<li>Ram (dynamic) pressure: P = ½·ρ·v²</li>
+<li>Buoyancy (Archimedes): F_b = ρ_fluid·g·V_displaced = γ_fluid·V_displaced (weight of the displaced fluid)</li></ul></section>
 
-<section><h2>Matter &amp; Density</h2><ul>
+<section><h2>Matter &amp; Atomic Structure</h2><ul>
+<li>A = Z + N (mass number = protons + neutrons) · N = A − Z</li>
+<li>Neutral atom: number of electrons = Z; an ion has gained or lost electrons</li>
+<li>Notation ᴬ_Z X, e.g. ²⁷₁₃Al: 13 protons, 14 neutrons, 13 electrons</li>
+<li>Isotopes: same Z, different N</li>
 <li>Mass density ρ = m/V · weight density γ = W/V</li>
 <li>Specific gravity SG = ρ/ρ_water</li></ul></section>
 
@@ -84,7 +114,7 @@ button{font:inherit;font-weight:600;padding:8px 14px;border:0;border-radius:4px;
 <li>Q = m·c·ΔT (water: c ≈ 1 BTU/(lb·°F))</li>
 <li>Gas law: P₁V₁/T₁ = P₂V₂/T₂ (T absolute)</li>
 <li>°R = °F + 459.67 · K = °C + 273.15 · °F = °C × 9/5 + 32</li></ul></section>
-<p class="note">Reference sheet for the course. Always follow the constants given in the exam.</p>
+<p class="note">Reference sheet for the course, matched to the lessons up to 19 October 2026. Topics not covered yet are kept. Always follow the constants given in the exam.</p>
 </main>
 </body>
 </html>
