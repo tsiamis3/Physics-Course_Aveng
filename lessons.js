@@ -3,73 +3,244 @@ window.LESSONS = [
  {
   "id": "2026-10-19",
   "date": "2026-10-19",
-  "title": "Title of the lesson",
+  "title": "Torque, Power and Simple Machines",
   "topics": [
-   "Kinematics",
-   "Friction"
+   "Work, Power, Energy, Torque and their relation",
+   "Simple Machines"
   ],
   "summary": [
-   "Write the review of the lesson here: what we covered, what to remember. A blank line starts a new paragraph."
+   "Torque is the turning effect of a force: tau = F*d, where d is the perpendicular distance from the axis to the line of action of the force (the lever arm). Units: lb·ft, lb·in, N·m. A torque wrench measures torque.",
+   "Power is the rate of doing work: P = W/t. Units: watt (1 W = 1 J/s) and horsepower (1 hp = 550 ft·lb/s = 745.7 W). For a force moving at speed v: P = F*v.",
+   "Link between torque and power in a machine: for a rotating shaft, P = tau*omega, with omega in rad/s (omega = 2*pi*n/60 when n is in rpm). In practical units: power (hp) = torque (lb·ft) * n (rpm) / 5252.",
+   "Example: an engine gives 250 lb·ft at 2,500 rpm. P = 250*2500/5252 = about 119 hp. At the same power, a higher rpm means a lower torque, and the reverse. This is what a gearbox trades.",
+   "The work done by a torque turning through an angle theta (in radians) is W = tau*theta. Power is the rate at which this work is done.",
+   "What to watch: (1) rpm is not rad/s. (2) The constant 5252 works only for lb·ft, rpm and hp. In SI use P (kW) = tau (N·m) * n (rpm) / 9549. (3) lb·ft (torque) and ft·lb (work) have the same dimensions but are different quantities. (4) Power is a rate, energy is not: kW is not kWh. (5) Peak torque and peak power of an engine occur at different rpm. (6) Real output power is smaller than input power because of losses: P_out = efficiency*P_in.",
+   "Simple machines: lever, pulley, inclined plane, wheel and axle, gear, screw, wedge. A machine does not create energy or work. It lets us use a smaller force over a larger distance (or the opposite), change the direction of the force, or change the speed.",
+   "Mechanical advantage MA = load force / effort force. Velocity ratio VR = distance moved by the effort / distance moved by the load. For an ideal machine (no friction) MA = VR. For a real machine MA < VR, and efficiency = MA/VR = work out / work in.",
+   "The lever has a fulcrum, an effort and a load. It balances when the torques are equal: F_e*L_e = F_l*L_l. Ideal MA = effort arm / load arm = L_e/L_l.",
+   "Example: load arm 1 ft, effort arm 4 ft, load 200 lb. The effort needed is 50 lb (MA = 4), but the effort moves 4 times as far as the load.",
+   "First class lever: the fulcrum is between the effort and the load. Examples: seesaw, crowbar, pliers, scissors. MA can be larger or smaller than 1.",
+   "Second class lever: the load is between the fulcrum and the effort. Examples: wheelbarrow, nutcracker, bottle opener. MA is always larger than 1 (a force multiplier).",
+   "Third class lever: the effort is between the fulcrum and the load. Examples: tweezers, fishing rod, the forearm lifting a weight. MA is always smaller than 1: it needs more force but gains distance and speed at the load."
   ],
   "keyPoints": [
-   "First point",
-   "Second point"
+   "Torque tau = F*d, with d the perpendicular distance (lever arm). Units lb·ft, lb·in, N·m.",
+   "Power is the rate of doing work, P = W/t. Units: W, kW, hp (1 hp = 550 ft·lb/s = 745.7 W).",
+   "The link between torque and power: P = tau*omega. In practical units, hp = torque (lb·ft) * rpm / 5252.",
+   "At constant power, higher rpm means lower torque. Gearboxes trade speed for torque.",
+   "Watch the units: rpm vs rad/s, lb·ft vs ft·lb, kW vs kWh, hp vs W.",
+   "A simple machine trades force for distance. It does not create work or energy.",
+   "MA = load / effort. VR = effort distance / load distance. Ideal MA = VR. Efficiency = MA/VR.",
+   "Lever balance: F_e*L_e = F_l*L_l. Three classes by the position of the fulcrum, effort and load."
   ],
   "formulas": [
-   "v = v0 + a*t"
+   "tau = F*d",
+   "P = W/t",
+   "P = F*v",
+   "P = tau*omega",
+   "omega = 2*pi*n/60 (n in rpm, omega in rad/s)",
+   "P (hp) = tau (lb·ft) * n (rpm) / 5252",
+   "P (kW) = tau (N·m) * n (rpm) / 9549",
+   "W = tau*theta (theta in rad)",
+   "1 hp = 550 ft·lb/s = 745.7 W",
+   "MA = F_load / F_effort",
+   "VR = d_effort / d_load",
+   "efficiency = MA/VR = W_out/W_in",
+   "Lever: F_e*L_e = F_l*L_l, ideal MA = L_e/L_l"
   ],
   "links": [
    {
-    "label": "Slides",
-    "href": "https://drive.google.com/"
+    "label": "PhET: Torque",
+    "href": "https://phet.colorado.edu/en/search?q=Torque"
+   },
+   {
+    "label": "PhET: Balancing Act",
+    "href": "https://phet.colorado.edu/en/search?q=Balancing%20Act"
    }
   ],
+  "questionIds": []
+ },
+ {
+  "id": "2026-10-17",
+  "date": "2026-10-17",
+  "title": "Circular Motion, Periodic Phenomena, Work and Energy",
+  "topics": [
+   "Momentum, Collisions & Circular Motion",
+   "Waves, Sound & Vibration",
+   "Work, Power, Energy, Torque and their relation"
+  ],
+  "summary": [
+   "Introduction to circular motion. We explained what the centripetal force is: F_c = m*v^2/r.",
+   "It is always perpendicular to the velocity and points to the centre. The speed (magnitude of the velocity) stays the same, but the direction of the velocity keeps changing, so there is a centripetal acceleration.",
+   "Centrifugal force: a fictitious force that has to be introduced to explain the physics in the rotating coordinate system.",
+   "Periodic phenomena: definition. Useful quantities: period, amplitude, frequency.",
+   "Pendulum example. The period of a pendulum depends only on its length (not on its mass), for small oscillations.",
+   "Definition of work: W = F*x. Potential energy (gravitational), kinetic energy, conservation of mechanical energy."
+  ],
+  "keyPoints": [
+   "Circular motion. Centripetal and centrifugal forces.",
+   "Periodic phenomena. Useful quantities: period, amplitude, frequency.",
+   "Pendulum: the period depends on the length, not on the mass.",
+   "Work and energy (kinetic, potential). Conservation of mechanical energy."
+  ],
+  "formulas": [
+   "F_c = m*v^2/r",
+   "T = 1/f (T = period, f = frequency)",
+   "Pendulum, small oscillations: T = 2*pi*sqrt(L/g)",
+   "W = F*x (force along the displacement x)",
+   "K = 1/2*m*v^2",
+   "U = m*g*h",
+   "E = K + U = const (no friction or heat losses)"
+  ],
+  "links": [],
+  "questionIds": []
+ },
+ {
+  "id": "2026-10-16",
+  "date": "2026-10-16",
+  "title": "Rigid Body Balance, Fluid Pressure and Buoyancy",
+  "topics": [
+   "Statics & Equilibrium",
+   "Fluids & Pressure"
+  ],
+  "summary": [
+   "We discussed how a rigid body stays in balance. We introduced the torque, tau = F*d. Example: balance of a rod with masses at each end (Balancing Act simulation).",
+   "Pressure from a liquid depends only on the depth and the density of the liquid (and on g).",
+   "Ram (dynamic) pressure, from liquid motion: P = 1/2*rho*v^2.",
+   "Buoyancy: Archimedes' principle. The buoyant force equals the weight of the displaced liquid.",
+   "We played with the PhET Buoyancy simulation."
+  ],
+  "keyPoints": [
+   "Rigid body balance: total force is 0 and total torque is 0. Examples with a rod and masses at each end.",
+   "Pressure in liquids: static pressure and ram (dynamic) pressure.",
+   "Buoyancy and Archimedes' principle."
+  ],
+  "formulas": [
+   "Torque: tau = F*d",
+   "Balance: Sum F = 0 and Sum tau = 0",
+   "Liquid static pressure: P = rho*g*h",
+   "Ram (dynamic) pressure: P = 1/2*rho*v^2",
+   "Buoyancy: B = rho_liquid*g*V (V = volume of the liquid displaced, i.e. the submerged volume)"
+  ],
+  "links": [
+   {
+    "label": "PhET: Balancing Act",
+    "href": "https://phet.colorado.edu/sims/html/balancing-act/latest/balancing-act_all.html"
+   },
+   {
+    "label": "PhET: Buoyancy",
+    "href": "https://phet.colorado.edu/sims/html/buoyancy/latest/buoyancy_all.html"
+   }
+  ],
+  "questionIds": []
+ },
+ {
+  "id": "2026-10-15",
+  "date": "2026-10-15",
+  "title": "Stress and Friction",
+  "topics": [
+   "Statics & Equilibrium",
+   "Friction"
+  ],
+  "summary": [
+   "We discussed stress (in Greek: τάση). It is the internal reaction of the atoms of the object when an external force is applied.",
+   "Formula: sigma = F/A. Its units are the units of pressure (Pa = N/m^2); we discussed the difference between stress and pressure.",
+   "We discussed the different types of stress (tensile, compressive, shear). Check them in the material.",
+   "Then we moved to friction.",
+   "Static friction: there is no formula for it; it is always opposite to the external force.",
+   "If the external force gets big enough, static friction reaches its maximum value, the limiting friction.",
+   "From then on the body starts sliding and we have sliding (kinetic) friction, calculated by F_f = mu*N. It is a little smaller than the limiting friction."
+  ],
+  "keyPoints": [
+   "Stress: definition, types (tensile, compressive, shear), qualitative description.",
+   "Stress has the units of pressure but is not the same thing as pressure.",
+   "Friction: static, limiting, sliding (kinetic).",
+   "Sliding friction is a little smaller than limiting friction."
+  ],
+  "formulas": [
+   "sigma = F/A (stress, units Pa = N/m^2)",
+   "Sliding friction: F_f = mu*N (N = normal force, mu = coefficient of friction)"
+  ],
+  "links": [],
   "questionIds": []
  },
  {
   "id": "2026-10-14",
   "date": "2026-10-14",
-  "title": "2026-10-14",
-  "topics": [],
+  "title": "Newton's Laws and Kinematics",
+  "topics": [
+   "Newton’s Laws & Forces",
+   "Kinematics"
+  ],
   "summary": [
-   "What matter is made of? Conservation of mass (i.e. mass is conserved, example liquid gas burnt, turned into another gas byproduct, with the total mass being conserved.\nWhat atom is made of ? \nprotons neutrons in the nucleus. electrons spin around, in specific trajectories/energies.\nUsed the interactive Periodic Table from zperiod to understand how protons neutrons and electrons are distributed for different elements. \nWe mentioned the idea of similar chemical characteristics across vertical lines of periodic table. Mentioned also that electrons actually are described by cloud probability , and not circular orbits, but not in much detail, just a taste.\nUsed also Build an Atom simulation from Phet, to play around and build various atoms.\nWe discussed states of matter (solid,liquid,gas,plasma), their macroscopic and microscopic differences.  \nFinally, we qualitetively discussed the formation of bonds (very simple things), and discussed the difference between compounds and mixtures.",
-   "An atom has a small, dense nucleus of protons and neutrons, surrounded by electrons. The atomic number Z counts the protons and decides the element. The mass number A counts protons plus neutrons. Atoms of the same element with different numbers of neutrons are isotopes."
+   "What are Newton's Laws?",
+   "1st Law (inertia): if the net force is zero, the velocity stays constant.",
+   "2nd Law, F = ma: force is connected to acceleration, i.e. to the change in velocity.",
+   "3rd Law (action-reaction): related to conservation of momentum. No exercises or examples here.",
+   "Kinematics: if the velocity is constant, we have uniform rectilinear motion.",
+   "If there is a net force, there is acceleration. With constant acceleration we have uniformly accelerated rectilinear motion.",
+   "Some arithmetic examples were covered for the constant-velocity case. For constant acceleration we saw only the formulas, no examples.",
+   "We discussed various forces: gravity, buoyancy, tension and friction."
+  ],
+  "keyPoints": [
+   "Newton's three laws.",
+   "Kinematics and its conceptual connection with Newton's laws: no net force means constant velocity, net force means acceleration.",
+   "Examples of forces: gravity, buoyancy, tension, friction."
+  ],
+  "formulas": [
+   "Sum F = 0 (1st law)",
+   "F = m*a (2nd law)",
+   "v = x/t (velocity)",
+   "Uniform rectilinear motion: v = const, x = v*t",
+   "Uniformly accelerated rectilinear motion: v = v_0 + a*t",
+   "x = v_0*t + (1/2)*a*t^2"
+  ],
+  "links": [],
+  "questionIds": []
+ },
+ {
+  "id": "2026-10-13",
+  "date": "2026-10-13",
+  "title": "Matter and the Atom",
+  "topics": [
+   "Matter & Atomic Structure"
+  ],
+  "summary": [
+   "What is matter made of? Conservation of mass: mass is conserved. Example: a liquid fuel burns and turns into gas byproducts, and the total mass stays the same.",
+   "What is an atom made of? Protons and neutrons in the nucleus. Electrons move around it in specific energy levels.",
+   "We used the interactive Periodic Table (zperiod) to see how protons, neutrons and electrons are distributed in different elements.",
+   "Elements in the same vertical column of the periodic table have similar chemical characteristics.",
+   "Electrons are actually described by a probability cloud, not by circular orbits. This was only a taste, not in detail.",
+   "We used the Build an Atom simulation from PhET to build various atoms.",
+   "We discussed the states of matter (solid, liquid, gas, plasma) and their macroscopic and microscopic differences.",
+   "Finally, we discussed qualitatively how bonds form (very simple), and the difference between compounds and mixtures."
   ],
   "keyPoints": [
    "Matter is made of atoms; an element is fixed by its atomic number Z (number of protons).",
    "Mass number A = Z + N, where N is the number of neutrons.",
    "A neutral atom has as many electrons as protons; an ion has gained or lost electrons.",
-   "Isotopes same Z, different N (e.g. carbon-12 and carbon-14).",
+   "Isotopes: same Z, different N (e.g. carbon-12 and carbon-14).",
    "Nearly all the mass of an atom is in the nucleus; the electrons decide chemical behaviour and bonding.",
-   "Properties of materials (density, strength, conductivity) come from the atoms and how they are bonded.",
-   "Difference between compounds and mixtures"
+   "Elements in the same column of the periodic table behave similarly.",
+   "States of matter: solid, liquid, gas, plasma.",
+   "A compound is chemically bonded atoms in a fixed ratio; a mixture is not chemically bonded and can be separated physically."
   ],
   "formulas": [
    "A = Z + N",
    "N = A - Z",
-   "Neutral atom number of electrons = Z",
-   "Atomic notation ^A_Z X  (e.g. ^27_13 Al 13 protons, 14 neutrons, 13 electrons)"
+   "Neutral atom: number of electrons = Z",
+   "Atomic notation ^A_Z X (e.g. ^27_13 Al: 13 protons, 14 neutrons, 13 electrons)"
   ],
   "links": [
    {
-    "label": "Periodic table ",
+    "label": "Interactive periodic table",
     "href": "https://zperiod.app/"
+   },
+   {
+    "label": "PhET: Build an Atom",
+    "href": "https://phet.colorado.edu/sims/html/build-an-atom/latest/build-an-atom_all.html"
    }
   ],
-  "questionIds": []
- },
- {
-  "id": "LESSONS_HOWTO",
-  "date": "",
-  "title": "LESSONS_HOWTO",
-  "topics": [],
-  "summary": [
-   "# Νέο μάθημα: τι γράφω, τι τρέχω (ΧΩΡΙΣ το GitHub ακόμα)",
-   "Όλα τρέχουν στον φάκελο του site (εκεί που είναι το questions.js). Αντικατέστησε πρώτα το generate_questions.py με το τελευταίο."
-  ],
-  "keyPoints": [],
-  "formulas": [],
-  "links": [],
   "questionIds": []
  }
 ];
