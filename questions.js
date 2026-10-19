@@ -2501,5 +2501,207 @@ window.QUESTIONS = [
   "explanation": "N = A - Z = 65 - 29 = 36 neutrons.",
   "type": "calculation",
   "lesson": "2026-10-14"
+ },
+ {
+  "id": "G125",
+  "topic": "Matter & Atomic Structure",
+  "difficulty": "easy",
+  "units": "SI",
+  "keywords": [
+   "weight"
+  ],
+  "question": "When rust forms on a jack's steel ram, some iron atoms lose three electrons and become Fe^3+ ions. Which statement is correct?",
+  "options": [
+   "The atom becomes a different element because its number of electrons has changed.",
+   "The atom loses most of its mass, because electrons carry nearly all of an atom's mass.",
+   "The number of protons drops by three to balance the lost electrons.",
+   "The atom is still iron, because the number of protons Z is unchanged; it is now an ion."
+  ],
+  "answer": 3,
+  "explanation": "The element is fixed by the atomic number Z (protons). Losing electrons makes an ion, not a new element. Nearly all the mass is in the nucleus, so the mass barely changes.",
+  "type": "theory",
+  "lesson": "2026-10-14"
+ },
+ {
+  "id": "G126",
+  "topic": "Matter & Atomic Structure",
+  "difficulty": "easy",
+  "units": "SI",
+  "keywords": [
+   "units"
+  ],
+  "question": "Corrosion on an aluminum jack bracket produces Al^3+ ions from the isotope ^27_13 Al. How many protons, neutrons and electrons does one of these ions contain?",
+  "options": [
+   "13 protons, 14 neutrons, 10 electrons",
+   "13 protons, 14 neutrons, 13 electrons",
+   "10 protons, 14 neutrons, 13 electrons",
+   "13 protons, 14 neutrons, 16 electrons"
+  ],
+  "answer": 0,
+  "explanation": "Protons = Z = 13 and neutrons N = A - Z = 27 - 13 = 14. The 3+ ion has lost 3 electrons, so it has 13 - 3 = 10 electrons.",
+  "type": "calculation",
+  "lesson": "2026-10-14"
+ },
+ {
+  "id": "G127",
+  "topic": "Matter & Atomic Structure",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "units"
+  ],
+  "question": "Roughly how many electrons are in a 2 lb steel hoist hook? Treat it as pure neutral iron, ^56_26 Fe, and take the hook to contain about 1 x 10^25 atoms.",
+  "options": [
+   "1 x 10^25 electrons",
+   "2.6 x 10^26 electrons",
+   "5.6 x 10^26 electrons",
+   "2.6 x 10^24 electrons"
+  ],
+  "answer": 1,
+  "explanation": "A neutral iron atom has Z = 26 electrons, so the total is 26 x 10^25 = 2.6 x 10^26. Using A = 56 would count nucleons, not electrons.",
+  "type": "calculation",
+  "lesson": "2026-10-14"
+ },
+ {
+  "id": "G128",
+  "topic": "Matter & Atomic Structure",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "units"
+  ],
+  "question": "Copper terminal lugs on a workshop bench are crimped onto wires. One copper atom in a lug is the isotope ^63_29 Cu. How many neutrons are in its nucleus?",
+  "options": [
+   "63",
+   "29",
+   "34",
+   "92"
+  ],
+  "answer": 2,
+  "explanation": "N = A - Z = 63 - 29 = 34 neutrons.",
+  "type": "calculation",
+  "lesson": "2026-10-14"
+ },
+ {
+  "id": "G129",
+  "topic": "Matter & Atomic Structure",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "units",
+   "weight"
+  ],
+  "question": "Fuel of 2.0 lb is burned completely in a shop test burner with 112 oz of oxygen. All of the fuel and oxygen end up as exhaust gases. What is the total mass of the exhaust in lb?",
+  "options": [
+   "114 lb",
+   "5.0 lb",
+   "9.0 lb",
+   "7.0 lb"
+  ],
+  "answer": 2,
+  "explanation": "Mass is conserved. 112 oz = 112/16 = 7.0 lb of oxygen, so the exhaust mass is 2.0 + 7.0 = 9.0 lb.",
+  "type": "calculation",
+  "lesson": "2026-10-14"
+ },
+ {
+  "id": "G130",
+  "topic": "Matter & Atomic Structure",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "units"
+  ],
+  "question": "While checking a materials record for iron (Z = 26) used in tool steel, you see four entries. Which one is physically impossible?",
+  "options": [
+   "A neutral ^56_26 Fe atom with 30 electrons",
+   "An ^54_26 Fe atom with 28 neutrons",
+   "A neutral ^56_26 Fe atom with 26 electrons",
+   "An ^56_26 Fe ion with 24 electrons"
+  ],
+  "answer": 0,
+  "explanation": "A neutral atom has as many electrons as protons, so neutral iron has 26 electrons, not 30. Having 24 electrons just means the atom is an ion.",
+  "type": "theory",
+  "lesson": "2026-10-14"
+ },
+ {
+  "id": "G131",
+  "topic": "Matter & Atomic Structure",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "density"
+  ],
+  "question": "Which statement about a neutral atom in a steel wrench is correct?",
+  "options": [
+   "The nucleus fills most of the atom's volume, so the atom is mostly nucleus.",
+   "Nearly all the atom's mass is in the tiny nucleus, while the electrons determine its chemical behavior.",
+   "Most of the atom's mass is in the electrons, because they move around the nucleus.",
+   "The neutrons set the element and the chemical bonding, because they are in the nucleus."
+  ],
+  "answer": 1,
+  "explanation": "The small, dense nucleus of protons and neutrons holds nearly all the mass, and the electrons decide bonding. The element is fixed by Z, the number of protons.",
+  "type": "theory",
+  "lesson": "2026-10-14"
+ },
+ {
+  "id": "G132",
+  "topic": "Matter & Atomic Structure",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "units"
+  ],
+  "question": "Consider, as a thought experiment, a carbon atom ^12_6 C in a steel file whose number of neutrons is doubled while its number of protons stays the same. What is the new mass number, and is it still carbon?",
+  "options": [
+   "A = 24, and it is still carbon",
+   "A = 18, and it is still carbon",
+   "A = 18, and it becomes a different element",
+   "A = 12, and it is still carbon"
+  ],
+  "answer": 1,
+  "explanation": "The original N = 12 - 6 = 6. Doubling gives N = 12, so A = Z + N = 6 + 12 = 18. Z is unchanged, so it is still carbon, a different isotope.",
+  "type": "calculation",
+  "lesson": "2026-10-14"
+ },
+ {
+  "id": "G133",
+  "topic": "Matter & Atomic Structure",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "units"
+  ],
+  "question": "Nickel plating on a landing gear brake component contains Ni^2+ ions of the isotope ^58_28 Ni. How many more neutrons than electrons does one such ion have?",
+  "options": [
+   "2",
+   "4",
+   "30",
+   "32"
+  ],
+  "answer": 1,
+  "explanation": "Neutrons: N = A - Z = 58 - 28 = 30. The ion has lost two electrons, so it has 28 - 2 = 26 electrons. The difference is 30 - 26 = 4.",
+  "type": "calculation",
+  "lesson": "2026-10-14"
+ },
+ {
+  "id": "G134",
+  "topic": "Matter & Atomic Structure",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "weight",
+   "units"
+  ],
+  "question": "Inside a sealed steel can, 1 lb 12 oz of liquid solvent is heated until all of it has turned to vapor. The empty can with its lid has a mass of 14 oz, and nothing escapes. What is the total mass of the can plus its contents after all the solvent has evaporated?",
+  "options": [
+   "2.00 lb",
+   "2.625 lb",
+   "1.75 lb",
+   "1.89 lb"
+  ],
+  "answer": 1,
+  "explanation": "Mass is conserved when a liquid turns to gas in a sealed can. Total = 1 lb 12 oz + 14 oz = 28 oz + 14 oz = 42 oz = 2.625 lb, since 1 lb = 16 oz.",
+  "type": "calculation",
+  "lesson": "2026-10-14"
  }
 ];

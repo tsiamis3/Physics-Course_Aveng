@@ -32,7 +32,7 @@ window.LESSONS = [
   "title": "2026-10-14",
   "topics": [],
   "summary": [
-   "Today we started from the question what is everything made of. All matter is built from atoms, and each chemical element is defined by its atomic number. We looked at the structure of the atom, how elements are labelled, and why this matters for aircraft materials (aluminium, titanium, steel).",
+   "What matter is made of? Conservation of mass (i.e. mass is conserved, example liquid gas burnt, turned into another gas byproduct, with the total mass being conserved.\nWhat atom is made of ? \nprotons neutrons in the nucleus. electrons spin around, in specific trajectories/energies.\nUsed the interactive Periodic Table from zperiod to understand how protons neutrons and electrons are distributed for different elements. \nWe mentioned the idea of similar chemical characteristics across vertical lines of periodic table. Mentioned also that electrons actually are described by cloud probability , and not circular orbits, but not in much detail, just a taste.\nUsed also Build an Atom simulation from Phet, to play around and build various atoms.\nWe discussed states of matter (solid,liquid,gas,plasma), their macroscopic and microscopic differences.  \nFinally, we qualitetively discussed the formation of bonds (very simple things), and discussed the difference between compounds and mixtures.",
    "An atom has a small, dense nucleus of protons and neutrons, surrounded by electrons. The atomic number Z counts the protons and decides the element. The mass number A counts protons plus neutrons. Atoms of the same element with different numbers of neutrons are isotopes."
   ],
   "keyPoints": [
@@ -41,7 +41,8 @@ window.LESSONS = [
    "A neutral atom has as many electrons as protons; an ion has gained or lost electrons.",
    "Isotopes same Z, different N (e.g. carbon-12 and carbon-14).",
    "Nearly all the mass of an atom is in the nucleus; the electrons decide chemical behaviour and bonding.",
-   "Properties of materials (density, strength, conductivity) come from the atoms and how they are bonded."
+   "Properties of materials (density, strength, conductivity) come from the atoms and how they are bonded.",
+   "Difference between compounds and mixtures"
   ],
   "formulas": [
    "A = Z + N",
@@ -55,6 +56,20 @@ window.LESSONS = [
     "href": "https://zperiod.app/"
    }
   ],
+  "questionIds": []
+ },
+ {
+  "id": "LESSONS_HOWTO",
+  "date": "",
+  "title": "LESSONS_HOWTO",
+  "topics": [],
+  "summary": [
+   "# Νέο μάθημα: τι γράφω, τι τρέχω (ΧΩΡΙΣ το GitHub ακόμα)",
+   "Όλα τρέχουν στον φάκελο του site (εκεί που είναι το questions.js). Αντικατέστησε πρώτα το generate_questions.py με το τελευταίο."
+  ],
+  "keyPoints": [],
+  "formulas": [],
+  "links": [],
   "questionIds": []
  }
 ];
