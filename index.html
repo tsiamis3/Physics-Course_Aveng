@@ -58,6 +58,7 @@ input{font:inherit;padding:8px;border:1px solid var(--line);border-radius:4px;ba
   </div>
 </main>
 <script src="questions.js"></script>
+<script src="mathfmt.js"></script>
 <script src="lessons.js"></script>
 <script src="scoreboard.js"></script>
 <script>
@@ -99,8 +100,8 @@ class HomePage {
     const topics = (L.topics || []).map(t => `<a class="chip" href="bank.html#${new URLSearchParams({topic: t})}">${esc(t)}</a>`).join('');
     $('latest').innerHTML =
       `<p class="meta">Latest lesson · ${esc(this.pretty(L.date))}</p><h2>${esc(L.title)}</h2>` +
-      (L.summary || []).slice(0, 2).map(p => `<p>${esc(p)}</p>`).join('') +
-      (L.keyPoints && L.keyPoints.length ? `<h3>Key points</h3><ul>${L.keyPoints.slice(0, 5).map(k => `<li>${esc(k)}</li>`).join('')}</ul>` : '') +
+      (L.summary || []).slice(0, 2).map(p => `<p>${mfmt(p)}</p>`).join('') +
+      (L.keyPoints && L.keyPoints.length ? `<h3>Key points</h3><ul>${L.keyPoints.slice(0, 5).map(k => `<li>${mfmt(k)}</li>`).join('')}</ul>` : '') +
       (topics ? `<div class="chips">${topics}</div>` : '') +
       `<div class="cta"><a class="btn go" href="lesson.html?d=${encodeURIComponent(L.id)}">Full report${n ? ' + ' + n + ' practice questions' : ''}</a>` +
       `<a class="btn" href="bank.html">Question bank</a></div>`;

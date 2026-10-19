@@ -45,6 +45,7 @@ input{font:inherit;padding:8px;border:1px solid var(--line);border-radius:4px;ba
 </header>
 <main id="main"></main>
 <script src="questions.js"></script>
+<script src="mathfmt.js"></script>
 <script src="lessons.js"></script>
 <script src="scoreboard.js"></script>
 <script>
@@ -70,10 +71,10 @@ class LessonPage {
     const topics = (L.topics || []).map(t => `<a class="chip" href="bank.html#${new URLSearchParams({topic: t})}">${esc(t)}</a>`).join('');
     const list = (title, items, fmt) => items && items.length ? `<section><h2>${title}</h2><ul>${items.map(i => `<li>${fmt(i)}</li>`).join('')}</ul></section>` : '';
     $('main').innerHTML =
-      `<section><h2>Lesson review</h2>${(L.summary || []).map(p => `<p>${esc(p)}</p>`).join('') || '<p class="note">No review text yet.</p>'}` +
+      `<section><h2>Lesson review</h2>${(L.summary || []).map(p => `<p>${mfmt(p)}</p>`).join('') || '<p class="note">No review text yet.</p>'}` +
       (topics ? `<div class="chips">${topics}</div><p class="note">Topic chips open the question bank filtered by that topic.</p>` : '') + `</section>` +
-      list('Key points', L.keyPoints, esc) +
-      list('Formulas', L.formulas, f => `<code>${esc(f)}</code>`) +
+      list('Key points', L.keyPoints, mfmt) +
+      list('Formulas', L.formulas, f => `<code>${mfmt(f)}</code>`) +
       list('Links', L.links, l => `<a href="${esc(l.href)}" target="_blank" rel="noopener">${esc(l.label)}</a>`) +
       `<section id="quizBox"><h2>Questions for this lesson</h2><div id="quiz"></div><div id="result"></div></section>`;
     this.renderQuiz();
@@ -89,9 +90,9 @@ class LessonPage {
       const card = document.createElement('article');
       card.className = 'card';
       card.innerHTML = `<div class="meta">${n + 1} of ${this.qs.length} · ${esc(q.difficulty || '')}${q.type ? ' · ' + esc(q.type) : ''}</div>
-        <p class="q">${esc(q.question)}</p>
-        ${opts.map((o, k) => `<button class="opt" type="button">${'ABCD'[k]}) ${esc(o.text)}</button>`).join('')}
-        <p class="expl" hidden>${esc(q.explanation || '')}</p>`;
+        <p class="q">${mfmt(q.question)}</p>
+        ${opts.map((o, k) => `<button class="opt" type="button">${'ABCD'[k]}) ${mfmt(o.text)}</button>`).join('')}
+        <p class="expl" hidden>${mfmt(q.explanation || '')}</p>`;
       card.querySelectorAll('.opt').forEach((b, k) => b.onclick = () => this.answer(q, opts, k, card));
       $('quiz').appendChild(card);
     });

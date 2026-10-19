@@ -90,6 +90,7 @@ input[type=search],input[type=number],select{width:100%;padding:8px;border:1px s
   </section>
 </main>
 <script src="questions.js"></script>
+<script src="mathfmt.js"></script>
 <script>
 // ---- Configuration: edit these two lines to update the site ----
 const CONFIG = {
@@ -288,9 +289,9 @@ class QuizApp {
       const card = document.createElement('article');
       card.className = 'card';
       card.innerHTML = `<div class="meta">${esc(q.topic)} · ${esc(q.difficulty)} · ${esc(q.units)}${q.type ? ' · ' + esc(q.type) : ''}</div>
-        <p class="q">${this.quiz ? (n + 1) + '. ' : ''}${esc(q.question)}</p>
-        ${opts.map((o, k) => `<button class="opt" type="button">${'ABCD'[k]}) ${esc(o.text)}</button>`).join('')}
-        <p class="expl" hidden>${esc(q.explanation || '')}</p>
+        <p class="q">${this.quiz ? (n + 1) + '. ' : ''}${mfmt(q.question)}</p>
+        ${opts.map((o, k) => `<button class="opt" type="button">${'ABCD'[k]}) ${mfmt(o.text)}</button>`).join('')}
+        <p class="expl" hidden>${mfmt(q.explanation || '')}</p>
         <div class="tags">${q.keywords.map(esc).join(', ')} ${this.reportLink(q)}</div>`;
       card.querySelectorAll('.opt').forEach((b, k) => b.onclick = () => this.answer(q, k, card));
       $('list').appendChild(card);
