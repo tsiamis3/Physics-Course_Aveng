@@ -1363,5 +1363,713 @@ window.QUESTIONS = [
   "answer": 1,
   "explanation": "Velocity includes direction as well as speed. In circular motion the direction changes continuously, so the velocity changes even at constant speed.",
   "type": "theory"
+ },
+ {
+  "id": "G056",
+  "topic": "Other",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "force",
+   "work"
+  ],
+  "question": "Bench testing a hydraulic hand pump shows the handle is a lever with the effort applied 18 in from the fulcrum and the piston rod attached 2 in from the fulcrum. With a 20 lb effort on the handle, which measured piston force is physically impossible?",
+  "options": [
+   "120 lb",
+   "150 lb",
+   "180 lb",
+   "200 lb"
+  ],
+  "answer": 3,
+  "explanation": "Ideal output = 20 lb × (18 in ÷ 2 in) = 180 lb. Friction can only reduce this, so a 200 lb result would mean more work out than in, which is impossible.",
+  "type": "calculation"
+ },
+ {
+  "id": "G057",
+  "topic": "Other",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "force",
+   "work"
+  ],
+  "question": "The handle of a hydraulic hand pump is a lever. A 25 lb effort is applied 20 in from the fulcrum, and the pump piston rod is attached 2.5 in from the fulcrum. Ignoring friction, what piston force results, and how far does the piston move when the handle end moves 6 in?",
+  "options": [
+   "200 lb of force; 0.75 in of travel",
+   "200 lb of force; 48 in of travel",
+   "3.125 lb of force; 0.75 in of travel",
+   "200 lb of force; 6 in of travel"
+  ],
+  "answer": 0,
+  "explanation": "Mechanical advantage = 20 ÷ 2.5 = 8, so force out = 25 × 8 = 200 lb. The distance is reduced by the same factor: 6 in ÷ 8 = 0.75 in.",
+  "type": "calculation"
+ },
+ {
+  "id": "G058",
+  "topic": "Other",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "force",
+   "power"
+  ],
+  "question": "A fuel-system hand pump uses a lever with a mechanical advantage of 8 in terms of force. Which statement about this machine is correct?",
+  "options": [
+   "It also multiplies speed by 8, because it multiplies force.",
+   "The output distance is smaller than the input distance, and the machine cannot deliver more power than it receives.",
+   "It multiplies the work output to 8 times the work input.",
+   "The output distance equals the input distance, because only the force changes."
+  ],
+  "answer": 1,
+  "explanation": "A machine cannot multiply force and speed at the same time. A force advantage comes with a distance disadvantage, and power out cannot exceed power in.",
+  "type": "theory"
+ },
+ {
+  "id": "G059",
+  "topic": "Other",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "units",
+   "force"
+  ],
+  "question": "A fuel selector valve is operated by a lever with the effort applied 1.5 ft from the fulcrum. The valve linkage is attached 4.5 in from the fulcrum. Ignoring friction, what force does the linkage receive from a 12 lb effort?",
+  "options": [
+   "3 lb",
+   "4 lb",
+   "48 lb",
+   "216 lb"
+  ],
+  "answer": 2,
+  "explanation": "Convert 1.5 ft to 18 in. Mechanical advantage = 18 in ÷ 4.5 in = 4, so force out = 12 lb × 4 = 48 lb.",
+  "type": "calculation"
+ },
+ {
+  "id": "G060",
+  "topic": "Other",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "force"
+  ],
+  "question": "Applying 40 lb of effort to a hydraulic hand pump lever produces 600 lb of force on the pump piston. What is the mechanical advantage of the lever?",
+  "options": [
+   "0.067",
+   "15",
+   "560",
+   "640"
+  ],
+  "answer": 1,
+  "explanation": "Mechanical Advantage = Force Out ÷ Force In = 600 lb ÷ 40 lb = 15.",
+  "type": "calculation"
+ },
+ {
+  "id": "G061",
+  "topic": "Other",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "force",
+   "pressure"
+  ],
+  "question": "On a hydraulic jack bench check, 100 lb is applied to a 2 in² input piston that drives a 20 in² output piston. By Pascal's law and Efficiency = Measured Performance ÷ Ideal Performance, which measured output force is physically impossible?",
+  "options": [
+   "650 lb",
+   "800 lb",
+   "900 lb",
+   "1,200 lb"
+  ],
+  "answer": 3,
+  "explanation": "Pressure = 100 ÷ 2 = 50 psi, so the ideal output is 50 × 20 = 1,000 lb. A measured 1,200 lb would mean an efficiency of 120%, which is impossible.",
+  "type": "calculation"
+ },
+ {
+  "id": "G062",
+  "topic": "Other",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "pressure",
+   "work"
+  ],
+  "question": "Estimate the work done when 1,500 psi acts on a 3 in² hydraulic actuator piston that moves 2 in. Which order of magnitude is correct?",
+  "options": [
+   "About 75 ft·lb",
+   "About 750 ft·lb",
+   "About 9,000 ft·lb",
+   "About 54,000 ft·lb"
+  ],
+  "answer": 1,
+  "explanation": "Force = 1,500 × 3 = 4,500 lb. Work = F × d = 4,500 × (2 ÷ 12) ft = 750 ft·lb.",
+  "type": "calculation"
+ },
+ {
+  "id": "G063",
+  "topic": "Other",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "pressure"
+  ],
+  "question": "Fuel with a specific gravity of 0.8 fills a closed vertical cylinder. A piston at the top adds 100 psi. Which statement is correct?",
+  "options": [
+   "The added 100 psi is greatest at the piston and decreases with depth, so the bottom sees less of it.",
+   "The added 100 psi acts equally and undiminished at every level, while the extra pressure from the fuel's own height depends on its density and increases with depth.",
+   "The added 100 psi acts only downward, so the side walls feel none of it.",
+   "The added 100 psi is larger at the bottom than halfway down because the fuel below is heavier."
+  ],
+  "answer": 1,
+  "explanation": "Pascal's law says added pressure is transmitted equally and undiminished in all directions. Only the pressure from fluid height varies with depth, in proportion to density.",
+  "type": "theory"
+ },
+ {
+  "id": "G064",
+  "topic": "Other",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "density",
+   "weight",
+   "pressure"
+  ],
+  "question": "Fuel with a specific gravity of 0.8 has a volume of 5 ft³ and rests on a piston of 24 in² area. Using water density of 62.4 lb/ft³, what pressure does the fuel's weight produce on the piston?",
+  "options": [
+   "10.4 psi",
+   "13.0 psi",
+   "249.6 psi",
+   "1,497.6 psi"
+  ],
+  "answer": 0,
+  "explanation": "Weight = 0.8 × 62.4 × 5 = 249.6 lb. Pressure = Force ÷ Area = 249.6 ÷ 24 = 10.4 psi.",
+  "type": "calculation"
+ },
+ {
+  "id": "G065",
+  "topic": "Other",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "pressure",
+   "work",
+   "power"
+  ],
+  "question": "Consider a hydraulic pump that delivers 1,100 psi to a 3 in² actuator piston. The piston moves 2 ft in 6 s. If the pump is 80% efficient, what input power in hp is required?",
+  "options": [
+   "1.6 hp",
+   "2.0 hp",
+   "2.5 hp",
+   "15 hp"
+  ],
+  "answer": 2,
+  "explanation": "Force = 1,100 × 3 = 3,300 lb, and work = 3,300 × 2 = 6,600 ft·lb. Output power = 6,600 ÷ 6 = 1,100 ft·lb/s = 2 hp, so input power = 2 ÷ 0.8 = 2.5 hp.",
+  "type": "calculation"
+ },
+ {
+  "id": "G066",
+  "topic": "Units & Conversions",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "units",
+   "heat"
+  ],
+  "question": "Which statement about heat energy units is correct, for example when reading a calorimeter log for a gear-driven test rig?",
+  "options": [
+   "One BTU is the heat needed to raise 1 lb of water by 1 °F, and a calorie (lower-case c) is 1/1000 of the food Calorie.",
+   "One BTU is the heat needed to raise 1 lb of water by 1 °C, and a calorie equals the food Calorie.",
+   "One BTU is the heat needed to raise 1 gram of water by 1 °F, and a calorie is 1000 food Calories.",
+   "The joule is a non-SI unit of heat, while the BTU and calorie are the SI units."
+  ],
+  "answer": 0,
+  "explanation": "By definition, 1 BTU heats 1 lb of water 1 °F, and the lower-case calorie is 1/1000 of the capital-C Calorie used for food. The joule is the SI unit of heat.",
+  "type": "theory"
+ },
+ {
+  "id": "G067",
+  "topic": "Other",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "temperature"
+  ],
+  "question": "If the length of a steel pulley-system control rod is halved and the rise in temperature it experiences is tripled, how does the thermal expansion change? (Expansion = coefficient x length x rise in temperature)",
+  "options": [
+   "It becomes 1.5 times as large",
+   "It becomes 6 times as large",
+   "It stays the same",
+   "It becomes 1/6 as large"
+  ],
+  "answer": 0,
+  "explanation": "Expansion is proportional to length x temperature rise, so the factor is 0.5 x 3 = 1.5.",
+  "type": "calculation"
+ },
+ {
+  "id": "G068",
+  "topic": "Work, Power, Energy, Torque and their relation",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "energy",
+   "work",
+   "heat"
+  ],
+  "question": "Burning 0.5 lb of aviation gasoline in an engine that drives a gear train releases heat equivalent to how much mechanical work? Use 18 900 BTU per lb of fuel and 1 BTU = 778 ft-lb.",
+  "options": [
+   "14 704 200 ft-lb",
+   "7 352 100 ft-lb",
+   "612 675 ft-lb",
+   "9 450 ft-lb"
+  ],
+  "answer": 1,
+  "explanation": "Heat = 0.5 x 18 900 = 9 450 BTU, and 9 450 x 778 = 7 352 100 ft-lb.",
+  "type": "calculation"
+ },
+ {
+  "id": "G069",
+  "topic": "Work, Power, Energy, Torque and their relation",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "heat",
+   "work",
+   "energy"
+  ],
+  "question": "Which entry in a calorimeter test log for aviation gasoline, written beside a pulley and gear test rig, is physically suspicious?",
+  "options": [
+   "1 lb of fuel contains 18 900 BTU of heat energy.",
+   "Burning 2 lb of fuel releases 37 800 BTU.",
+   "1 lb of fuel is capable of only 18 900 ft-lb of work, because 1 BTU = 1 ft-lb.",
+   "1 BTU of heat is equivalent to 778 ft-lb of work."
+  ],
+  "answer": 2,
+  "explanation": "Since 1 BTU = 778 ft-lb, 1 lb of fuel should be capable of 18 900 x 778 = 14 704 200 ft-lb, so the 18 900 ft-lb entry is wrong.",
+  "type": "theory"
+ },
+ {
+  "id": "G070",
+  "topic": "Other",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "pressure",
+   "force"
+  ],
+  "question": "A hydraulic pump pushes on a piston of area 0.002 m² with a perpendicular force of 600 N. What pressure does it apply to the fluid?",
+  "options": [
+   "1.2 Pa",
+   "3×10^3 Pa",
+   "3×10^4 Pa",
+   "3×10^5 Pa"
+  ],
+  "answer": 3,
+  "explanation": "Pressure = force / area = 600 N / 0.002 m² = 3×10^5 Pa.",
+  "type": "calculation"
+ },
+ {
+  "id": "G071",
+  "topic": "Other",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "pressure",
+   "density"
+  ],
+  "question": "All the fuel in a tall, narrow tank is transferred into a second tank with twice the base area. What happens to the pressure due to the fuel at the bottom of the tank, compared with before?",
+  "options": [
+   "It is halved, because the depth is halved",
+   "It stays the same, because the volume of fuel is the same",
+   "It doubles, because the base area is doubled",
+   "It is reduced to one quarter"
+  ],
+  "answer": 0,
+  "explanation": "The same volume spread over twice the base area gives half the depth. Since P = ρ·g·h, the pressure at the bottom is halved.",
+  "type": "theory"
+ },
+ {
+  "id": "G072",
+  "topic": "Other",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "pressure",
+   "units",
+   "force"
+  ],
+  "question": "In a hydraulic jack, the small piston has an area of 20 cm² and the large piston has an area of 0.04 m². A force of 150 N is applied to the small piston. What force does the large piston exert?",
+  "options": [
+   "0.3 N",
+   "300 N",
+   "3000 N",
+   "30 000 N"
+  ],
+  "answer": 2,
+  "explanation": "0.04 m² = 400 cm², so the area ratio is 400/20 = 20. By Pascal's principle, F = 150 N × 20 = 3000 N.",
+  "type": "calculation"
+ },
+ {
+  "id": "G073",
+  "topic": "Other",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "pressure"
+  ],
+  "question": "A maintenance log for a hydraulic reservoir filled with fluid at rest lists several gauge readings. Which entry is physically suspicious?",
+  "options": [
+   "Two gauges at the same depth on opposite walls of the reservoir read 180 kPa and 150 kPa",
+   "A gauge near the bottom reads higher than a gauge near the top, by an amount ρ·g·h",
+   "A 100 N input on a 10 cm² piston gives 2000 N on a 200 cm² piston",
+   "The pressure at the small piston and at the large piston is the same, 100 kPa"
+  ],
+  "answer": 0,
+  "explanation": "Two points at the same depth in the same liquid at rest must have the same pressure, so the 180 kPa and 150 kPa readings cannot both be right. The other entries agree with P = ρ·g·h and Pascal's principle.",
+  "type": "theory"
+ },
+ {
+  "id": "G074",
+  "topic": "Other",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "pressure",
+   "density"
+  ],
+  "question": "Estimate the total pressure at the bottom of an open underground fuel storage tank that is 5 m deep. The fuel has density 800 kg/m³, g = 10 m/s², and atmospheric pressure is 1×10^5 Pa. Which value is closest?",
+  "options": [
+   "4×10^4 Pa",
+   "1.4×10^5 Pa",
+   "1.4×10^6 Pa",
+   "5×10^5 Pa"
+  ],
+  "answer": 1,
+  "explanation": "The fuel contributes ρ·g·h = 800 × 10 × 5 = 4×10^4 Pa. Adding atmospheric pressure gives 1.4×10^5 Pa.",
+  "type": "calculation"
+ },
+ {
+  "id": "G075",
+  "topic": "Work, Power, Energy, Torque and their relation",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "torque",
+   "power",
+   "rotation"
+  ],
+  "question": "Estimate the order of magnitude of the torque carried by the propeller flange bolts of an engine producing 180 hp at 2,400 rpm. The propeller is a rotating mass concentrated around its perimeter, much like a gyro rotor. Use Torque = Horsepower × 5252 ÷ rpm.",
+  "options": [
+   "About 4 lb·ft",
+   "About 40 lb·ft",
+   "About 400 lb·ft",
+   "About 4,000 lb·ft"
+  ],
+  "answer": 2,
+  "explanation": "Torque = 180 × 5252 ÷ 2400 ≈ 394 lb·ft, so the order of magnitude is 400 lb·ft.",
+  "type": "calculation"
+ },
+ {
+  "id": "G076",
+  "topic": "Work, Power, Energy, Torque and their relation",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "power",
+   "torque"
+  ],
+  "question": "During an engine run-up review, a log lists the torque on a propeller shaft, whose flange bolts hold a spinning rotor much like a gyro. Using Torque = Horsepower × 5252 ÷ rpm, which entry is inconsistent and therefore suspicious?",
+  "options": [
+   "100 hp at 2,500 rpm gives 210 lb·ft",
+   "200 hp at 2,500 rpm gives 420 lb·ft",
+   "200 hp at 1,000 rpm gives 1,050 lb·ft",
+   "100 hp at 2,000 rpm gives 525 lb·ft"
+  ],
+  "answer": 3,
+  "explanation": "For 100 hp at 2,000 rpm, torque = 100 × 5252 ÷ 2000 ≈ 263 lb·ft, not 525 lb·ft. The other three entries check out.",
+  "type": "calculation"
+ },
+ {
+  "id": "G077",
+  "topic": "Friction",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "friction",
+   "torque",
+   "force"
+  ],
+  "question": "A clamp bolt presses a bracket of a gyro's supporting ring against its mounting with a normal force N = 400 lbf. The sliding friction coefficient is 0.25, and the friction force acts at a radius of 6 in from the pivot. Using F = μN and τ = F · l, what torque is needed to make the bracket slip, in lb·ft?",
+  "options": [
+   "50 lb·ft",
+   "600 lb·ft",
+   "100 lb·ft",
+   "200 lb·ft"
+  ],
+  "answer": 0,
+  "explanation": "Friction force F = 0.25 × 400 = 100 lbf. With l = 6 in = 0.5 ft, torque = 100 × 0.5 = 50 lb·ft.",
+  "type": "calculation"
+ },
+ {
+  "id": "G078",
+  "topic": "Other",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "rotation",
+   "weight"
+  ],
+  "question": "A gyro rotor is held in a supporting ring and an outer ring, which are attached to the structure by brackets and bolts. Which statement is correct?",
+  "options": [
+   "It is a free gyro, free to rotate about two axes perpendicular to the spin axis, and the rotor weight is still B = m × g whether it spins or not.",
+   "It is a free gyro with three planes of rotation, because the spin plane counts as one, and spinning makes the rotor weigh more than m × g.",
+   "It is a captive gyro, free to rotate about two axes, and its weight is zero while the rotor spins.",
+   "It is a captive gyro with two axes of freedom, and its weight is B = m × g only when the rotor is stationary."
+  ],
+  "answer": 0,
+  "explanation": "Two rings plus the mounting bracket make a free gyro with two axes perpendicular to the spin axis. The spin plane is not counted, and weight is B = m × g regardless of spin.",
+  "type": "theory"
+ },
+ {
+  "id": "G079",
+  "topic": "Units & Conversions",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "units",
+   "velocity"
+  ],
+  "question": "Roughly what order of magnitude, in ft/s, is the speed of a propeller airplane cruising at 120 mph? (Use 1 mph = 1.467 ft/s.)",
+  "options": [
+   "About 1 ft/s",
+   "About 10 ft/s",
+   "About 100 ft/s",
+   "About 1,000 ft/s"
+  ],
+  "answer": 2,
+  "explanation": "120 mph × 1.467 ≈ 176 ft/s, which is on the order of 10^2 (hundreds of) ft/s.",
+  "type": "calculation"
+ },
+ {
+  "id": "G080",
+  "topic": "Kinematics",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "velocity"
+  ],
+  "question": "Consider a propeller blade tip that moves around its circular path at a constant speed. Which statement is correct?",
+  "options": [
+   "Its velocity is constant, because its speed is constant.",
+   "Its velocity is constantly changing, because its direction is constantly changing.",
+   "Its velocity is zero, because it returns to the same point each revolution.",
+   "Its velocity changes only when the speed changes."
+  ],
+  "answer": 1,
+  "explanation": "Velocity includes direction as well as speed. In circular motion the direction changes continuously, so the velocity changes even at constant speed.",
+  "type": "theory"
+ },
+ {
+  "id": "G081",
+  "topic": "Other",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "heat",
+   "energy"
+  ],
+  "question": "Roughly how much heat, in Btu, is absorbed when 2 lb of water sprayed on a hot gear housing completely evaporates at constant temperature? Take the latent heat of vaporization of water as about 970 Btu/lb.",
+  "options": [
+   "About 20 Btu",
+   "About 200 Btu",
+   "About 2,000 Btu",
+   "About 20,000 Btu"
+  ],
+  "answer": 2,
+  "explanation": "All the heat absorbed during the change of state is latent heat: 2 lb × 970 Btu/lb ≈ 1,940 Btu, which is of the order of 2,000 Btu.",
+  "type": "calculation",
+  "lesson": "2026-10-14"
+ },
+ {
+  "id": "G082",
+  "topic": "Other",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "heat",
+   "temperature"
+  ],
+  "question": "Cleaning solvent used on a gear train is held at its boiling point in a heated tank. The tank holds 0.4 lb of solvent, its latent heat of vaporization is 150 Btu/lb, and the heater delivers 20 Btu/min. How long does it take to vaporize all the solvent?",
+  "options": [
+   "3 min",
+   "7.5 min",
+   "0.33 min",
+   "30 min"
+  ],
+  "answer": 0,
+  "explanation": "Heat needed = 0.4 lb × 150 Btu/lb = 60 Btu; time = 60 Btu ÷ 20 Btu/min = 3 min, with the temperature constant throughout.",
+  "type": "calculation",
+  "lesson": "2026-10-14"
+ },
+ {
+  "id": "G083",
+  "topic": "Other",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "heat",
+   "temperature"
+  ],
+  "question": "A steam-driven pulley winch is fed by a small boiler holding 2 lb of water at its boiling point. The latent heat of vaporization is 970 Btu/lb, and the steam has a specific heat of 0.5 Btu/lb·°F. The heater supplies 99 Btu/min. How long does it take to vaporize all the water and then superheat the vapor by 40°F?",
+  "options": [
+   "19.6 min",
+   "20.0 min",
+   "10.0 min",
+   "0.4 min"
+  ],
+  "answer": 1,
+  "explanation": "Latent heat: 2 × 970 = 1,940 Btu. Superheat: 2 × 0.5 × 40 = 40 Btu. Total 1,980 Btu ÷ 99 Btu/min = 20.0 min.",
+  "type": "calculation",
+  "lesson": "2026-10-14"
+ },
+ {
+  "id": "G084",
+  "topic": "Other",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "temperature",
+   "heat",
+   "pressure"
+  ],
+  "question": "Review of a log from a steam-driven gear pump lists four observations. Which one is physically suspicious?",
+  "options": [
+   "The liquid temperature kept rising steadily while the liquid was boiling at constant pressure and heat was being added",
+   "After all the liquid had vaporized, extra heat raised the vapor temperature (superheat)",
+   "The boiling point dropped when the pressure on the liquid was reduced",
+   "Heat flowed from the hot pump casing to the cooler water"
+  ],
+  "answer": 0,
+  "explanation": "During a change of state the temperature stays constant because the added heat is latent heat, so a steadily rising temperature while boiling at constant pressure is suspicious.",
+  "type": "theory",
+  "lesson": "2026-10-14"
+ },
+ {
+  "id": "G085",
+  "topic": "Other",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "units",
+   "heat"
+  ],
+  "question": "Eight ounces (16 oz = 1 lb) of solvent at its boiling point is in a heated cleaning tank for a gear-driven pulley block. The latent heat of vaporization is 120 Btu/lb, and the heater delivers 3,000 Btu/hr. How many minutes are needed to vaporize all of it?",
+  "options": [
+   "1.2 min",
+   "0.02 min",
+   "19.2 min",
+   "72 min"
+  ],
+  "answer": 0,
+  "explanation": "8 oz = 0.5 lb, so heat = 0.5 × 120 = 60 Btu. Time = 60 ÷ 3,000 = 0.02 hr = 1.2 min.",
+  "type": "calculation",
+  "lesson": "2026-10-14"
+ },
+ {
+  "id": "G086",
+  "topic": "Other",
+  "difficulty": "easy",
+  "units": "SI",
+  "keywords": [
+   "units"
+  ],
+  "question": "Inspection notes for a copper pulley sheave list four statements about its atoms. Which statement is physically wrong and should be questioned?",
+  "options": [
+   "A neutral copper atom has 29 protons and 29 electrons.",
+   "Copper has atomic number 29, set by the number of protons in its nucleus.",
+   "Electrons sit inside the nucleus together with the protons and neutrons.",
+   "The neutron in the nucleus carries no electrical charge."
+  ],
+  "answer": 2,
+  "explanation": "Protons and neutrons are in the nucleus, while electrons orbit around it in concentric shells. The other three statements agree with the material.",
+  "type": "theory",
+  "lesson": "2026-10-14"
+ },
+ {
+  "id": "G087",
+  "topic": "Other",
+  "difficulty": "hard",
+  "units": "SI",
+  "keywords": [
+   "units"
+  ],
+  "question": "A tiny corrosion cluster on a lever pivot pin is modeled as 3 neutral oxygen atoms (8 protons each) and 2 neutral copper atoms (29 protons each). How many electrons are in the cluster in total?",
+  "options": [
+   "53",
+   "103",
+   "82",
+   "164"
+  ],
+  "answer": 2,
+  "explanation": "A neutral atom has as many electrons as protons: 3 x 8 + 2 x 29 = 24 + 58 = 82 electrons.",
+  "type": "calculation",
+  "lesson": "2026-10-14"
+ },
+ {
+  "id": "G088",
+  "topic": "Other",
+  "difficulty": "easy",
+  "units": "SI",
+  "keywords": [
+   "heat"
+  ],
+  "question": "When a thin oil film on a hot gear tooth burns away and seems to vanish, which statement is correct according to the Law of Conservation of matter?",
+  "options": [
+   "The matter is destroyed by the burning, so the total amount of matter decreases.",
+   "The matter is changed into energy and no longer exists in any form.",
+   "The matter still exists, now as the gases given off by the burning oil.",
+   "The matter only moves into the gear metal and stays a liquid."
+  ],
+  "answer": 2,
+  "explanation": "Matter cannot be created or destroyed, only changed in physical state. The oil no longer exists as a liquid, but it still exists as combustion gases.",
+  "type": "theory",
+  "lesson": "2026-10-14"
+ },
+ {
+  "id": "G089",
+  "topic": "Other",
+  "difficulty": "easy",
+  "units": "SI",
+  "keywords": [
+   "units"
+  ],
+  "question": "Fifty oxygen atoms are found in a small oxide spot on a pulley guard. Each oxygen atom has 8 protons, 8 neutrons and 8 electrons. How many particles are in the nuclei of all 50 atoms together?",
+  "options": [
+   "400",
+   "800",
+   "1200",
+   "128"
+  ],
+  "answer": 1,
+  "explanation": "Each nucleus holds 8 protons + 8 neutrons = 16 particles, so 50 x 16 = 800.",
+  "type": "calculation",
+  "lesson": "2026-10-14"
+ },
+ {
+  "id": "G090",
+  "topic": "Units & Conversions",
+  "difficulty": "hard",
+  "units": "SI",
+  "keywords": [
+   "units"
+  ],
+  "question": "A worn bushing in a gear train is modeled as 1 dozen copper atoms (1 dozen = 12) plus 10 more single copper atoms. Each copper atom has 29 protons. How many protons are there in total?",
+  "options": [
+   "319",
+   "358",
+   "22",
+   "638"
+  ],
+  "answer": 3,
+  "explanation": "Convert the dozen first: 12 + 10 = 22 atoms. Then 22 x 29 = 638 protons.",
+  "type": "calculation",
+  "lesson": "2026-10-14"
  }
 ];
