@@ -47,7 +47,9 @@ class Board {
           try { sessionStorage.setItem(ck, JSON.stringify({t: Date.now(), v})); } catch (e) {}
           return v;
         }
-      } catch (e) { /* fall through to local mode */ }
+        let why = ''; try { why = (await r.json()).error || ''; } catch (e) {}
+        this.error = 'HTTP ' + r.status + (why ? ': ' + why : '');
+      } catch (e) { this.error = 'Cannot reach the Worker (' + e.message + ')'; }
     }
     const all = this.local(), me = this.nick || 'You';
     let rows = [];
@@ -56,14 +58,14 @@ class Board {
       const ids = Object.keys(all);
       if (ids.length) rows = [{nick: me, correct: ids.reduce((a, k) => a + all[k].correct, 0), total: ids.reduce((a, k) => a + all[k].total, 0)}];
     }
-    return {shared: false, rows};
+    return {shared: false, rows, error: this.error || ''};
   }
 
   // HTML table for the rows. The row of the current nickname is highlighted.
   table(res) {
     const me = this.nick.toLowerCase();
     const note = `<p class="note">${res.shared ? 'Shared scoreboard. Scores come from the students\u2019 browsers, so treat it as a game.'
-                                                 : 'Local mode: only your own scores on this device.'}</p>`;
+                                                 : 'Local mode: only your own scores on this device.' + (res.error ? ' Shared board unavailable: ' + Board.esc(res.error) : '')}</p>`;
     if (!res.rows.length) return '<p class="note">No scores yet. Take a lesson quiz to be the first.</p>' + note;
     return '<ol class="board">' + res.rows.slice(0, 15).map((r, i) =>
       `<li${r.nick.toLowerCase() === me ? ' class="me"' : ''}><span class="rk">${i + 1}</span><span class="nm">${Board.esc(r.nick)}</span>` +
