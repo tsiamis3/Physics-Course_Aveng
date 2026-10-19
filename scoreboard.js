@@ -61,13 +61,13 @@ class Board {
 
   // HTML table for the rows. The row of the current nickname is highlighted.
   table(res) {
-    if (!res.rows.length) return '<p class="note">No scores yet. Take a lesson quiz to be the first.</p>';
     const me = this.nick.toLowerCase();
+    const note = `<p class="note">${res.shared ? 'Shared scoreboard. Scores come from the students\u2019 browsers, so treat it as a game.'
+                                                 : 'Local mode: only your own scores on this device.'}</p>`;
+    if (!res.rows.length) return '<p class="note">No scores yet. Take a lesson quiz to be the first.</p>' + note;
     return '<ol class="board">' + res.rows.slice(0, 15).map((r, i) =>
       `<li${r.nick.toLowerCase() === me ? ' class="me"' : ''}><span class="rk">${i + 1}</span><span class="nm">${Board.esc(r.nick)}</span>` +
-      `<span class="pt">${r.correct * 10} pts <small>${r.correct}/${r.total}</small></span></li>`).join('') + '</ol>' +
-      `<p class="note">${res.shared ? 'Shared scoreboard. Scores come from the students’ browsers, so treat it as a game.'
-                                    : 'Local mode: only your own scores on this device.'}</p>`;
+      `<span class="pt">${r.correct * 10} pts <small>${r.correct}/${r.total}</small></span></li>`).join('') + '</ol>' + note;
   }
 }
 const board = new Board(BOARD_URL);
