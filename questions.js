@@ -2515,5 +2515,1689 @@ window.QUESTIONS = [
   "explanation": "Input power is proportional to 40*100 = 4,000. The outputs are proportional to 3,200, 4,500, 2,000 and 3,000. Only 300*15 = 4,500 exceeds the input (112% efficiency), which is impossible since P_out = efficiency*P_in with efficiency < 1.",
   "type": "calculation",
   "lesson": "2026-10-19"
+ },
+ {
+  "id": "G121",
+  "topic": "Simple Machines",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "work",
+   "energy"
+  ],
+  "question": "Which statement is correct when a block and tackle lets one mechanic raise a heavy engine with a small pull on the rope?",
+  "options": [
+   "The tackle reduces the work needed, because the effort is smaller than the weight of the engine.",
+   "The effort is smaller, but the rope must be pulled farther, and the work output can never exceed the work input.",
+   "The pulleys create extra energy, so the work output is greater than the work the mechanic puts in.",
+   "The effort is smaller only because the fixed pulleys multiply the force; the movable pulleys only change direction."
+  ],
+  "answer": 1,
+  "explanation": "A simple machine does not create work or energy. It trades force for distance, so a smaller effort acts over a longer rope travel, and W_out is at most W_in.",
+  "type": "theory",
+  "lesson": "2026-10-20"
+ },
+ {
+  "id": "G122",
+  "topic": "Simple Machines",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "force"
+  ],
+  "question": "Roughly how much effort is needed on the rope of a chain hoist with 6 supporting rope segments to lift a 1,800 lb engine, ignoring friction?",
+  "options": [
+   "30 lb",
+   "300 lb",
+   "1,800 lb",
+   "10,800 lb"
+  ],
+  "answer": 1,
+  "explanation": "Ideal MA equals the number of supporting segments, 6, so the effort is 1800/6 = 300 lb.",
+  "type": "calculation",
+  "lesson": "2026-10-20"
+ },
+ {
+  "id": "G123",
+  "topic": "Simple Machines",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "units",
+   "force"
+  ],
+  "question": "A shop jack uses a lever whose handle is applied 3 ft from the fulcrum, while the lifting point is 4 in from the fulcrum. The load is 900 lb and the jack has an efficiency of 80 %. What effort is needed on the handle?",
+  "options": [
+   "80 lb",
+   "100 lb",
+   "125 lb",
+   "675 lb"
+  ],
+  "answer": 2,
+  "explanation": "Ideal MA = 36 in / 4 in = 9. The actual MA = 9*0.80 = 7.2, so the effort is 900/7.2 = 125 lb.",
+  "type": "calculation",
+  "lesson": "2026-10-20"
+ },
+ {
+  "id": "G124",
+  "topic": "Simple Machines",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "rotation"
+  ],
+  "question": "In a hoist winch, a pinion with 12 teeth turns at 900 rpm and drives a drum gear with 48 teeth. What is the speed of the drum gear?",
+  "options": [
+   "225 rpm",
+   "300 rpm",
+   "450 rpm",
+   "3,600 rpm"
+  ],
+  "answer": 0,
+  "explanation": "Gear ratio = 48/12 = 4:1, so the driven gear turns at 900/4 = 225 rpm.",
+  "type": "calculation",
+  "lesson": "2026-10-20"
+ },
+ {
+  "id": "G125",
+  "topic": "Simple Machines",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "work",
+   "energy"
+  ],
+  "question": "During acceptance tests of four chain hoists, each one gave a velocity ratio (VR) and a measured mechanical advantage (MA). Which result is physically impossible?",
+  "options": [
+   "VR = 4 and MA = 3.4",
+   "VR = 6 and MA = 3.0",
+   "VR = 2 and MA = 1.9",
+   "VR = 4 and MA = 4.3"
+  ],
+  "answer": 3,
+  "explanation": "Efficiency = MA/VR = 4.3/4, which is about 107 %. A real machine always has efficiency below 100 %, since W_out cannot exceed W_in.",
+  "type": "theory",
+  "lesson": "2026-10-20"
+ },
+ {
+  "id": "G126",
+  "topic": "Simple Machines",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "force",
+   "work"
+  ],
+  "question": "An engine on a wheeled stand weighs 600 lb. It is pushed up a straight ramp 12 ft long onto a platform 3 ft high. Neglecting friction, what is the ideal effort needed along the slope?",
+  "options": [
+   "50 lb",
+   "150 lb",
+   "200 lb",
+   "450 lb"
+  ],
+  "answer": 1,
+  "explanation": "Ideal MA = length/height = 12/3 = 4, so effort = 600/4 = 150 lb (or 600*3/12 = 150 lb).",
+  "type": "calculation",
+  "lesson": "2026-10-20"
+ },
+ {
+  "id": "G127",
+  "topic": "Simple Machines",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "work",
+   "energy",
+   "force"
+  ],
+  "question": "A lever-type bottle jack has an ideal MA of 20 and is used to raise an aircraft axle. Which statement is correct?",
+  "options": [
+   "The jack needs only about 1/20 of the work that would be needed to lift the axle directly.",
+   "The handle moves about 20 times farther than the axle, and the work put in is at least equal to the work done on the load.",
+   "Because the MA is 20, the efficiency of the jack is 2,000 %.",
+   "The jack makes the work output larger than the work input, because the force is multiplied."
+  ],
+  "answer": 1,
+  "explanation": "A simple machine does not create work: it trades force for distance. With VR = 20 the effort moves 20 times farther, and friction makes W_in greater than W_out.",
+  "type": "theory",
+  "lesson": "2026-10-20"
+ },
+ {
+  "id": "G128",
+  "topic": "Simple Machines",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "torque",
+   "power",
+   "rotation"
+  ],
+  "question": "A 5 hp motor turns at 1,750 rpm and drives a hoist drum through a gear pair. The drive gear has 25 teeth and the driven gear has 125 teeth. Using P = torque*rpm/5252, what is the ideal torque on the drum shaft?",
+  "options": [
+   "3 lb·ft",
+   "15 lb·ft",
+   "75 lb·ft",
+   "375 lb·ft"
+  ],
+  "answer": 2,
+  "explanation": "Input torque = 5*5252/1750 = 15 lb·ft. The gear ratio is 125/25 = 5:1, so the ideal output torque is 15*5 = 75 lb·ft at 350 rpm.",
+  "type": "calculation",
+  "lesson": "2026-10-20"
+ },
+ {
+  "id": "G129",
+  "topic": "Simple Machines",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "work",
+   "energy",
+   "force"
+  ],
+  "question": "Bench-test records for four different manual lifting devices list the effort and the load, each with the distance moved. Which record is physically impossible?",
+  "options": [
+   "Effort 50 lb moved 40 in; load 300 lb raised 5 in.",
+   "Effort 100 lb moved 30 in; load 400 lb raised 6 in.",
+   "Effort 90 lb moved 24 in; load 800 lb raised 3 in.",
+   "Effort 200 lb moved 10 in; load 500 lb raised 3 in."
+  ],
+  "answer": 2,
+  "explanation": "In record C, work in = 90*24 = 2,160 in·lb but work out = 800*3 = 2,400 in·lb, which is more than the input. The others give 75 %, 80 % and 75 % efficiency.",
+  "type": "calculation",
+  "lesson": "2026-10-20"
+ },
+ {
+  "id": "G130",
+  "topic": "Simple Machines",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "force",
+   "work"
+  ],
+  "question": "If the thread pitch of a jack screw is halved while the handle, the load and the lifting height stay the same, and friction is neglected, what happens?",
+  "options": [
+   "The ideal effort is halved, and the handle must be turned through twice as many turns.",
+   "The ideal effort is doubled, and the handle must be turned through half as many turns.",
+   "The ideal effort is halved, and the number of turns stays the same.",
+   "The ideal effort stays the same, because the work done on the load stays the same."
+  ],
+  "answer": 0,
+  "explanation": "A smaller pitch is a gentler inclined plane with a larger MA, so the effort is halved. The effort distance doubles, so the work stays the same.",
+  "type": "theory",
+  "lesson": "2026-10-20"
+ },
+ {
+  "id": "G131",
+  "topic": "Simple Machines",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "force",
+   "equilibrium"
+  ],
+  "question": "Hauling a 240 lb bag of shop supplies, a wheelbarrow carries the load 20 in from the wheel axle, and the handles are held 80 in from the axle. Ignoring friction, what effort is needed at the handles to lift the load?",
+  "options": [
+   "48 lb",
+   "60 lb",
+   "180 lb",
+   "960 lb"
+  ],
+  "answer": 1,
+  "explanation": "For a second class lever F_e*L_e = F_l*L_l, so F_e = 240*20/80 = 60 lb (MA = 80/20 = 4).",
+  "type": "calculation",
+  "lesson": "2026-10-20"
+ },
+ {
+  "id": "G132",
+  "topic": "Work, Power, Energy, Torque and their relation",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "torque",
+   "rotation"
+  ],
+  "question": "If the driven gear in an ideal gear pair is replaced by one with twice as many teeth, while the drive gear and the input speed and torque stay the same, what happens at the driven gear?",
+  "options": [
+   "The speed doubles and the torque is halved",
+   "The speed is halved and the torque doubles",
+   "The speed is halved and the torque is also halved",
+   "The speed and the torque both stay the same, only the direction changes"
+  ],
+  "answer": 1,
+  "explanation": "The gear ratio doubles, so the driven gear turns at half the speed and delivers twice the torque, keeping P = tau*omega constant.",
+  "type": "theory",
+  "lesson": "2026-10-20"
+ },
+ {
+  "id": "G133",
+  "topic": "Simple Machines",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "work",
+   "energy"
+  ],
+  "question": "An engine weighing 800 lb is raised 5 ft with a block and tackle that has 5 supporting rope segments. The measured pulling effort is 200 lb. How much of the input work is lost to friction?",
+  "options": [
+   "800 ft·lb",
+   "1,000 ft·lb",
+   "4,000 ft·lb",
+   "5,000 ft·lb"
+  ],
+  "answer": 1,
+  "explanation": "The rope is pulled 5*5 = 25 ft, so W_in = 200*25 = 5,000 ft·lb and W_out = 800*5 = 4,000 ft·lb. The loss is 5,000 - 4,000 = 1,000 ft·lb (efficiency 80 %).",
+  "type": "calculation",
+  "lesson": "2026-10-20"
+ },
+ {
+  "id": "G134",
+  "topic": "Simple Machines",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "rotation",
+   "velocity"
+  ],
+  "question": "Roughly how long does a 60-tooth worm wheel take to make one full turn if the worm crank is turned by hand at about 2 turns per second (120 rpm)? One turn of the worm moves the wheel by one tooth.",
+  "options": [
+   "About 0.5 s",
+   "About 3 s",
+   "About 30 s",
+   "About 300 s"
+  ],
+  "answer": 2,
+  "explanation": "The velocity ratio is 60:1, so the wheel turns at 120/60 = 2 rpm, which is one turn in about 30 s.",
+  "type": "calculation",
+  "lesson": "2026-10-20"
+ },
+ {
+  "id": "G135",
+  "topic": "Simple Machines",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "force",
+   "equilibrium"
+  ],
+  "question": "The handle of a hydraulic hand pump used to fill a flap system is a lever. The pump piston rod attaches 2 in from the fulcrum, and the hand grips the handle 20 in from the fulcrum. Ignoring friction, what force acts on the piston rod when the hand pushes with 30 lb?",
+  "options": [
+   "300 lb",
+   "3 lb",
+   "600 lb",
+   "60 lb"
+  ],
+  "answer": 0,
+  "explanation": "F_e*L_e = F_l*L_l, so F_l = 30*20/2 = 300 lb (ideal MA = 20/2 = 10).",
+  "type": "calculation",
+  "lesson": "2026-10-20"
+ },
+ {
+  "id": "G136",
+  "topic": "Simple Machines",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "force",
+   "weight"
+  ],
+  "question": "Roughly how much push force is needed to roll a full fuel drum weighing about 400 lb up a smooth 12 ft ramp to a truck bed 3 ft high? Treat the ramp as frictionless and the push as parallel to the slope.",
+  "options": [
+   "400 lb",
+   "25 lb",
+   "1,200 lb",
+   "100 lb"
+  ],
+  "answer": 3,
+  "explanation": "Ideal MA = length/height = 12/3 = 4, so the effort = 400/4 = 100 lb.",
+  "type": "calculation",
+  "lesson": "2026-10-20"
+ },
+ {
+  "id": "G137",
+  "topic": "Work, Power, Energy, Torque and their relation",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "torque",
+   "power",
+   "rotation"
+  ],
+  "question": "Test-stand notes for a hydraulic pump drive: a 30-tooth drive gear turns at 3,000 rpm with 50 lb·ft of input torque and drives a 60-tooth gear on the pump shaft. Which recorded result is physically impossible for this gear pair?",
+  "options": [
+   "Pump shaft speed of 1,500 rpm",
+   "Output torque of 92 lb·ft",
+   "Output torque of 105 lb·ft at 1,500 rpm",
+   "Input power about 28.6 hp and output power about 26.3 hp"
+  ],
+  "answer": 2,
+  "explanation": "Gear ratio is 60/30 = 2:1, so the ideal output torque is 100 lb·ft and a real gear gives less. 105 lb·ft at 1,500 rpm is about 30 hp out for 28.6 hp in, which is impossible.",
+  "type": "calculation",
+  "lesson": "2026-10-20"
+ },
+ {
+  "id": "G138",
+  "topic": "Simple Machines",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "rotation"
+  ],
+  "question": "A 24-tooth engine gear drives a 48-tooth fuel pump gear directly. To reverse the pump direction, a 12-tooth idler gear is inserted between them. Compared with the direct mesh, what is the effect of the idler?",
+  "options": [
+   "The pump speed becomes 4 times the engine speed because the idler has only 12 teeth",
+   "The speed ratio stays 2:1, with the pump at half engine speed, and only the direction of rotation is reversed",
+   "The pump speed becomes one quarter of the engine speed, because 48/12 = 4",
+   "The pump torque doubles and its speed stays the same"
+  ],
+  "answer": 1,
+  "explanation": "An idler gear does not change the gear ratio, which depends only on the drive gear (24 teeth) and the driven gear (48 teeth). It only reverses the direction of rotation.",
+  "type": "theory",
+  "lesson": "2026-10-20"
+ },
+ {
+  "id": "G139",
+  "topic": "Simple Machines",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "work",
+   "energy",
+   "force"
+  ],
+  "question": "A block and tackle with 6 supporting rope segments raises a 600 lb hydraulic power pack by 3 ft. Because of friction, a measured pull of 125 lb is needed. How much input energy is lost to friction?",
+  "options": [
+   "75 ft·lb",
+   "450 ft·lb",
+   "1,800 ft·lb",
+   "2,250 ft·lb"
+  ],
+  "answer": 1,
+  "explanation": "The rope moves 6*3 = 18 ft, so W_in = 125*18 = 2,250 ft·lb. W_out = 600*3 = 1,800 ft·lb, so the loss is 2,250 - 1,800 = 450 ft·lb (efficiency 80 %).",
+  "type": "calculation",
+  "lesson": "2026-10-20"
+ },
+ {
+  "id": "G140",
+  "topic": "Work, Power, Energy, Torque and their relation",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "work",
+   "energy"
+  ],
+  "question": "A block and tackle with 4 supporting rope segments raises a 900 lb gearbox by 3 ft. The measured effort is 300 lb. How much work is lost to friction in the system?",
+  "options": [
+   "2,700 ft·lb",
+   "900 ft·lb",
+   "300 ft·lb",
+   "3,600 ft·lb"
+  ],
+  "answer": 1,
+  "explanation": "The rope is pulled 4*3 = 12 ft, so W_in = 300*12 = 3,600 ft·lb. W_out = 900*3 = 2,700 ft·lb. The loss is 3,600 - 2,700 = 900 ft·lb (efficiency 75 %).",
+  "type": "calculation",
+  "lesson": "2026-10-20"
+ },
+ {
+  "id": "G141",
+  "topic": "Momentum, Collisions & Circular Motion",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "momentum",
+   "weight"
+  ],
+  "question": "Fuel in a transfer line has a weight of 64.4 lb for the length of line being considered and is flowing at 8 ft/s. What is the momentum of this fuel? (Use g = 32.2 ft/s^2.)",
+  "options": [
+   "16 slug·ft/s",
+   "515 slug·ft/s",
+   "0.12 slug·ft/s",
+   "8 slug·ft/s"
+  ],
+  "answer": 0,
+  "explanation": "Mass = 64.4/32.2 = 2 slug, so p = m*v = 2*8 = 16 slug·ft/s (lb·s). Using weight in place of mass gives the wrong value of 515.",
+  "type": "calculation",
+  "lesson": "2026-10-21"
+ },
+ {
+  "id": "G142",
+  "topic": "Momentum, Collisions & Circular Motion",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "momentum",
+   "force"
+  ],
+  "question": "Closing a fast-acting shutoff valve stops a column of hydraulic fluid weighing 96.6 lb that is moving at 6 ft/s. The valve closes completely in 0.05 s. What is the average force on the valve from stopping the fluid? (Use g = 32.2 ft/s^2.)",
+  "options": [
+   "360 lb",
+   "11,600 lb",
+   "18 lb",
+   "0.9 lb"
+  ],
+  "answer": 0,
+  "explanation": "m = 96.6/32.2 = 3 slug, so the change in momentum is 3*6 = 18 lb·s. F = 18/0.05 = 360 lb. Using weight instead of mass gives 11,600 lb.",
+  "type": "calculation",
+  "lesson": "2026-10-21"
+ },
+ {
+  "id": "G143",
+  "topic": "Momentum, Collisions & Circular Motion",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "force",
+   "momentum"
+  ],
+  "question": "Estimate the reaction force on a fuel line that has split and is spraying a jet. The jet leaves at about 80 ft/s and carries 0.4 lb of fuel per second. Which order of magnitude is correct? (Use g = 32.2 ft/s^2.)",
+  "options": [
+   "About 1 lb",
+   "About 32 lb",
+   "About 0.01 lb",
+   "About 1,000 lb"
+  ],
+  "answer": 0,
+  "explanation": "Mass flow = 0.4/32.2 = 0.0124 slug/s. Force is about mass flow * change in velocity = 0.0124*80, which is about 1 lb. Using 0.4 lb/s directly gives 32 lb.",
+  "type": "calculation",
+  "lesson": "2026-10-21"
+ },
+ {
+  "id": "G144",
+  "topic": "Momentum, Collisions & Circular Motion",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "force",
+   "momentum"
+  ],
+  "question": "Suppose a shutoff valve stops a moving column of fuel. Test A stops the fluid from speed v in time t. Test B stops the same mass of fluid from speed 2v in time t/2. How does the average force on the valve in Test B compare with Test A?",
+  "options": [
+   "It is the same",
+   "It is twice as large",
+   "It is four times as large",
+   "It is half as large"
+  ],
+  "answer": 2,
+  "explanation": "F = m*Δv/t. Doubling Δv doubles the force and halving t doubles it again, so F_B = 2*2 = 4 times F_A.",
+  "type": "theory",
+  "lesson": "2026-10-21"
+ },
+ {
+  "id": "G145",
+  "topic": "Momentum, Collisions & Circular Motion",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "momentum",
+   "energy"
+  ],
+  "question": "Logged data from a coupling test: a 4 slug hydraulic service cart moving at 5 ft/s hits a stationary 6 slug fuel cart, and the two couple together. Which logged entry is physically suspicious?",
+  "options": [
+   "Total momentum after coupling = 20 slug·ft/s",
+   "Coupled speed = 2 ft/s",
+   "Kinetic energy after coupling = 50 ft·lb, the same as before the impact",
+   "About 30 ft·lb of kinetic energy was converted to heat and deformation"
+  ],
+  "answer": 2,
+  "explanation": "Momentum before is 4*5 = 20 slug·ft/s, so v = 20/10 = 2 ft/s. KE before is 1/2*4*5^2 = 50 ft·lb and after is 1/2*10*2^2 = 20 ft·lb, so 30 ft·lb is lost. Kinetic energy cannot stay at 50 ft·lb when the carts stick together.",
+  "type": "calculation",
+  "lesson": "2026-10-21"
+ },
+ {
+  "id": "G146",
+  "topic": "Momentum, Collisions & Circular Motion",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "momentum",
+   "energy"
+  ],
+  "question": "During a workshop test, a 6 slug gearbox cradle rolling at 4 ft/s on a track strikes a stationary 2 slug cradle, and the two lock together. Which logged result is physically impossible?",
+  "options": [
+   "Total momentum after impact is 24 slug·ft/s.",
+   "Kinetic energy after impact is 36 ft·lb.",
+   "Both cradles move together at 4.5 ft/s after impact.",
+   "About 12 ft·lb of kinetic energy was converted to heat, noise and deformation."
+  ],
+  "answer": 2,
+  "explanation": "Momentum before = 6*4 = 24 slug·ft/s, so v = 24/(6+2) = 3 ft/s, not 4.5 ft/s. KE falls from 1/2*6*4^2 = 48 ft·lb to 1/2*8*3^2 = 36 ft·lb, a loss of 12 ft·lb, as expected for a sticking collision.",
+  "type": "calculation",
+  "lesson": "2026-10-21"
+ },
+ {
+  "id": "G147",
+  "topic": "Momentum, Collisions & Circular Motion",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "force",
+   "momentum"
+  ],
+  "question": "On a hoist beam, a 10 slug trolley rolls into a stationary 1 slug trolley. Which statement about the impact is correct?",
+  "options": [
+   "The heavier trolley pushes on the lighter one with a larger force than the lighter one pushes back.",
+   "The forces are equal and opposite, but the lighter trolley has the larger acceleration.",
+   "The forces are equal and opposite, so both trolleys have the same acceleration.",
+   "The lighter trolley exerts the larger force because its velocity changes more."
+  ],
+  "answer": 1,
+  "explanation": "By Newton's third law the two forces are equal in size and opposite in direction. Since F = m*a, the 1 slug trolley has ten times the acceleration of the 10 slug trolley.",
+  "type": "theory",
+  "lesson": "2026-10-21"
+ },
+ {
+  "id": "G148",
+  "topic": "Momentum, Collisions & Circular Motion",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "units",
+   "momentum",
+   "force"
+  ],
+  "question": "A 48.3 lb gear housing slides along a bench at 180 in/s and is brought to rest by a rubber stop in 50 ms. What is the average force on the housing during the stop?",
+  "options": [
+   "5,400 lb",
+   "14,490 lb",
+   "22.5 lb",
+   "450 lb"
+  ],
+  "answer": 3,
+  "explanation": "m = 48.3/32.2 = 1.5 slug and v = 180 in/s = 15 ft/s, so the impulse is 1.5*15 = 22.5 lb·s. The average force is 22.5/0.05 = 450 lb.",
+  "type": "calculation",
+  "lesson": "2026-10-21"
+ },
+ {
+  "id": "G149",
+  "topic": "Momentum, Collisions & Circular Motion",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "momentum",
+   "force"
+  ],
+  "question": "Estimate the average force on a gearbox casing when a 2 lb broken gear fragment, thrown off at 100 ft/s, is stopped by the casing in 2 ms. Which order of magnitude is correct?",
+  "options": [
+   "About 31 lb",
+   "About 310 lb",
+   "About 3,100 lb",
+   "About 100,000 lb"
+  ],
+  "answer": 2,
+  "explanation": "m = 2/32.2 = 0.062 slug, so the impulse is 0.062*100 = 6.2 lb·s. The average force is 6.2/0.002 = about 3,100 lb. Using 2 lb as the mass gives the wrong answer of 100,000 lb.",
+  "type": "calculation",
+  "lesson": "2026-10-21"
+ },
+ {
+  "id": "G150",
+  "topic": "Momentum, Collisions & Circular Motion",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "momentum"
+  ],
+  "question": "Two pulley carriages run toward each other on a rail. A 5 slug carriage moves at +6 ft/s and a 3 slug carriage moves at -2 ft/s. They collide and stick together. What is their common velocity just after the collision?",
+  "options": [
+   "+3 ft/s",
+   "+4.5 ft/s",
+   "+3.75 ft/s",
+   "+2 ft/s"
+  ],
+  "answer": 0,
+  "explanation": "Total momentum = 5*6 + 3*(-2) = 24 slug·ft/s. Then v = 24/(5+3) = +3 ft/s, in the direction of the first carriage.",
+  "type": "calculation",
+  "lesson": "2026-10-21"
+ },
+ {
+  "id": "G151",
+  "topic": "Momentum, Collisions & Circular Motion",
+  "difficulty": "easy",
+  "units": "SI",
+  "keywords": [
+   "force",
+   "momentum"
+  ],
+  "question": "An engine-driven propeller on a light aircraft on the ramp draws in air and accelerates 8 slug/s of it backward by 75 ft/s. Using thrust = (mass flow) * (change in air velocity), what is the approximate thrust?",
+  "options": [
+   "600 lb",
+   "19,300 lb",
+   "83 lb",
+   "9.4 lb"
+  ],
+  "answer": 0,
+  "explanation": "Mass flow is already in slug/s, so thrust = 8 * 75 = 600 lb. Multiplying by 32.2 (treating the flow as lb/s) gives the wrong 19,300 lb.",
+  "type": "calculation",
+  "lesson": "2026-10-21"
+ },
+ {
+  "id": "G152",
+  "topic": "Momentum, Collisions & Circular Motion",
+  "difficulty": "easy",
+  "units": "SI",
+  "keywords": [
+   "force",
+   "momentum"
+  ],
+  "question": "Roughly how large is the average force on an engine spinner when a 3.22 lb gull hits it at a relative speed of 200 ft/s and is brought to rest in 0.01 s?",
+  "options": [
+   "About 2,000 lb",
+   "About 64,400 lb",
+   "About 200 lb",
+   "About 20 lb"
+  ],
+  "answer": 0,
+  "explanation": "m = 3.22/32.2 = 0.1 slug, so the impulse = 0.1 * 200 = 20 lb·s. Average force = 20/0.01 = 2,000 lb. Using 3.22 as mass instead of slug gives 64,400 lb.",
+  "type": "calculation",
+  "lesson": "2026-10-21"
+ },
+ {
+  "id": "G153",
+  "topic": "Momentum, Collisions & Circular Motion",
+  "difficulty": "hard",
+  "units": "SI",
+  "keywords": [
+   "momentum",
+   "force"
+  ],
+  "question": "Starting from rest on a level runway, a 3,220 lb aircraft has a propeller that accelerates 10 slug/s of air backward by 60 ft/s. Rolling resistance on the wheels is 100 lb and air drag is negligible at this low speed. What is the aircraft speed after 8 s?",
+  "options": [
+   "40 ft/s",
+   "48 ft/s",
+   "1.24 ft/s",
+   "400 ft/s"
+  ],
+  "answer": 0,
+  "explanation": "Thrust = 10 * 60 = 600 lb, so net force = 600 - 100 = 500 lb. Mass = 3220/32.2 = 100 slug, and F*t = m*Δv gives Δv = 500 * 8 / 100 = 40 ft/s.",
+  "type": "calculation",
+  "lesson": "2026-10-21"
+ },
+ {
+  "id": "G154",
+  "topic": "Momentum, Collisions & Circular Motion",
+  "difficulty": "easy",
+  "units": "SI",
+  "keywords": [
+   "momentum",
+   "force"
+  ],
+  "question": "If a propeller is replaced by a larger one that moves twice the mass of air per second but accelerates that air by only half as much, how does the thrust compare, using thrust = (mass flow) * (change in air velocity)?",
+  "options": [
+   "It is unchanged",
+   "It doubles",
+   "It is halved",
+   "It becomes four times larger"
+  ],
+  "answer": 0,
+  "explanation": "Thrust is proportional to mass flow times Δv, so the factors are 2 * 1/2 = 1 and the thrust is unchanged.",
+  "type": "calculation",
+  "lesson": "2026-10-21"
+ },
+ {
+  "id": "G155",
+  "topic": "Momentum, Collisions & Circular Motion",
+  "difficulty": "hard",
+  "units": "SI",
+  "keywords": [
+   "momentum",
+   "energy"
+  ],
+  "question": "During a rig test, a 1 slug broken propeller fragment moving at 60 ft/s sticks to a stationary 5 slug engine test hub on a nearly frictionless mount. No external horizontal force acts. Which logged result is physically impossible?",
+  "options": [
+   "Final speed 10 ft/s, kinetic energy falling from 1,800 ft·lb to 300 ft·lb",
+   "Final speed 12 ft/s, with the logger reporting only 432 ft·lb of kinetic energy after, so the loss is acceptable",
+   "Total momentum of 60 slug·ft/s both before and after the impact",
+   "About 1,500 ft·lb of the initial kinetic energy converted to heat, noise and deformation"
+  ],
+  "answer": 1,
+  "explanation": "Momentum before is 1*60 = 60 slug·ft/s, so the common speed must be 60/6 = 10 ft/s. A 12 ft/s result would give 72 slug·ft/s, violating conservation of momentum, even though the kinetic energy loss looks plausible.",
+  "type": "theory",
+  "lesson": "2026-10-21"
+ },
+ {
+  "id": "G156",
+  "topic": "Momentum, Collisions & Circular Motion",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "force",
+   "momentum"
+  ],
+  "question": "An engine-driven propeller on a light aircraft on the ramp draws in air and accelerates 8 slug/s of it backward by 75 ft/s. Using thrust = (mass flow) * (change in air velocity), what is the approximate thrust?",
+  "options": [
+   "600 lb",
+   "19,300 lb",
+   "83 lb",
+   "9.4 lb"
+  ],
+  "answer": 0,
+  "explanation": "Mass flow is already in slug/s, so thrust = 8 * 75 = 600 lb. Multiplying by 32.2 (treating the flow as lb/s) gives the wrong 19,300 lb.",
+  "type": "calculation",
+  "lesson": "2026-10-21"
+ },
+ {
+  "id": "G157",
+  "topic": "Momentum, Collisions & Circular Motion",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "force",
+   "momentum"
+  ],
+  "question": "Roughly how large is the average force on an engine spinner when a 3.22 lb gull hits it at a relative speed of 200 ft/s and is brought to rest in 0.01 s?",
+  "options": [
+   "About 2,000 lb",
+   "About 64,400 lb",
+   "About 200 lb",
+   "About 20 lb"
+  ],
+  "answer": 0,
+  "explanation": "m = 3.22/32.2 = 0.1 slug, so the impulse = 0.1 * 200 = 20 lb·s. Average force = 20/0.01 = 2,000 lb. Using 3.22 as mass instead of slug gives 64,400 lb.",
+  "type": "calculation",
+  "lesson": "2026-10-21"
+ },
+ {
+  "id": "G158",
+  "topic": "Momentum, Collisions & Circular Motion",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "momentum",
+   "force"
+  ],
+  "question": "Starting from rest on a level runway, a 3,220 lb aircraft has a propeller that accelerates 10 slug/s of air backward by 60 ft/s. Rolling resistance on the wheels is 100 lb and air drag is negligible at this low speed. What is the aircraft speed after 8 s?",
+  "options": [
+   "40 ft/s",
+   "48 ft/s",
+   "1.24 ft/s",
+   "400 ft/s"
+  ],
+  "answer": 0,
+  "explanation": "Thrust = 10 * 60 = 600 lb, so net force = 600 - 100 = 500 lb. Mass = 3220/32.2 = 100 slug, and F*t = m*Δv gives Δv = 500 * 8 / 100 = 40 ft/s.",
+  "type": "calculation",
+  "lesson": "2026-10-21"
+ },
+ {
+  "id": "G159",
+  "topic": "Momentum, Collisions & Circular Motion",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "momentum",
+   "energy"
+  ],
+  "question": "During a shop-floor test, a 4 slug engine trolley rolling at 6 ft/s couples to a stationary 2 slug trolley and the two move off together. Which logbook entry is physically impossible?",
+  "options": [
+   "The final speed is 4 ft/s.",
+   "The total momentum after the collision is 24 slug·ft/s.",
+   "The kinetic energy decreased by 24 ft·lb.",
+   "The total kinetic energy after the collision equals the value before it (72 ft·lb)."
+  ],
+  "answer": 3,
+  "explanation": "Momentum: 4*6 = 24 = 6*v, so v = 4 ft/s. Kinetic energy goes from 1/2*4*6^2 = 72 ft·lb to 1/2*6*4^2 = 48 ft·lb, so a loss of 24 ft·lb is expected. Objects that stick together cannot conserve kinetic energy.",
+  "type": "theory",
+  "lesson": "2026-10-21"
+ },
+ {
+  "id": "G160",
+  "topic": "Momentum, Collisions & Circular Motion",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "momentum",
+   "force"
+  ],
+  "question": "A 3.22 lb hammer head strikes a stuck bushing at 20 ft/s and stops (no rebound) in 0.005 s. What is the average force on the bushing?",
+  "options": [
+   "40 lb",
+   "400 lb",
+   "12,900 lb",
+   "2 lb"
+  ],
+  "answer": 1,
+  "explanation": "m = 3.22/32.2 = 0.1 slug. Impulse = 0.1*20 = 2 lb·s, so F = 2/0.005 = 400 lb.",
+  "type": "calculation",
+  "lesson": "2026-10-21"
+ },
+ {
+  "id": "G161",
+  "topic": "Fluids & Pressure",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "pressure",
+   "force"
+  ],
+  "question": "A hand-operated hydraulic press seats a bushing in a wing-fitting lug. The input piston has an area of 0.5 in^2 and the output piston has an area of 20 in^2. The operator pushes the input piston with 80 lb. What is the output force on the bushing (ideal system)?",
+  "options": [
+   "1,600 lb",
+   "3,200 lb",
+   "160 lb",
+   "2 lb"
+  ],
+  "answer": 1,
+  "explanation": "Pressure = 80/0.5 = 160 psi everywhere in the fluid, so F_out = 160 * 20 = 3,200 lb (MA = 20/0.5 = 40).",
+  "type": "calculation",
+  "lesson": "2026-10-22"
+ },
+ {
+  "id": "G162",
+  "topic": "Fluids & Pressure",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "work",
+   "force"
+  ],
+  "question": "Which statement is correct about a hydraulic jack used to raise a fuselage section on its supports?",
+  "options": [
+   "The large output piston gives more work than the input piston supplies, because the force is multiplied.",
+   "The output piston gives a larger force but moves a shorter distance, so the work out is not greater than the work in.",
+   "The output piston moves the same distance as the input piston but with a larger force.",
+   "The pressure under the large output piston is lower than under the small input piston, which is why the force is larger."
+  ],
+  "answer": 1,
+  "explanation": "Work = force * distance. The jack trades distance for force (A_in*d_in = A_out*d_out), and no machine gives more work than it receives. The pressure is the same everywhere in the fluid.",
+  "type": "theory",
+  "lesson": "2026-10-22"
+ },
+ {
+  "id": "G163",
+  "topic": "Fluids & Pressure",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "force",
+   "pressure"
+  ],
+  "question": "In a hydraulic clamp that holds a skin panel while fasteners are installed, the input piston and the input force stay the same. The diameter of the output piston is doubled. What happens to the output force and to the output piston travel (ideal system)?",
+  "options": [
+   "The force doubles and the travel is halved.",
+   "The force becomes 4 times larger and the travel becomes 1/4 as large.",
+   "The force becomes 4 times larger and the travel is halved.",
+   "The force doubles and the travel becomes 1/4 as large."
+  ],
+  "answer": 1,
+  "explanation": "Piston area is pi*d^2/4, so doubling the diameter makes the area 4 times larger. Since MA = A_out/A_in, the force is 4 times larger and the travel is 1/4 as large.",
+  "type": "theory",
+  "lesson": "2026-10-22"
+ },
+ {
+  "id": "G164",
+  "topic": "Fluids & Pressure",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "pressure",
+   "force",
+   "units"
+  ],
+  "question": "An actuator in a wing-panel assembly fixture works at a system pressure of 2,000 psi. Its piston area is given on the drawing as 0.05 ft^2. What force does the actuator produce?",
+  "options": [
+   "100 lb",
+   "694 lb",
+   "1,200 lb",
+   "14,400 lb"
+  ],
+  "answer": 3,
+  "explanation": "Convert the area: 0.05 ft^2 * 144 in^2/ft^2 = 7.2 in^2. Then F = P*A = 2,000 * 7.2 = 14,400 lb.",
+  "type": "calculation",
+  "lesson": "2026-10-22"
+ },
+ {
+  "id": "G165",
+  "topic": "Fluids & Pressure",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "force",
+   "work"
+  ],
+  "question": "Estimate without a detailed calculation: a hydraulic bolt-tensioning ram has an input piston of 0.2 in^2 and an output piston of 4.0 in^2. The input piston is pushed with 40 lb and moves 3 in. Which pair of values is closest to the output force and the output piston travel (ideal system)?",
+  "options": [
+   "20 lb and 3 in",
+   "2 lb and 0.15 in",
+   "800 lb and 60 in",
+   "800 lb and 0.15 in"
+  ],
+  "answer": 3,
+  "explanation": "The area ratio is 4.0/0.2 = 20, so the force is about 20 * 40 = 800 lb and the travel is about 3/20 = 0.15 in.",
+  "type": "calculation",
+  "lesson": "2026-10-22"
+ },
+ {
+  "id": "G166",
+  "topic": "Fluids & Pressure",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "pressure",
+   "force"
+  ],
+  "question": "A hand-operated hydraulic press seats a bushing in a wing-fitting lug. The input piston has an area of 0.5 in^2 and the output piston has an area of 20 in^2. The operator pushes the input piston with 80 lb. What is the output force on the bushing (ideal system)?",
+  "options": [
+   "1,600 lb",
+   "3,200 lb",
+   "160 lb",
+   "2 lb"
+  ],
+  "answer": 1,
+  "explanation": "Pressure = 80/0.5 = 160 psi everywhere in the fluid, so F_out = 160 * 20 = 3,200 lb (MA = 20/0.5 = 40).",
+  "type": "calculation",
+  "lesson": "2026-10-22"
+ },
+ {
+  "id": "G167",
+  "topic": "Simple Machines",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "work",
+   "force"
+  ],
+  "question": "Which statement is correct about a hydraulic jack used to raise a fuselage section on its supports?",
+  "options": [
+   "The large output piston gives more work than the input piston supplies, because the force is multiplied.",
+   "The output piston gives a larger force but moves a shorter distance, so the work out is not greater than the work in.",
+   "The output piston moves the same distance as the input piston but with a larger force.",
+   "The pressure under the large output piston is lower than under the small input piston, which is why the force is larger."
+  ],
+  "answer": 1,
+  "explanation": "Work = force * distance. The jack trades distance for force (A_in*d_in = A_out*d_out), and no machine gives more work than it receives. The pressure is the same everywhere in the fluid.",
+  "type": "theory",
+  "lesson": "2026-10-22"
+ },
+ {
+  "id": "G168",
+  "topic": "Simple Machines",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "force",
+   "pressure"
+  ],
+  "question": "In a hydraulic clamp that holds a skin panel while fasteners are installed, the input piston and the input force stay the same. If the diameter of the output piston is doubled, what happens to the output force and to the output piston travel (ideal system)?",
+  "options": [
+   "The force doubles and the travel is halved.",
+   "The force becomes 4 times larger and the travel becomes 1/4 as large.",
+   "The force becomes 4 times larger and the travel is halved.",
+   "The force doubles and the travel becomes 1/4 as large."
+  ],
+  "answer": 1,
+  "explanation": "Piston area is pi*d^2/4, so doubling the diameter makes the area 4 times larger. Since MA = A_out/A_in, the force is 4 times larger and the travel is 1/4 as large.",
+  "type": "theory",
+  "lesson": "2026-10-22"
+ },
+ {
+  "id": "G169",
+  "topic": "Fluids & Pressure",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "pressure",
+   "force",
+   "units"
+  ],
+  "question": "An actuator in a wing-panel assembly fixture works at a system pressure of 2,000 psi. Its piston area is given on the drawing as 0.05 ft^2. What force does the actuator produce?",
+  "options": [
+   "100 lb",
+   "694 lb",
+   "1,200 lb",
+   "14,400 lb"
+  ],
+  "answer": 3,
+  "explanation": "Convert the area: 0.05 ft^2 * 144 in^2/ft^2 = 7.2 in^2. Then F = P*A = 2,000 * 7.2 = 14,400 lb.",
+  "type": "calculation",
+  "lesson": "2026-10-22"
+ },
+ {
+  "id": "G170",
+  "topic": "Simple Machines",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "force",
+   "work"
+  ],
+  "question": "Estimate without a detailed calculation: a hydraulic bolt-tensioning ram has an input piston of 0.2 in^2 and an output piston of 4.0 in^2. The input piston is pushed with 40 lb and moves 3 in. Which pair of values is closest to the output force and the output piston travel (ideal system)?",
+  "options": [
+   "20 lb and 3 in",
+   "2 lb and 0.15 in",
+   "800 lb and 60 in",
+   "800 lb and 0.15 in"
+  ],
+  "answer": 3,
+  "explanation": "The area ratio is 4.0/0.2 = 20, so the force is about 20 * 40 = 800 lb and the travel is about 3/20 = 0.15 in.",
+  "type": "calculation",
+  "lesson": "2026-10-22"
+ },
+ {
+  "id": "G171",
+  "topic": "Fluids & Pressure",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "pressure",
+   "force",
+   "units"
+  ],
+  "question": "A shop hydraulic press has a pressure sensor that reads 288,000 lb/ft^2. The ram piston has an area of 3 in^2. What is the ideal force on the ram?",
+  "options": [
+   "864,000 lb",
+   "6,000 lb",
+   "96,000 lb",
+   "2,000 lb"
+  ],
+  "answer": 1,
+  "explanation": "Convert first: 1 psi = 144 lb/ft^2, so P = 288,000/144 = 2,000 psi. Then F = P*A = 2,000 * 3 = 6,000 lb.",
+  "type": "calculation",
+  "lesson": "2026-10-22"
+ },
+ {
+  "id": "G172",
+  "topic": "Fluids & Pressure",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "force",
+   "pressure"
+  ],
+  "question": "If the diameter of the output piston of a hydraulic bearing puller is doubled while the input piston and the input force stay the same, what happens to the output force and the output piston travel?",
+  "options": [
+   "Force doubles, travel is halved",
+   "Force becomes 4 times larger, travel is halved",
+   "Force doubles, travel becomes 1/4",
+   "Force becomes 4 times larger, travel becomes 1/4"
+  ],
+  "answer": 3,
+  "explanation": "Area is proportional to d^2, so doubling the diameter makes A_out 4 times larger. MA = A_out/A_in = 4, so the force is 4 times larger and the travel is 1/4.",
+  "type": "theory",
+  "lesson": "2026-10-22"
+ },
+ {
+  "id": "G173",
+  "topic": "Fluids & Pressure",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "force",
+   "work"
+  ],
+  "question": "An engine hoist has a pump piston of 0.4 in^2 and a lifting ram of 12 in^2. Ignoring losses, how far must the pump piston move in total (over many strokes) to raise the engine 2 in?",
+  "options": [
+   "60 in",
+   "2 in",
+   "0.067 in",
+   "30 in"
+  ],
+  "answer": 0,
+  "explanation": "MA = A_out/A_in = 12/0.4 = 30. From A_in*d_in = A_out*d_out, d_in = 30 * 2 = 60 in.",
+  "type": "calculation",
+  "lesson": "2026-10-22"
+ },
+ {
+  "id": "G174",
+  "topic": "Fluids & Pressure",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "work",
+   "force",
+   "energy"
+  ],
+  "question": "During a test of a bench hydraulic press, the input piston is 2 in^2 and the output piston is 10 in^2. An input force of 100 lb moves the input piston 5 in. Which output reading is physically impossible?",
+  "options": [
+   "Output force 450 lb, output travel 1 in",
+   "Output force 500 lb, output travel 1 in",
+   "Output force 500 lb, output travel 2.5 in",
+   "Output force 450 lb, output travel 0.8 in"
+  ],
+  "answer": 2,
+  "explanation": "Work in = 100 * 5 = 500 in·lb. An output of 500 lb over 2.5 in would be 1,250 in·lb, more than the work put in, which is impossible. Ideal values are 500 lb and 1 in. Seal losses or air can only lower the output.",
+  "type": "calculation",
+  "lesson": "2026-10-22"
+ },
+ {
+  "id": "G175",
+  "topic": "Fluids & Pressure",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "pressure",
+   "force"
+  ],
+  "question": "In a shop hydraulic press the output piston has 10 times the area of the input piston, and fluid weight is ignored. Which statement is correct?",
+  "options": [
+   "The pressure at the output piston is 10 times the pressure at the input piston",
+   "The pressure is the same at both pistons, but the force is 10 times larger at the output piston",
+   "The pressure at the output piston is 1/10 of the input pressure, so the force is the same",
+   "The pressure is the same at both pistons, and so is the force"
+  ],
+  "answer": 1,
+  "explanation": "By Pascal's law the pressure is the same everywhere in the confined fluid. Since F = P*A, the force is 10 times larger on the piston with 10 times the area.",
+  "type": "theory",
+  "lesson": "2026-10-22"
+ },
+ {
+  "id": "G176",
+  "topic": "Fluids & Pressure",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "pressure",
+   "units"
+  ],
+  "question": "A closed water-filled test cylinder has a piston on top. The piston has an area of 0.5 ft^2 and carries a load of 7,200 lb. What does a gauge read at the bottom of the water column, 10 ft below the piston? Use 0.433 psi per foot of water.",
+  "options": [
+   "100.00 psi",
+   "14,404.33 psi",
+   "104.33 psi",
+   "108.33 psi"
+  ],
+  "answer": 2,
+  "explanation": "0.5 ft^2 = 72 in^2, so the piston gives 7200/72 = 100 psi everywhere. The water column adds 0.433*10 = 4.33 psi, so the bottom gauge reads 104.33 psi.",
+  "type": "calculation",
+  "lesson": "2026-10-22"
+ },
+ {
+  "id": "G177",
+  "topic": "Simple Machines",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "force",
+   "work"
+  ],
+  "question": "Suppose a bottle jack is fitted with an output piston of half the original area. The input piston, the input force and the pump stroke stay the same, and losses are ignored. What happens to the output force and to the output piston travel per stroke?",
+  "options": [
+   "The force doubles and the travel doubles",
+   "The force doubles and the travel halves",
+   "The force halves and the travel halves",
+   "The force halves and the travel doubles"
+  ],
+  "answer": 3,
+  "explanation": "The output force is P*A_out, so half the area gives half the force. The displaced volume is unchanged, so A_in*d_in = A_out*d_out gives twice the travel.",
+  "type": "theory",
+  "lesson": "2026-10-22"
+ },
+ {
+  "id": "G178",
+  "topic": "Simple Machines",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "force",
+   "pressure"
+  ],
+  "question": "Estimate quickly: a shop jack has a pump piston of 0.5 in^2 and a lifting piston of 25 in^2. About how much force must be applied to the pump piston to hold up a 10,000 lb load, ignoring losses?",
+  "options": [
+   "20 lb",
+   "200 lb",
+   "2,000 lb",
+   "500,000 lb"
+  ],
+  "answer": 1,
+  "explanation": "The area ratio is 25/0.5 = 50, so MA = 50. The input force is about 10,000/50 = 200 lb.",
+  "type": "calculation",
+  "lesson": "2026-10-22"
+ },
+ {
+  "id": "G179",
+  "topic": "Simple Machines",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "force",
+   "pressure",
+   "work"
+  ],
+  "question": "To lift a 9,000 lb load, a hydraulic jack has a pump piston of 0.75 in^2 and a lifting piston of 30 in^2. The efficiency is 90 % because of seal friction. What input force is needed on the pump piston?",
+  "options": [
+   "225 lb",
+   "203 lb",
+   "400 lb",
+   "250 lb"
+  ],
+  "answer": 3,
+  "explanation": "The area ratio is 30/0.75 = 40, so the ideal input force is 9000/40 = 225 lb. With 90 % efficiency, F_in = 9000/(40*0.9) = 250 lb.",
+  "type": "calculation",
+  "lesson": "2026-10-22"
+ },
+ {
+  "id": "G180",
+  "topic": "Simple Machines",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "work",
+   "force",
+   "energy"
+  ],
+  "question": "Which entry in a bench press log is physically impossible? The press has a 2 in^2 input piston and a 40 in^2 output piston. Each entry is for a 30 lb input force applied through a 10 in input stroke.",
+  "options": [
+   "Output force 600 lb, output travel 1.0 in",
+   "Output force 600 lb, output travel 0.5 in",
+   "Output force 540 lb, output travel 0.5 in",
+   "Output force 450 lb, output travel 0.5 in"
+  ],
+  "answer": 0,
+  "explanation": "Work in = 30*10 = 300 in·lb. Entry A gives work out = 600*1.0 = 600 in·lb, more than the work in, which is impossible. The ideal travel is 10*2/40 = 0.5 in, and the other entries have work out no greater than 300 in·lb.",
+  "type": "calculation",
+  "lesson": "2026-10-22"
+ },
+ {
+  "id": "G181",
+  "topic": "Fluids & Pressure",
+  "difficulty": "hard",
+  "units": "SI",
+  "keywords": [
+   "density",
+   "weight"
+  ],
+  "question": "Before the aircraft is pushed back from the gate, one wing tank is found to contain 50 US gallons of aviation gasoline with SG 0.72. Use water = 62.4 lb/ft^3 and 1 US gallon = 0.1337 ft^3. What is the approximate weight of this fuel?",
+  "options": [
+   "About 36 lb",
+   "About 300 lb",
+   "About 417 lb",
+   "About 2,250 lb"
+  ],
+  "answer": 1,
+  "explanation": "Density = 0.72*62.4 = 44.9 lb/ft^3. Volume = 50*0.1337 = 6.69 ft^3. Weight = 44.9*6.69 = about 300 lb (6.0 lb per gallon).",
+  "type": "calculation",
+  "lesson": "2026-10-23"
+ },
+ {
+  "id": "G182",
+  "topic": "Fluids & Pressure",
+  "difficulty": "hard",
+  "units": "SI",
+  "keywords": [
+   "pressure",
+   "velocity"
+  ],
+  "question": "Estimate the dynamic pressure of the air at the pitot tube when an aircraft is towed at 10 ft/s (about 7 mph) in still air at sea level (rho = 0.002377 slug/ft^3). Which order of magnitude is correct?",
+  "options": [
+   "About 1.2 lb/ft^2",
+   "About 12 lb/ft^2",
+   "About 0.12 lb/ft^2",
+   "About 120 lb/ft^2"
+  ],
+  "answer": 2,
+  "explanation": "q = 1/2*rho*v^2 = 0.5*0.002377*10^2 = about 0.12 lb/ft^2. Because q grows with v^2, one tenth of 100 ft/s (q = 11.9 lb/ft^2) gives one hundredth of the pressure.",
+  "type": "calculation",
+  "lesson": "2026-10-23"
+ },
+ {
+  "id": "G183",
+  "topic": "Fluids & Pressure",
+  "difficulty": "easy",
+  "units": "SI",
+  "keywords": [
+   "density"
+  ],
+  "question": "While checking the battery of a ground power cart, a hydrometer is used on four cells. Which reading is physically suspicious for a lead-acid electrolyte (water plus acid)?",
+  "options": [
+   "1.150, a discharged cell",
+   "1.285, a charged cell",
+   "1.310, a fully charged cell",
+   "0.850, lighter than pure water"
+  ],
+  "answer": 3,
+  "explanation": "Pure water reads 1.000 and the acid makes the electrolyte denser than water, so a reading of 0.850 (SG below 1) cannot be right. The other readings are in the normal range.",
+  "type": "theory",
+  "lesson": "2026-10-23"
+ },
+ {
+  "id": "G184",
+  "topic": "Fluids & Pressure",
+  "difficulty": "easy",
+  "units": "SI",
+  "keywords": [
+   "velocity"
+  ],
+  "question": "A fuel hose with a flow area of 6 in^2 delivers avgas at 5 ft/s to a refuelling nozzle whose outlet area is 1.5 in^2. What is the fuel velocity at the nozzle outlet?",
+  "options": [
+   "20 ft/s",
+   "1.25 ft/s",
+   "7.5 ft/s",
+   "80 ft/s"
+  ],
+  "answer": 0,
+  "explanation": "Continuity: A1*v1 = A2*v2, so v2 = 6*5/1.5 = 20 ft/s.",
+  "type": "calculation",
+  "lesson": "2026-10-23"
+ },
+ {
+  "id": "G185",
+  "topic": "Fluids & Pressure",
+  "difficulty": "hard",
+  "units": "SI",
+  "keywords": [
+   "pressure",
+   "energy"
+  ],
+  "question": "Low-speed air flows through a venturi-shaped duct of a ground air cart, from a wide section into a narrow throat. Assuming ideal flow with no energy added or removed, which statement is correct?",
+  "options": [
+   "The total pressure drops in the throat because the air is squeezed.",
+   "The static pressure drops and the dynamic pressure rises in the throat, while the total pressure stays constant.",
+   "The static pressure rises in the throat because the air is compressed into a smaller area.",
+   "The velocity stays the same in the throat, but the static pressure drops because of friction."
+  ],
+  "answer": 1,
+  "explanation": "By continuity the air speeds up in the throat, so the dynamic pressure rises and the static pressure falls by the same amount. Total pressure = static + dynamic stays constant.",
+  "type": "theory",
+  "lesson": "2026-10-23"
+ },
+ {
+  "id": "G186",
+  "topic": "Fluids & Pressure",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "density",
+   "weight"
+  ],
+  "question": "Four drums stored near the tug were checked by weighing a 1 ft^3 sample of each liquid. Which result is physically suspicious and should make the crew doubt the label or the measurement?",
+  "options": [
+   "Water: 62.4 lb",
+   "Hydraulic fluid with SG 0.85: 53.0 lb",
+   "Avgas (SG about 0.72): 44.9 lb",
+   "Avgas (SG about 0.72): 78 lb"
+  ],
+  "answer": 3,
+  "explanation": "78 lb/ft^3 gives SG = 78/62.4 = 1.25, so the liquid would be heavier than water. Avgas has SG about 0.72 (about 44.9 lb/ft^3) and floats on water.",
+  "type": "theory",
+  "lesson": "2026-10-23"
+ },
+ {
+  "id": "G187",
+  "topic": "Fluids & Pressure",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "pressure",
+   "force"
+  ],
+  "question": "Estimate the dynamic pressure of a 60 ft/s headwind gust (sea-level air, rho = 0.002377 slug/ft^3) hitting a parked aircraft. Which value has the correct order of magnitude, in psi?",
+  "options": [
+   "0.0003 psi",
+   "0.03 psi",
+   "3 psi",
+   "4.3 psi"
+  ],
+  "answer": 1,
+  "explanation": "q = 0.5*0.002377*60^2 = 4.28 lb/ft^2. Dividing by 144 gives 4.28/144 = about 0.03 psi, a very small pressure.",
+  "type": "calculation",
+  "lesson": "2026-10-23"
+ },
+ {
+  "id": "G188",
+  "topic": "Fluids & Pressure",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "density",
+   "pressure"
+  ],
+  "question": "Air in the receiver of a ground air cart is compressed until its absolute pressure is doubled, with the temperature unchanged. What happens to the density of the air in the receiver?",
+  "options": [
+   "It stays the same, because the weight of the air does not change",
+   "It is halved",
+   "It doubles, because the density of a gas is directly proportional to its pressure",
+   "It increases four times, like dynamic pressure"
+  ],
+  "answer": 2,
+  "explanation": "For a gas the density increases in direct proportion to the pressure. Doubling the pressure at constant temperature doubles the density.",
+  "type": "theory",
+  "lesson": "2026-10-23"
+ },
+ {
+  "id": "G189",
+  "topic": "Fluids & Pressure",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "density",
+   "weight",
+   "units"
+  ],
+  "question": "The reservoir of a tow tug holds 864 in^3 of hydraulic fluid with a specific gravity of 0.85. Using 62.4 lb/ft^3 for water and 1 ft^3 = 1,728 in^3, what is the weight of the fluid?",
+  "options": [
+   "0.0307 lb",
+   "26.5 lb",
+   "53.0 lb",
+   "45,800 lb"
+  ],
+  "answer": 1,
+  "explanation": "Volume = 864/1728 = 0.5 ft^3. Density = 0.85*62.4 = 53.04 lb/ft^3, so weight = 53.04*0.5 = about 26.5 lb.",
+  "type": "calculation",
+  "lesson": "2026-10-23"
+ },
+ {
+  "id": "G190",
+  "topic": "Fluids & Pressure",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "temperature",
+   "friction"
+  ],
+  "question": "On a very cold morning the hydraulic fluid in a towing tug turns sluggish and the pump works harder. Which statement about the fluid is correct?",
+  "options": [
+   "Its viscosity has increased, so it resists flow more; a fluid with a high viscosity index would change less",
+   "Its viscosity has decreased, so it is too thin and the pump wears faster",
+   "Its density has dropped to zero, so the pump cannot move it",
+   "Its viscosity is unchanged, because viscosity depends only on the fluid weight"
+  ],
+  "answer": 0,
+  "explanation": "The viscosity of a liquid increases when the temperature decreases, so the cold fluid resists flow more. A high viscosity index means a small change of viscosity with temperature.",
+  "type": "theory",
+  "lesson": "2026-10-23"
+ },
+ {
+  "id": "G191",
+  "topic": "Fluids & Pressure",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "density",
+   "weight"
+  ],
+  "question": "Fuel fills a rectangular integral wing-tank bay, built from ribs and skin panels held with fasteners, that measures 4 ft by 2 ft by 0.5 ft inside. The avgas has SG 0.72 and water is 62.4 lb/ft^3. What is the approximate weight of the fuel in the full bay?",
+  "options": [
+   "About 180 lb",
+   "About 250 lb",
+   "About 125 lb",
+   "About 347 lb"
+  ],
+  "answer": 0,
+  "explanation": "Volume = 4*2*0.5 = 4 ft^3. Density = 0.72*62.4 = about 44.9 lb/ft^3, so weight = 4*44.9 = about 180 lb.",
+  "type": "calculation",
+  "lesson": "2026-10-23"
+ },
+ {
+  "id": "G192",
+  "topic": "Fluids & Pressure",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "density"
+  ],
+  "question": "The logbook for a wing-root fastener cleaning area lists four solvents with a measured density and a hydrometer SG (water = 62.4 lb/ft^3). Which entry is inconsistent and so suspicious?",
+  "options": [
+   "Density 49.9 lb/ft^3, SG 0.80",
+   "Density 74.9 lb/ft^3, SG 1.20",
+   "Density 31.2 lb/ft^3, SG 0.50",
+   "Density 55.0 lb/ft^3, SG 1.15"
+  ],
+  "answer": 3,
+  "explanation": "SG = density/62.4. The first three entries give 0.80, 1.20 and 0.50, but 55.0/62.4 = 0.88, not 1.15.",
+  "type": "calculation",
+  "lesson": "2026-10-23"
+ },
+ {
+  "id": "G193",
+  "topic": "Fluids & Pressure",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "velocity"
+  ],
+  "question": "Sealant, which is practically incompressible, is pumped at a constant volume flow rate through a round nozzle onto a row of fasteners. The nozzle bore diameter is halved. What happens to the exit velocity of the sealant?",
+  "options": [
+   "It becomes 4 times larger",
+   "It becomes 2 times larger",
+   "It becomes 8 times larger",
+   "It stays the same because the flow rate is the same"
+  ],
+  "answer": 0,
+  "explanation": "Continuity: A1*v1 = A2*v2. Area is proportional to diameter squared, so halving the diameter makes the area 1/4 and the velocity 4 times larger.",
+  "type": "theory",
+  "lesson": "2026-10-23"
+ },
+ {
+  "id": "G194",
+  "topic": "Fluids & Pressure",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "pressure",
+   "velocity"
+  ],
+  "question": "Air at low speed accelerates through a narrowing gap between a fairing and the skin, with no energy added or removed and negligible friction. Which statement is correct?",
+  "options": [
+   "Static pressure falls and dynamic pressure rises, while the total pressure stays constant",
+   "Static pressure and total pressure both fall by the same amount",
+   "Static pressure rises because the air has more kinetic energy",
+   "Static and dynamic pressure both rise, so the total pressure rises"
+  ],
+  "answer": 0,
+  "explanation": "By Bernoulli, higher velocity means higher dynamic pressure and lower static pressure. Static plus dynamic pressure (the total pressure) stays constant, so only the two exchange.",
+  "type": "theory",
+  "lesson": "2026-10-23"
+ },
+ {
+  "id": "G195",
+  "topic": "Fluids & Pressure",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "density"
+  ],
+  "question": "Four cells of a lead-acid aircraft battery that has just finished a full charge in the battery shop are checked with a hydrometer. Which reading is suspicious and points to a faulty or weak cell?",
+  "options": [
+   "1.290",
+   "1.150",
+   "1.275",
+   "1.310"
+  ],
+  "answer": 1,
+  "explanation": "A charged cell should read about 1.275 to 1.310. A reading of 1.150 is typical of a discharged cell, so it is suspicious after a full charge.",
+  "type": "theory",
+  "lesson": "2026-10-23"
+ },
+ {
+  "id": "G196",
+  "topic": "Fluids & Pressure",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "weight",
+   "density"
+  ],
+  "question": "Before choosing a hoist for a full 55-gallon drum of aviation gasoline (SG about 0.72, 1 US gallon = 0.1337 ft^3, water = 62.4 lb/ft^3), estimate the weight of the fuel alone, ignoring the drum. Which value is closest?",
+  "options": [
+   "33 lb",
+   "330 lb",
+   "459 lb",
+   "2,470 lb"
+  ],
+  "answer": 1,
+  "explanation": "Density = 0.72*62.4 = 44.9 lb/ft^3 and volume = 55*0.1337 = 7.35 ft^3, so weight = 44.9*7.35 = about 330 lb (about 6 lb per gallon).",
+  "type": "calculation",
+  "lesson": "2026-10-23"
+ },
+ {
+  "id": "G197",
+  "topic": "Fluids & Pressure",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "pressure",
+   "velocity"
+  ],
+  "question": "On a bench rig used to test an airspeed indicator, the air speed past the pitot tube is doubled while a change in test conditions halves the air density. How does the dynamic pressure q = 1/2*rho*v^2 change?",
+  "options": [
+   "It stays the same",
+   "It doubles",
+   "It increases four times",
+   "It increases eight times"
+  ],
+  "answer": 1,
+  "explanation": "q is proportional to rho*v^2, so the factor is (1/2)*(2^2) = 2. The dynamic pressure doubles.",
+  "type": "calculation",
+  "lesson": "2026-10-23"
+ },
+ {
+  "id": "G198",
+  "topic": "Fluids & Pressure",
+  "difficulty": "hard",
+  "units": "imperial",
+  "keywords": [
+   "pressure",
+   "velocity"
+  ],
+  "question": "In a hydraulic shop flow rig, water (rho = 1.94 slug/ft^3) moves at 10 ft/s through a 2 in^2 pipe that narrows to a 1 in^2 throat. Treating the water as ideal, by about how much is the static pressure in the throat lower than in the wide pipe?",
+  "options": [
+   "2.0 psi",
+   "4.0 psi",
+   "2.7 psi",
+   "291 psi"
+  ],
+  "answer": 0,
+  "explanation": "Continuity gives v2 = 2*10/1 = 20 ft/s. The pressure drop is 1/2*1.94*(20^2 - 10^2) = 291 lb/ft^2, and 291/144 = about 2.0 psi.",
+  "type": "calculation",
+  "lesson": "2026-10-23"
+ },
+ {
+  "id": "G199",
+  "topic": "Fluids & Pressure",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "pressure",
+   "energy"
+  ],
+  "question": "Inside a workshop siphon-type cleaning gun, compressed air speeds up through a narrow nozzle and draws solvent up a tube. Ignoring friction, which statement about the air in the nozzle is correct?",
+  "options": [
+   "The total pressure drops because the static pressure drops",
+   "The static pressure falls as the velocity rises, while static plus dynamic pressure stays about constant",
+   "The static pressure rises because the air is squeezed into a smaller area",
+   "The dynamic pressure falls because the same volume flow passes through a smaller area"
+  ],
+  "answer": 1,
+  "explanation": "In the nozzle, static pressure is converted into dynamic pressure. The total pressure (static + dynamic) stays about constant, and the low static pressure draws the solvent in.",
+  "type": "theory",
+  "lesson": "2026-10-23"
+ },
+ {
+  "id": "G200",
+  "topic": "Fluids & Pressure",
+  "difficulty": "easy",
+  "units": "imperial",
+  "keywords": [
+   "density",
+   "weight"
+  ],
+  "question": "Corrosion-inhibiting oil with a specific gravity of 0.85 fills a 4 ft^3 tote used for dipping structural fasteners. Using 62.4 lb/ft^3 for water, about how much does the oil in the tote weigh?",
+  "options": [
+   "About 212 lb",
+   "About 250 lb",
+   "About 294 lb",
+   "About 53 lb"
+  ],
+  "answer": 0,
+  "explanation": "Density = 0.85*62.4 = 53.0 lb/ft^3, so the weight is 53.0*4 = about 212 lb.",
+  "type": "calculation",
+  "lesson": "2026-10-23"
  }
 ];
