@@ -39,7 +39,11 @@ class Board {
   }
   register(nick, pin) { return this._auth('/register', nick, pin); }   // returns '' on success, else an error text
   login(nick, pin) { return this._auth('/login', nick, pin); }
-  async logout() { if (this.token) await this.api('/logout', {}); this.token = ''; }
+  async logout() {
+    if (this.token) await this.api('/logout', {});
+    this.token = '';
+    try { localStorage.removeItem('physq-nick'); localStorage.removeItem('physq-pending'); } catch (e) {}   // back to a clean guest
+  }
   async me() { return this.api('/me'); }
 
   // Add one finished session to the profile: {mode:'test'|'practice', n, ok, secs, per:{topic:{c,n}}, tags:{tag:count}}.
