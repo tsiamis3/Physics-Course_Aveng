@@ -15,7 +15,7 @@ header h1{margin:0;font:700 clamp(28px,5vw,44px)/1.05 "Barlow Condensed",Impact,
 header p{margin:6px 0 0;color:#b9c6d0;max-width:60ch}
 nav{margin-top:12px;display:flex;gap:16px;flex-wrap:wrap}
 nav a{color:#fff;text-decoration:underline;text-underline-offset:3px}
-main{display:grid;grid-template-columns:1fr 340px;gap:20px;max-width:1150px;margin:20px auto;padding:0 16px;align-items:start}
+main{display:grid;grid-template-columns:1fr;gap:20px;max-width:820px;margin:20px auto;padding:0 16px;align-items:start}
 @media(max-width:860px){main{grid-template-columns:1fr}}
 section{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px 18px;margin-bottom:16px}
 h2{font:700 24px "Barlow Condensed",sans-serif;margin:0 0 8px}
@@ -52,9 +52,6 @@ input{font:inherit;padding:8px;border:1px solid var(--line);border-radius:4px;ba
     <section id="builder"></section>
     <section id="tools"></section>
   </div>
-  <div>
-    <section id="board"></section>
-  </div>
 </main>
 <script src="m2meta.js"></script>
 <script src="scoreboard.js"></script>
@@ -76,7 +73,7 @@ const CONFIG = {
 const $ = id => document.getElementById(id);
 const esc = Board.esc;
 
-// The home page: the test builder entry points, the tool links and the scoreboard.
+// The home page: the test builder entry points and the tool links.
 class HomePage {
   constructor(cfg, meta) {
     this.cfg = cfg;
@@ -101,26 +98,9 @@ class HomePage {
       this.cfg.TOOLS.map(t => `<a class="item" href="${esc(t.href)}"><b>${esc(t.title)}</b><span>${esc(t.note)}</span></a>`).join('');
   }
 
-  async renderBoard() {
-    const res = await board.top('');
-    $('board').innerHTML = '<h2>Scoreboard</h2>' +
-      board.table(res) +
-      (board.loggedIn
-        ? `<p class="note">Logged in as <b>${esc(board.nick)}</b> · <a href="profile.html">my profile</a></p>`
-        : (Board.valid(board.nick) ? `<p class="note">Playing as <b>${esc(board.nick)}</b> · <a href="#" id="chg">change nickname</a> · <a href="profile.html">log in / create a profile</a></p>` : '')) +
-      `<div id="nickForm" ${Board.valid(board.nick) ? 'hidden' : ''}><p class="note">Pick a nickname (2 to 16 letters or digits). Your scores from timed tests use it.</p>` +
-      `<div class="row"><input id="nick" maxlength="16" placeholder="Nickname" value="${esc(board.nick)}"><button class="btn" id="saveNick" type="button">Save</button></div><p class="note" id="nickMsg"></p></div>`;
-    if ($('chg')) $('chg').onclick = e => { e.preventDefault(); $('nickForm').hidden = false; $('nick').focus(); };
-    $('saveNick').onclick = () => {
-      const v = $('nick').value.trim();
-      if (!Board.valid(v)) { $('nickMsg').textContent = 'Use 2 to 16 letters, digits, spaces, - or _.'; return; }
-      board.nick = v; this.renderBoard();
-    };
-  }
-
   init() {
     $('links').innerHTML = this.cfg.LINKS.map(l => `<a href="${esc(l.href)}">${esc(l.label)}</a>`).join('');
-    this.renderBuilder(); this.renderTools(); this.renderBoard();
+    this.renderBuilder(); this.renderTools();
   }
 }
 

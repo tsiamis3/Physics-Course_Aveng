@@ -336,7 +336,6 @@ class TestApp {
       if (b.id === 'again') this.start(); else if (b.id === 'back') { this.side(); this.idle(); }
       else if (b.id === 'wo') { R.onlyWrong = !R.onlyWrong; this.review(); }
     };
-    this.report(ok, n);
     this.sendStats();
   }
 
@@ -357,14 +356,6 @@ class TestApp {
     this.board.sendStats({mode: F.mode, n, ok, secs: Math.round((Date.now() - R.t0) / 1000), per, tags}).then(err => {
       const m = $('pfmsg'); if (m) m.innerHTML = err ? 'Could not save to your profile: ' + esc(err) : 'Saved to your profile. <a href="profile.html">Open my profile</a>';
     });
-  }
-
-  // Only timed/closed tests count for the shared scoreboard (practice shows answers, so it would be too easy).
-  async report(ok, n) {
-    const m = $('sbmsg'); if (!m || this.F.mode !== 'test' || n < 10 || n > 50) return;
-    if (!Board.valid(this.board.nick)) { m.innerHTML = 'Pick a nickname on the <a href="index.html">home page</a> to appear on the scoreboard, or <a href="profile.html">create a profile</a> to keep your statistics.'; return; }
-    const saved = await this.board.submit(this.cfg.BOARD_LESSON, ok, n);
-    m.textContent = saved ? 'Saved to the scoreboard as ' + this.board.nick + ' (your best result counts).' : 'Saved on this device. The shared scoreboard could not be reached.';
   }
 
   review() {
