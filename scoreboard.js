@@ -125,7 +125,7 @@ const board = new Board(BOARD_URL);
 // Account badge in the page header: who is logged in, or a clear Log in button. Not shown on the profile page itself.
 document.addEventListener('DOMContentLoaded', () => {
   const h = document.querySelector('header');
-  if (!h || !board.url || /profile\.html$/.test(location.pathname)) return;
+  if (!h || !board.url || /(profile|admin)\.html$/.test(location.pathname)) return;
   const st = document.createElement('style');
   st.textContent = '.acct{margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:16px}' +
     '.acct a.lg{display:inline-block;padding:7px 16px;border-radius:4px;background:#e8a317;color:#14212b;font-weight:700;text-decoration:none}' +
