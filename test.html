@@ -352,7 +352,11 @@ class TestApp {
     });
     if (!n) return;
     R.sent = true;
-    this.board.sendStats({mode: F.mode, n, ok, secs: Math.round((Date.now() - R.t0) / 1000), per, tags});
+    const done = R.done, sb = $('sbmsg');
+    if (done && sb && !$('pfmsg')) sb.insertAdjacentHTML('afterend', '<p class="note" id="pfmsg">Saving to your profile…</p>');
+    this.board.sendStats({mode: F.mode, n, ok, secs: Math.round((Date.now() - R.t0) / 1000), per, tags}).then(err => {
+      const m = $('pfmsg'); if (m) m.innerHTML = err ? 'Could not save to your profile: ' + esc(err) : 'Saved to your profile. <a href="profile.html">Open my profile</a>';
+    });
   }
 
   // Only timed/closed tests count for the shared scoreboard (practice shows answers, so it would be too easy).
@@ -375,7 +379,10 @@ class TestApp {
   }
 }
 
-new TestApp(window.M2_BANK, board, CONFIG).init();
+const app = new TestApp(window.M2_BANK, board, CONFIG);
+app.init();
+// Leaving a practice session half way (Home, Profile, closing the tab) still saves the answers given so far.
+addEventListener('pagehide', () => { if (app.R && !app.R.done && app.F.mode === 'practice') app.sendStats(); });
 </script>
 </body>
 </html>

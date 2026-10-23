@@ -25,7 +25,7 @@ class Board {
     const h = {'Content-Type': 'application/json'};
     if (this.token) h.Authorization = 'Bearer ' + this.token;
     try {
-      const r = await fetch(this.url + path, {method: body ? 'POST' : 'GET', headers: h, body: body ? JSON.stringify(body) : undefined});
+      const r = await fetch(this.url + path, {method: body ? 'POST' : 'GET', headers: h, body: body ? JSON.stringify(body) : undefined, keepalive: !!body && path === '/stats'});
       let data = {}; try { data = await r.json(); } catch (e) {}
       if (r.status === 401 && this.token && path !== '/login') this.token = '';
       return {ok: r.ok, status: r.status, data};
@@ -45,13 +45,18 @@ class Board {
   // Add one finished session to the profile: {mode:'test'|'practice', n, ok, secs, per:{topic:{c,n}}, tags:{tag:count}}.
   // If the server cannot be reached the session waits in this browser and goes out with the next one.
   async sendStats(d) {
-    if (!this.loggedIn) return false;
+    if (!this.loggedIn) return 'Not logged in';
     let q = []; try { q = JSON.parse(localStorage.getItem('physq-pending') || '[]'); } catch (e) {}
     q.push(d); q = q.slice(-20);
-    const left = [];
-    for (const x of q) { const r = await this.api('/stats', x); if (!r.ok && (r.status === 0 || r.status >= 500)) left.push(x); }
+    const left = []; let err = '';
+    for (const x of q) {
+      const r = await this.api('/stats', x);
+      if (r.ok) continue;
+      err = r.data.error || ('HTTP ' + r.status);
+      if (r.status === 0 || r.status >= 500) left.push(x);    // keep it for later only when the server was unreachable
+    }
     try { localStorage.setItem('physq-pending', JSON.stringify(left)); } catch (e) {}
-    return left.length === 0;
+    return err;                                                // '' = everything saved
   }
 
   // Best score per lesson on this device: {lessonId: {correct, total}}
@@ -112,3 +117,21 @@ class Board {
   }
 }
 const board = new Board(BOARD_URL);
+
+// Account badge in the page header: who is logged in, or a clear Log in button. Not shown on the profile page itself.
+document.addEventListener('DOMContentLoaded', () => {
+  const h = document.querySelector('header');
+  if (!h || !board.url || /profile\.html$/.test(location.pathname)) return;
+  const st = document.createElement('style');
+  st.textContent = '.acct{margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:16px}' +
+    '.acct a.lg{display:inline-block;padding:7px 16px;border-radius:4px;background:#e8a317;color:#14212b;font-weight:700;text-decoration:none}' +
+    '.acct .dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#62b886;margin-right:6px}' +
+    '.acct button{background:none;border:0;color:inherit;text-decoration:underline;cursor:pointer;font:inherit;padding:0}';
+  document.head.appendChild(st);
+  const d = document.createElement('div'); d.className = 'acct';
+  if (board.loggedIn) {
+    d.innerHTML = `<span><span class="dot"></span>Logged in as <b>${Board.esc(board.nick)}</b></span><a href="profile.html" style="color:inherit">My profile</a><button type="button" id="acctOut">Log out</button>`;
+    d.querySelector('#acctOut').onclick = async () => { await board.logout(); location.reload(); };
+  } else d.innerHTML = '<a class="lg" href="profile.html">Log in / Sign up</a><span style="opacity:.8">Save your statistics and keep your nickname.</span>';
+  h.appendChild(d);
+});
