@@ -305,7 +305,7 @@ class TestApp {
       else if (b.id === 'submit') R.confirm = true;
       else if (b.id === 'no') R.confirm = false;
       else if (b.id === 'yes') return this.finish();
-      else if (b.id === 'quit') { this.side(); return this.idle(); }
+      else if (b.id === 'quit') { this.sendStats(); this.side(); return this.idle(); }
       else return;
       this.run();
     };
@@ -337,12 +337,28 @@ class TestApp {
       else if (b.id === 'wo') { R.onlyWrong = !R.onlyWrong; this.review(); }
     };
     this.report(ok, n);
+    this.sendStats();
+  }
+
+  // Add this session to the player's profile (only when logged in). Practice counts the answered questions only.
+  sendStats() {
+    const R = this.R, F = this.F; if (R.sent || !this.board.loggedIn) return;
+    const per = {}, tags = {}; let n = 0, ok = 0;
+    R.qs.forEach((q, i) => {
+      const a = R.ans[i]; if (F.mode === 'practice' && a === undefined) return;
+      const g = a === q.a; n++; if (g) ok++;
+      const p = per[q.topic] || (per[q.topic] = {c: 0, n: 0}); p.n++; if (g) p.c++;
+      if (!g && a !== undefined && q.tags[a]) tags[q.tags[a]] = (tags[q.tags[a]] || 0) + 1;
+    });
+    if (!n) return;
+    R.sent = true;
+    this.board.sendStats({mode: F.mode, n, ok, secs: Math.round((Date.now() - R.t0) / 1000), per, tags});
   }
 
   // Only timed/closed tests count for the shared scoreboard (practice shows answers, so it would be too easy).
   async report(ok, n) {
     const m = $('sbmsg'); if (!m || this.F.mode !== 'test' || n < 10 || n > 50) return;
-    if (!Board.valid(this.board.nick)) { m.innerHTML = 'Pick a nickname on the <a href="index.html">home page</a> to appear on the scoreboard.'; return; }
+    if (!Board.valid(this.board.nick)) { m.innerHTML = 'Pick a nickname on the <a href="index.html">home page</a> to appear on the scoreboard, or <a href="profile.html">create a profile</a> to keep your statistics.'; return; }
     const saved = await this.board.submit(this.cfg.BOARD_LESSON, ok, n);
     m.textContent = saved ? 'Saved to the scoreboard as ' + this.board.nick + ' (your best result counts).' : 'Saved on this device. The shared scoreboard could not be reached.';
   }

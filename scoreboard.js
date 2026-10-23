@@ -15,6 +15,45 @@ class Board {
   get nick() { try { return localStorage.getItem('physq-nick') || ''; } catch (e) { return ''; } }
   set nick(v) { try { localStorage.setItem('physq-nick', v.trim()); } catch (e) {} }
 
+  // Login token of a registered profile (null for guests). A logged-in player's nickname is fixed.
+  get token() { try { return localStorage.getItem('physq-token') || ''; } catch (e) { return ''; } }
+  set token(v) { try { v ? localStorage.setItem('physq-token', v) : localStorage.removeItem('physq-token'); } catch (e) {} }
+  get loggedIn() { return !!(this.url && this.token && Board.valid(this.nick)); }
+
+  // Call the Worker. Returns {ok, status, data}. A 401 on a call with a token means the token expired: forget it.
+  async api(path, body) {
+    const h = {'Content-Type': 'application/json'};
+    if (this.token) h.Authorization = 'Bearer ' + this.token;
+    try {
+      const r = await fetch(this.url + path, {method: body ? 'POST' : 'GET', headers: h, body: body ? JSON.stringify(body) : undefined});
+      let data = {}; try { data = await r.json(); } catch (e) {}
+      if (r.status === 401 && this.token && path !== '/login') this.token = '';
+      return {ok: r.ok, status: r.status, data};
+    } catch (e) { return {ok: false, status: 0, data: {error: 'Cannot reach the server'}}; }
+  }
+
+  async _auth(path, nick, pin) {
+    const r = await this.api(path, {nick: nick.trim(), pin});
+    if (r.ok) { this.nick = r.data.nick; this.token = r.data.token; }
+    return r.ok ? '' : (r.data.error || 'Failed');
+  }
+  register(nick, pin) { return this._auth('/register', nick, pin); }   // returns '' on success, else an error text
+  login(nick, pin) { return this._auth('/login', nick, pin); }
+  async logout() { if (this.token) await this.api('/logout', {}); this.token = ''; }
+  async me() { return this.api('/me'); }
+
+  // Add one finished session to the profile: {mode:'test'|'practice', n, ok, secs, per:{topic:{c,n}}, tags:{tag:count}}.
+  // If the server cannot be reached the session waits in this browser and goes out with the next one.
+  async sendStats(d) {
+    if (!this.loggedIn) return false;
+    let q = []; try { q = JSON.parse(localStorage.getItem('physq-pending') || '[]'); } catch (e) {}
+    q.push(d); q = q.slice(-20);
+    const left = [];
+    for (const x of q) { const r = await this.api('/stats', x); if (!r.ok && (r.status === 0 || r.status >= 500)) left.push(x); }
+    try { localStorage.setItem('physq-pending', JSON.stringify(left)); } catch (e) {}
+    return left.length === 0;
+  }
+
   // Best score per lesson on this device: {lessonId: {correct, total}}
   local() { try { return JSON.parse(localStorage.getItem('physq-board') || '{}'); } catch (e) { return {}; } }
 
@@ -27,8 +66,8 @@ class Board {
     }
     if (!this.url || !Board.valid(this.nick)) return false;
     try {
-      const r = await fetch(this.url + '/score', {method: 'POST', headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({nick: this.nick, lesson, correct, total})});
+      const h = {'Content-Type': 'application/json'}; if (this.token) h.Authorization = 'Bearer ' + this.token;
+      const r = await fetch(this.url + '/score', {method: 'POST', headers: h, body: JSON.stringify({nick: this.nick, lesson, correct, total})});
       try { Object.keys(sessionStorage).filter(k => k.startsWith('physq-top:')).forEach(k => sessionStorage.removeItem(k)); } catch (e) {}
       return r.ok;
     } catch (e) { return false; }
@@ -64,8 +103,8 @@ class Board {
   // HTML table for the rows. The row of the current nickname is highlighted.
   table(res) {
     const me = this.nick.toLowerCase();
-    const note = `<p class="note">${res.shared ? 'Shared scoreboard. Scores come from the students\u2019 browsers, so treat it as a game.'
-                                                 : 'Local mode: only your own scores on this device.' + (res.error ? ' Shared board unavailable: ' + Board.esc(res.error) : '')}</p>`;
+    // No description on the shared board. Only local mode explains itself (and shows the error if the shared board is down).
+    const note = res.shared ? '' : `<p class="note">Local mode: only your own scores on this device.${res.error ? ' Shared board unavailable: ' + Board.esc(res.error) : ''}</p>`;
     if (!res.rows.length) return '<p class="note">No scores yet. Take a timed test in the Test builder to be the first.</p>' + note;
     return '<ol class="board">' + res.rows.slice(0, 15).map((r, i) =>
       `<li${r.nick.toLowerCase() === me ? ' class="me"' : ''}><span class="rk">${i + 1}</span><span class="nm">${Board.esc(r.nick)}</span>` +

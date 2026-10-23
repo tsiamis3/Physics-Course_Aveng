@@ -64,7 +64,8 @@ const CONFIG = {
   LINKS: [
     {label: 'Test builder', href: 'test.html'},
     {label: 'Formula sheet', href: 'formula.html'},
-    {label: 'Unit conversions', href: 'units.html'}
+    {label: 'Unit conversions', href: 'units.html'},
+    {label: 'My profile', href: 'profile.html'}
   ],
   TOOLS: [
     {title: 'Formula sheet', note: 'Imperial units first, SI in brackets.', href: 'formula.html'},
@@ -104,9 +105,9 @@ class HomePage {
     const res = await board.top('');
     $('board').innerHTML = '<h2>Scoreboard</h2>' +
       board.table(res) +
-      (Board.valid(board.nick)
-        ? `<p class="note">Playing as <b>${esc(board.nick)}</b> · <a href="#" id="chg">change nickname</a></p>`
-        : '') +
+      (board.loggedIn
+        ? `<p class="note">Logged in as <b>${esc(board.nick)}</b> · <a href="profile.html">my profile</a></p>`
+        : (Board.valid(board.nick) ? `<p class="note">Playing as <b>${esc(board.nick)}</b> · <a href="#" id="chg">change nickname</a> · <a href="profile.html">log in / create a profile</a></p>` : '')) +
       `<div id="nickForm" ${Board.valid(board.nick) ? 'hidden' : ''}><p class="note">Pick a nickname (2 to 16 letters or digits). Your scores from timed tests use it.</p>` +
       `<div class="row"><input id="nick" maxlength="16" placeholder="Nickname" value="${esc(board.nick)}"><button class="btn" id="saveNick" type="button">Save</button></div><p class="note" id="nickMsg"></p></div>`;
     if ($('chg')) $('chg').onclick = e => { e.preventDefault(); $('nickForm').hidden = false; $('nick').focus(); };
