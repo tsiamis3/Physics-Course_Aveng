@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Physics for Aircraft Engineers · Test Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600&display=swap">
+<style>
+:root{--bg:#e6ebef;--panel:#f7f9fa;--ink:#14212b;--mute:#5b6b78;--line:#c3cdd5;--blue:#1f4e79;--amber:#e8a317;--ok:#1f7a4d;--bad:#b3261e}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 "Source Sans 3",system-ui,sans-serif}
+header{background:var(--ink);color:#fff;padding:22px 20px;border-bottom:6px solid var(--amber)}
+header h1{margin:0;font:700 clamp(28px,5vw,44px)/1.05 "Barlow Condensed",Impact,sans-serif;letter-spacing:.01em}
+header p{margin:6px 0 0;color:#b9c6d0;max-width:60ch}
+nav{margin-top:12px;display:flex;gap:16px;flex-wrap:wrap}
+nav a{color:#fff;text-decoration:underline;text-underline-offset:3px}
+main{display:grid;grid-template-columns:320px 1fr;gap:20px;max-width:1150px;margin:20px auto;padding:0 16px;align-items:start}
+main.running{grid-template-columns:1fr;max-width:820px}
+main.running aside{display:none}
+@media(max-width:800px){main{grid-template-columns:1fr}}
+aside,section{background:var(--panel);border:1px solid var(--line);border-radius:6px}
+aside{padding:16px}
+section{padding:16px 18px;min-width:0}
+aside h2{font:700 20px "Barlow Condensed",sans-serif;margin:16px 0 6px}
+aside h2:first-child{margin-top:0}
+h2{font:700 24px "Barlow Condensed",sans-serif;margin:0 0 8px}
+label{display:block;font-size:15px;color:var(--mute)}
+input,select,button{font:inherit;color:inherit}
+input[type=number]{width:100%;padding:8px;border:1px solid var(--line);border-radius:4px;background:#fff}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:#fff;border-radius:99px;padding:2px 10px;font-size:14px;cursor:pointer}
+.chip small{opacity:.7;margin-left:4px}
+.chip[aria-pressed=true]{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn{border:0;border-radius:4px;padding:9px 14px;cursor:pointer;font-weight:600;background:var(--blue);color:#fff}
+.btn.alt{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.btn.go{background:var(--amber);color:var(--ink)}
+.btn[disabled]{opacity:.45;cursor:default}
+.btn:focus-visible,.chip:focus-visible,input:focus-visible,.opt:focus-visible,.g:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+.row{display:flex;gap:8px;align-items:end;flex-wrap:wrap}
+.row>label{flex:1;min-width:110px}
+.grow{flex:1}
+.avail{margin:12px 0 8px;color:var(--mute)}.avail b{font-size:26px;color:var(--ink)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.clock{font:700 22px "Barlow Condensed",sans-serif;font-variant-numeric:tabular-nums}.clock.low{color:var(--bad)}
+.prog{height:6px;background:var(--line);margin:10px 0 14px}.prog i{display:block;height:100%;background:var(--amber)}
+.meta{font-size:14px;color:var(--mute)}
+.q{font-size:19px;font-weight:600;margin:0 0 12px}
+.q .en,.opt .en{display:block;font-weight:400;font-size:.88em;color:var(--mute)}
+.opt{display:flex;gap:10px;width:100%;text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 10px;margin-bottom:8px;cursor:pointer}
+.opt b{flex:none;font-family:ui-monospace,Consolas,monospace}
+.opt.sel{border-color:var(--blue);background:#e3edf6}
+.opt.ok{background:#e3f3ea;border-color:var(--ok)}
+.opt.bad{background:#fbe6e4;border-color:var(--bad)}
+.opt.dim{opacity:.55}
+.expl{margin:10px 0 0;padding:8px 10px;border-left:4px solid var(--amber);background:#fff7e0}
+.expl .en{display:block;color:var(--mute);font-size:.92em}
+.expl p{margin:0 0 4px}.expl p:last-child{margin:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(42px,1fr));gap:6px;margin-top:14px}
+.g{border:1px solid var(--line);background:#fff;border-radius:4px;padding:6px 0;cursor:pointer;position:relative;font-size:14px}
+.g.a{background:#e3edf6;border-color:var(--blue)}.g.cur{outline:2px solid var(--amber)}
+.g.f::after{content:"";position:absolute;top:3px;right:4px;width:7px;height:7px;border-radius:50%;background:var(--amber)}
+.nav{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:6px}
+.nav .sp{flex:1}
+#result{font:700 56px/1 "Barlow Condensed",sans-serif}
+#result.pass{color:var(--ok)}#result.fail{color:var(--bad)}
+.tb{display:grid;grid-template-columns:minmax(0,200px) 1fr auto;gap:10px;align-items:center;font-size:15px;margin:4px 0}
+.tb .bar{height:8px;background:var(--line)}.tb .bar i{display:block;height:100%;background:var(--amber)}
+.blk{border-top:1px solid var(--line);margin-top:16px;padding-top:14px}
+.rev{border-top:1px solid var(--line);padding:12px 0}
+.rev .o{font-size:15px;color:var(--mute)}
+.mk{font-weight:700;font-size:14px}.mk.ok{color:var(--ok)}.mk.bad{color:var(--bad)}
+.note{color:var(--mute);font-size:15px}
+.stat{margin:0 0 6px}
+</style>
+<link rel="stylesheet" href="assets/theme.css">
+</head>
+<body>
+<header>
+  <h1>Physics for Aircraft Engineers</h1>
+  <p>Test builder. Pick chapters and filters, then practise with instant explanations or take a timed test.</p>
+  <nav id="links"></nav>
+</header>
+<main id="main">
+  <aside id="side"></aside>
+  <section id="stage" aria-live="polite"></section>
+</main>
+<script src="m2bank.js"></script>
+<script src="scoreboard.js"></script>
+<script>
+// ---- Configuration: edit the header links here ----
+const CONFIG = {
+  LINKS: [
+    {label: 'Home', href: 'index.html'},
+    {label: 'Unit conversions', href: 'units.html'},
+    {label: 'Formula sheet', href: 'formula.html'}
+  ],
+  PASS: 0.75,              // pass mark of the exam
+  BOARD_LESSON: 'm2-test'  // id used on the shared scoreboard (timed tests of 10 to 50 questions only)
+};
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const mmss = s => { s = Math.max(0, s); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); };
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+// Per-browser statistics: how often each question and each named mistake came up. Works without localStorage.
+class Store {
+  constructor() { this.k = 'm2.stats.v1'; this.d = {q: {}, t: {}}; try { const s = localStorage.getItem(this.k); if (s) this.d = JSON.parse(s); } catch (e) {} }
+  save() { try { localStorage.setItem(this.k, JSON.stringify(this.d)); } catch (e) {} }
+  rec(q, ok, tag) {
+    const r = this.d.q[q.id] || (this.d.q[q.id] = {r: 0, w: 0, l: 0});
+    ok ? r.r++ : r.w++; r.l = ok ? 1 : 0;
+    if (!ok && tag) this.d.t[tag] = (this.d.t[tag] || 0) + 1;
+    this.save();
+  }
+  reset() { this.d = {q: {}, t: {}}; this.save(); }
+}
+
+// Holds the filters, the running test and all rendering.
+class TestApp {
+  constructor(bank, board, cfg) {
+    this.cfg = cfg; this.board = board; this.Q = bank.questions; this.MISC = bank.misc; this.meta = bank.meta;
+    this.topics = Object.keys(bank.meta.topics);
+    this.st = new Store();
+    this.F = {topics: new Set(this.topics), units: 'both', d: new Set([1, 2, 3]), n: 20, mode: 'practice', mins: 25, lang: 'both', only: 'all'};
+    this.R = null; this.tick = null;
+  }
+
+  tname(t) { const i = this.meta.topics[t]; return i ? i.en : t; }
+  txt(o) { const l = this.F.lang; if (o.el === o.en) return esc(o.en); return l === 'el' ? esc(o.el) : l === 'en' ? esc(o.en) : esc(o.en) + '<span class="en">' + esc(o.el) + '</span>'; }
+  mist(tag) { return this.MISC[tag] || null; }
+
+  // Questions that pass the current filters. skipTopic = ignore the chapter selection (used for the per-chapter counts).
+  pool(skipTopic) {
+    const F = this.F;
+    return this.Q.filter(q => {
+      if (!skipTopic && !F.topics.has(q.topic)) return false;
+      if (F.units !== 'both' && q.units !== F.units) return false;
+      if (!F.d.has(q.d)) return false;
+      const r = this.st.d.q[q.id];
+      if (F.only === 'wrong' && !(r && r.l === 0 && r.w > 0)) return false;
+      if (F.only === 'new' && r) return false;
+      return true;
+    });
+  }
+
+  init() {
+    $('links').innerHTML = this.cfg.LINKS.map(l => `<a href="${esc(l.href)}">${esc(l.label)}</a>`).join('');
+    const go = this.applyHash();
+    this.bind();
+    this.side(); this.idle();
+    if (go && this.pool(false).length) this.start();
+  }
+
+  // Links from the home page: test.html#topic=statics,fluids&n=20&mode=test&mins=40&go=1
+  applyHash() {
+    const p = new URLSearchParams(location.hash.slice(1)), F = this.F;
+    if (p.get('topic')) F.topics = new Set(p.get('topic').split(',').filter(t => this.topics.includes(t)));
+    if (p.get('units') && ['SI', 'imperial', 'both'].includes(p.get('units'))) F.units = p.get('units');
+    if (p.get('d')) { const d = p.get('d').split(',').map(Number).filter(x => x >= 1 && x <= 3); if (d.length) F.d = new Set(d); }
+    if (p.get('n')) F.n = Math.max(1, Math.min(200, +p.get('n') || 20));
+    if (p.get('mode') === 'test' || p.get('mode') === 'practice') F.mode = p.get('mode');
+    if (p.get('mins') !== null && p.get('mins') !== '') F.mins = Math.max(0, +p.get('mins') || 0);
+    if (['el', 'en', 'both'].includes(p.get('lang'))) F.lang = p.get('lang');
+    if (['all', 'new', 'wrong'].includes(p.get('only'))) F.only = p.get('only');
+    return p.get('go') === '1';
+  }
+
+  seg(key, vals) {
+    return '<div class="chips">' + vals.map(v => `<button class="chip" type="button" data-k="${key}" data-v="${v[0]}" aria-pressed="${String(this.F[key]) === String(v[0])}">${v[1]}</button>`).join('') + '</div>';
+  }
+
+  // Left column: all filters.
+  side() {
+    const F = this.F, cnt = {};
+    this.pool(true).forEach(q => { cnt[q.topic] = (cnt[q.topic] || 0) + 1; });
+    const avail = this.pool(false).length;
+    $('side').innerHTML =
+      '<h2>Chapters</h2><div class="chips">' + this.topics.map(t =>
+        `<button class="chip" type="button" data-t="${t}" aria-pressed="${F.topics.has(t)}">${esc(this.tname(t))}<small>${cnt[t] || 0}</small></button>`).join('') + '</div>' +
+      '<div class="chips" style="margin-top:8px"><button class="chip" type="button" id="all">All</button><button class="chip" type="button" id="none">None</button></div>' +
+      '<h2>Units</h2>' + this.seg('units', [['both', 'SI + imperial'], ['SI', 'SI'], ['imperial', 'Imperial']]) +
+      '<h2>Difficulty</h2><div class="chips">' + [1, 2, 3].map(d => `<button class="chip" type="button" data-d="${d}" aria-pressed="${F.d.has(d)}">${['Easy', 'Medium', 'Hard'][d - 1]}</button>`).join('') + '</div>' +
+      '<h2>My history</h2>' + this.seg('only', [['all', 'All'], ['new', 'Not seen yet'], ['wrong', 'My mistakes']]) +
+      '<h2>Mode</h2>' + this.seg('mode', [['practice', 'Practice: instant explanation'], ['test', 'Test: explanations at the end']]) +
+      '<h2>Language</h2>' + this.seg('lang', [['both', 'EN + EL'], ['en', 'EN'], ['el', 'EL']]) +
+      '<div class="row" style="margin-top:12px"><label>Questions<input id="n" type="number" min="1" max="200" value="' + F.n + '"></label>' +
+      (F.mode === 'test' ? '<label>Minutes (0 = no limit)<input id="mins" type="number" min="0" max="180" value="' + F.mins + '"></label>' : '') + '</div>' +
+      `<div class="avail"><b id="avail">${avail}</b> questions available</div>` +
+      `<div class="row"><button class="btn go grow" id="go" type="button"${avail ? '' : ' disabled'}>Start</button><button class="btn alt" id="link" type="button">Copy link</button></div><p class="note" id="msg"></p>`;
+  }
+
+  // Right column before a test: summary of the selection and own statistics.
+  idle() {
+    clearInterval(this.tick); this.R = null; $('main').className = '';
+    const F = this.F, avail = this.pool(false).length, seen = Object.keys(this.st.d.q).length;
+    const worst = Object.keys(this.st.d.t).sort((a, b) => this.st.d.t[b] - this.st.d.t[a]).slice(0, 3);
+    $('stage').innerHTML =
+      '<h2>Build a test</h2>' +
+      '<ol class="note"><li>Pick the chapters on the left (and units or difficulty if you want).</li><li>Choose Practice (answer shown after each question) or Test (timer, explanations at the end).</li><li>Press Start.</li></ol>' +
+      `<p>${F.n} questions from ${F.topics.size} chapter${F.topics.size === 1 ? '' : 's'}, ${F.mode === 'test' ? (F.mins ? F.mins + ' minute timer, ' : 'no time limit, ') + 'explanations at the end' : 'explanation after every answer'}.</p>` +
+      `<p class="note">${avail} questions match your filters. Each test mixes the chapters evenly. The pass mark is ${Math.round(this.cfg.PASS * 100)} %.</p>` +
+      '<div class="row"><button class="btn go" id="go2" type="button"' + (avail ? '' : ' disabled') + '>Start</button></div>' +
+      (seen ? '<div class="blk"><h2>My statistics</h2><p class="stat">You have answered ' + seen + ' different questions on this device.</p>' +
+        (worst.length ? '<p class="stat">Most frequent mistakes:</p><ul>' + worst.map(t => `<li>${this.mist(t) ? esc(this.mist(t).en) : esc(t)} (${this.st.d.t[t]}×)</li>`).join('') + '</ul>' : '') +
+        '<button class="btn alt" id="reset" type="button">Reset my statistics</button></div>' : '');
+  }
+
+  bind() {
+    $('side').onclick = e => {
+      const b = e.target.closest('button'); if (!b) return;
+      const F = this.F;
+      if (b.dataset.t) { F.topics.has(b.dataset.t) ? F.topics.delete(b.dataset.t) : F.topics.add(b.dataset.t); }
+      else if (b.dataset.d) { const d = +b.dataset.d; F.d.has(d) ? (F.d.size > 1 && F.d.delete(d)) : F.d.add(d); }
+      else if (b.dataset.k) { F[b.dataset.k] = b.dataset.v; }
+      else if (b.id === 'all') F.topics = new Set(this.topics);
+      else if (b.id === 'none') F.topics = new Set();
+      else if (b.id === 'go') return this.start();
+      else if (b.id === 'link') return this.copyLink();
+      else return;
+      this.side(); this.idle();
+    };
+    $('side').oninput = e => {
+      if (e.target.id === 'n') this.F.n = Math.max(1, Math.min(200, +e.target.value || 1));
+      if (e.target.id === 'mins') this.F.mins = Math.max(0, +e.target.value || 0);
+      const a = this.pool(false).length;
+      if ($('avail')) $('avail').textContent = a;
+      if ($('go')) $('go').disabled = !a;
+      this.idle();
+    };
+    $('stage').onclick = e => {
+      const b = e.target.closest('button'); if (!b) return;
+      if (b.id === 'go2') this.start();
+      else if (b.id === 'reset') { this.st.reset(); this.side(); this.idle(); }
+    };
+  }
+
+  copyLink() {
+    const F = this.F, p = new URLSearchParams({topic: [...F.topics].join(','), units: F.units, d: [...F.d].join(','), n: F.n, mode: F.mode, mins: F.mins, lang: F.lang, only: F.only});
+    const url = location.href.split('#')[0] + '#' + p, msg = $('msg');
+    const show = t => { if (msg) msg.textContent = t; };
+    (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(() => show('Link copied. Anyone who opens it gets these filters.'), () => show(url));
+  }
+
+  // Draw the questions round-robin over the selected chapters, so every chapter is represented.
+  start() {
+    const F = this.F, by = {};
+    shuffle(this.pool(false)).forEach(q => (by[q.topic] = by[q.topic] || []).push(q));
+    let keys = shuffle(Object.keys(by)), qs = [], i = 0;
+    while (qs.length < F.n && keys.length) {
+      const k = keys[i % keys.length], q = by[k].shift();
+      if (q) { qs.push(q); i++; } else keys.splice(i % keys.length, 1);
+    }
+    if (!qs.length) return;
+    this.R = {qs: shuffle(qs), cur: 0, ans: [], flag: [], done: false, confirm: false, t0: Date.now(), used: 0,
+              end: F.mode === 'test' && F.mins > 0 ? Date.now() + F.mins * 60000 : 0, onlyWrong: false};
+    if (this.R.end) this.tick = setInterval(() => {
+      const c = $('clock'), r = Math.ceil((this.R.end - Date.now()) / 1000);
+      if (c) { c.textContent = mmss(r); c.className = 'clock' + (r <= 60 ? ' low' : ''); }
+      if (r <= 0) this.finish();
+    }, 500);
+    $('main').className = 'running';
+    this.run();
+    window.scrollTo(0, 0);
+  }
+
+  run() {
+    const R = this.R, F = this.F, q = R.qs[R.cur], i = R.cur, n = R.qs.length, practice = F.mode === 'practice', a = R.ans[i], shown = practice && a !== undefined;
+    const opts = q.o.map((o, k) => {
+      const c = 'opt' + (shown ? (k === q.a ? ' ok' : k === a ? ' bad' : ' dim') : a === k ? ' sel' : '');
+      return `<button class="${c}" type="button" data-o="${k}"${shown ? ' disabled' : ''}><b>${'ABC'[k]})</b><span>${this.txt(o)}</span></button>`;
+    }).join('');
+    let why = '';
+    if (shown) {
+      const ok = a === q.a, m = !ok && q.tags[a] && this.mist(q.tags[a]);
+      why = `<div class="expl"><p><b>${ok ? 'Correct.' : 'Not quite. The answer is ' + 'ABC'[q.a] + '.'}</b></p>` + (m ? '<p>' + this.txt(m) + '</p>' : '') + '<p>' + this.txt(q.x) + '</p></div>';
+    }
+    const good = R.ans.reduce((s, v, k) => s + (v === R.qs[k].a ? 1 : 0), 0);
+    const head = `<div class="top"><div><div class="meta">${esc(this.tname(q.topic))} · ${q.units}</div><div class="meta">Question ${i + 1} of ${n}${practice ? ' · correct ' + good : ''}</div></div>` +
+      (R.end ? `<div class="clock" id="clock">${mmss(Math.ceil((R.end - Date.now()) / 1000))}</div>` : '') + '</div>' +
+      `<div class="prog"><i style="width:${Math.round((i + (shown ? 1 : 0)) / n * 100)}%"></i></div>`;
+    let nav;
+    if (practice) {
+      nav = `<div class="nav"><button class="btn alt" id="quit" type="button">Stop</button><span class="sp"></span><button class="btn go" id="next" type="button"${shown ? '' : ' disabled'}>${i === n - 1 ? 'See results' : 'Next'}</button></div>`;
+    } else {
+      nav = `<div class="nav"><button class="btn alt" id="prev" type="button"${i ? '' : ' disabled'}>Previous</button>` +
+        `<button class="btn alt" id="flag" type="button">${R.flag[i] ? 'Unflag' : 'Flag'}</button>` +
+        `<button class="btn alt" id="next" type="button"${i < n - 1 ? '' : ' disabled'}>Next</button><span class="sp"></span><button class="btn go" id="submit" type="button">Submit</button></div>` +
+        '<div class="grid">' + R.qs.map((_, k) => `<button class="g${R.ans[k] !== undefined ? ' a' : ''}${R.flag[k] ? ' f' : ''}${k === i ? ' cur' : ''}" type="button" data-g="${k}">${k + 1}</button>`).join('') + '</div>' +
+        (R.confirm ? `<div class="expl"><p><b>Submit the test?</b> You answered ${R.ans.filter(v => v !== undefined).length} of ${n}.</p><div class="nav"><button class="btn go" id="yes" type="button">Yes, submit</button><button class="btn alt" id="no" type="button">Keep working</button></div></div>` : '');
+    }
+    $('stage').innerHTML = head + `<p class="q">${this.txt(q.q)}</p>` + `<div role="group">${opts}</div>` + why + nav;
+    $('stage').onclick = e => {
+      const b = e.target.closest('button'); if (!b) return;
+      if (b.dataset.o !== undefined) {
+        if (shown) return;
+        const k = +b.dataset.o; R.ans[i] = k;
+        if (practice) this.st.rec(q, k === q.a, q.tags[k]);
+      }
+      else if (b.dataset.g) R.cur = +b.dataset.g;
+      else if (b.id === 'next') { if (practice && i === n - 1) return this.finish(); R.cur = Math.min(n - 1, i + 1); R.confirm = false; }
+      else if (b.id === 'prev') R.cur = Math.max(0, i - 1);
+      else if (b.id === 'flag') R.flag[i] = !R.flag[i];
+      else if (b.id === 'submit') R.confirm = true;
+      else if (b.id === 'no') R.confirm = false;
+      else if (b.id === 'yes') return this.finish();
+      else if (b.id === 'quit') { this.side(); return this.idle(); }
+      else return;
+      this.run();
+    };
+  }
+
+  finish() {
+    const R = this.R, F = this.F; if (R.done) return;
+    R.done = true; clearInterval(this.tick); R.used = Math.round((Date.now() - R.t0) / 1000);
+    const n = R.qs.length, per = {}, tags = {}; let ok = 0;
+    R.qs.forEach((q, i) => {
+      const a = R.ans[i], g = a === q.a; if (g) ok++;
+      const p = per[q.topic] || (per[q.topic] = {c: 0, n: 0}); p.n++; if (g) p.c++;
+      if (F.mode === 'test') this.st.rec(q, g, a === undefined ? null : q.tags[a]);
+      if (!g && a !== undefined && q.tags[a]) tags[q.tags[a]] = (tags[q.tags[a]] || 0) + 1;
+    });
+    const pct = Math.round(ok / n * 100), pass = pct >= this.cfg.PASS * 100;
+    const rows = Object.keys(per).map(t => `<div class="tb"><span>${esc(this.tname(t))}</span><div class="bar"><i style="width:${Math.round(per[t].c / per[t].n * 100)}%"></i></div><span>${per[t].c}/${per[t].n}</span></div>`).join('');
+    const tl = Object.keys(tags).sort((a, b) => tags[b] - tags[a]).map(t => `<p><b>${tags[t]}×</b> ${this.txt(this.mist(t) || {el: t, en: t})}</p>`).join('');
+    $('stage').innerHTML =
+      `<div class="meta">Result · ${mmss(R.used)}</div><div id="result" class="${pass ? 'pass' : 'fail'}">${pct} %</div>` +
+      `<p>${ok} of ${n} correct. Pass mark ${Math.round(this.cfg.PASS * 100)} %: ${pass ? 'passed.' : 'not yet.'}</p><p class="note" id="sbmsg"></p>` +
+      `<div class="blk"><h2>By chapter</h2>${rows}</div>` +
+      (tl ? `<div class="blk"><h2>Mistakes you made</h2><div class="expl">${tl}</div></div>` : '') +
+      '<div class="blk nav"><button class="btn go" id="again" type="button">New test, same filters</button><button class="btn alt" id="back" type="button">Change filters</button><button class="chip" id="wo" type="button" aria-pressed="false">Wrong answers only</button></div><div id="rev"></div>';
+    this.review();
+    $('stage').onclick = e => {
+      const b = e.target.closest('button'); if (!b) return;
+      if (b.id === 'again') this.start(); else if (b.id === 'back') { this.side(); this.idle(); }
+      else if (b.id === 'wo') { R.onlyWrong = !R.onlyWrong; this.review(); }
+    };
+    this.report(ok, n);
+  }
+
+  // Only timed/closed tests count for the shared scoreboard (practice shows answers, so it would be too easy).
+  async report(ok, n) {
+    const m = $('sbmsg'); if (!m || this.F.mode !== 'test' || n < 10 || n > 50) return;
+    if (!Board.valid(this.board.nick)) { m.innerHTML = 'Pick a nickname on the <a href="index.html">home page</a> to appear on the scoreboard.'; return; }
+    const saved = await this.board.submit(this.cfg.BOARD_LESSON, ok, n);
+    m.textContent = saved ? 'Saved to the scoreboard as ' + this.board.nick + ' (your best result counts).' : 'Saved on this device. The shared scoreboard could not be reached.';
+  }
+
+  review() {
+    const R = this.R; $('wo').setAttribute('aria-pressed', R.onlyWrong);
+    $('rev').innerHTML = R.qs.map((q, i) => {
+      const a = R.ans[i], g = a === q.a; if (R.onlyWrong && g) return '';
+      const m = !g && a !== undefined && q.tags[a] && this.mist(q.tags[a]);
+      return `<article class="rev"><div class="mk ${g ? 'ok' : 'bad'}">${i + 1} · ${g ? 'CORRECT' : a === undefined ? 'NO ANSWER' : 'WRONG'}</div><p class="q">${this.txt(q.q)}</p>` +
+        q.o.map((o, k) => `<div class="o"><b>${'ABC'[k]})</b> ${this.txt(o)}${k === q.a ? ' <span class="mk ok">✓</span>' : k === a ? ' <span class="mk bad">your answer</span>' : ''}</div>`).join('') +
+        `<div class="expl">${m ? '<p>' + this.txt(m) + '</p>' : ''}<p>${this.txt(q.x)}</p></div></article>`;
+    }).join('');
+  }
+}
+
+new TestApp(window.M2_BANK, board, CONFIG).init();
+</script>
+</body>
+</html>

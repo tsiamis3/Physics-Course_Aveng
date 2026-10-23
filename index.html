@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Physics for Aircraft Engineers · Home</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600&display=swap">
+<style>
+:root{--bg:#e6ebef;--panel:#f7f9fa;--ink:#14212b;--mute:#5b6b78;--line:#c3cdd5;--blue:#1f4e79;--amber:#e8a317}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 "Source Sans 3",system-ui,sans-serif}
+header{background:var(--ink);color:#fff;padding:22px 20px;border-bottom:6px solid var(--amber)}
+header h1{margin:0;font:700 clamp(28px,5vw,44px)/1.05 "Barlow Condensed",Impact,sans-serif}
+header p{margin:6px 0 0;color:#b9c6d0;max-width:60ch}
+nav{margin-top:12px;display:flex;gap:16px;flex-wrap:wrap}
+nav a{color:#fff;text-decoration:underline;text-underline-offset:3px}
+main{display:grid;grid-template-columns:1fr 340px;gap:20px;max-width:1150px;margin:20px auto;padding:0 16px;align-items:start}
+@media(max-width:860px){main{grid-template-columns:1fr}}
+section{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px 18px;margin-bottom:16px}
+h2{font:700 24px "Barlow Condensed",sans-serif;margin:0 0 8px}
+h3{font:700 20px "Barlow Condensed",sans-serif;margin:14px 0 4px}
+ul{margin:0;padding-left:20px}
+li{margin-bottom:4px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{display:inline-block;border:1px solid var(--line);background:#fff;border-radius:99px;padding:2px 10px;font-size:14px;color:inherit;text-decoration:none;cursor:pointer;font-family:inherit}
+.chip[aria-pressed=true]{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn{display:inline-block;border:0;border-radius:4px;padding:10px 16px;cursor:pointer;font:inherit;font-weight:600;background:var(--blue);color:#fff;text-decoration:none}
+.btn.go{background:var(--amber);color:var(--ink)}
+.cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.meta{font-size:14px;color:var(--mute)}
+.note{color:var(--mute);font-size:15px}
+.item{display:block;border-top:1px solid var(--line);padding:8px 0;color:inherit;text-decoration:none}
+.item b{color:var(--blue)}
+.item span{display:block;color:var(--mute);font-size:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input{font:inherit;padding:8px;border:1px solid var(--line);border-radius:4px;background:#fff;color:inherit;width:100%;max-width:200px}
+.board{list-style:none;margin:8px 0;padding:0}
+.board li{display:flex;gap:10px;padding:5px 0;border-bottom:1px solid var(--line)}
+.board .rk{width:1.6em;color:var(--mute)}.board .nm{flex:1}.board .pt small{color:var(--mute)}.board .me{font-weight:700}
+</style>
+<link rel="stylesheet" href="assets/theme.css">
+</head>
+<body>
+<header>
+  <h1>Physics for Aircraft Engineers</h1>
+  <p>Build a practice test or a timed mock exam from the question bank. Formulas and unit conversions are one click away.</p>
+  <nav id="links"></nav>
+</header>
+<main>
+  <div>
+    <section id="builder"></section>
+    <section id="tools"></section>
+  </div>
+  <div>
+    <section id="board"></section>
+  </div>
+</main>
+<script src="m2meta.js"></script>
+<script src="scoreboard.js"></script>
+<script>
+// ---- Configuration: edit the header links and the tool links here ----
+const CONFIG = {
+  LINKS: [
+    {label: 'Test builder', href: 'test.html'},
+    {label: 'Formula sheet', href: 'formula.html'},
+    {label: 'Unit conversions', href: 'units.html'}
+  ],
+  TOOLS: [
+    {title: 'Formula sheet', note: 'Imperial units first, SI in brackets.', href: 'formula.html'},
+    {title: 'Unit conversions', note: 'Converter and conversion tables from the course sheet.', href: 'units.html'}
+  ]
+};
+
+const $ = id => document.getElementById(id);
+const esc = Board.esc;
+
+// The home page: the test builder entry points, the tool links and the scoreboard.
+class HomePage {
+  constructor(cfg, meta) {
+    this.cfg = cfg;
+    this.meta = meta;       // summary of the question bank (m2meta.js)
+    this.tab = 'overall';
+  }
+
+  renderBuilder() {
+    const m = this.meta, test = p => 'test.html#' + new URLSearchParams({go: 1, ...p});
+    if (!m) { $('builder').innerHTML = '<h2>Test builder</h2><p class="note">The question bank (m2bank.js) is missing.</p>'; return; }
+    $('builder').innerHTML = '<h2>Test builder</h2>' +
+      `<p>${m.count} bilingual (EN + EL) exam-style questions. Choose chapters, units and difficulty, then practise with instant explanations or take a timed test.</p>` +
+      `<div class="cta"><a class="btn go" href="${esc(test({n: 20, mode: 'practice'}))}">Practice, 20 questions</a>` +
+      `<a class="btn" href="${esc(test({n: 32, mode: 'test', mins: 40}))}">Mock exam, 32 in 40 min</a>` +
+      '<a class="btn" href="test.html">Choose filters</a></div>' +
+      '<h3>Practice one chapter</h3>' +
+      `<div class="chips">${Object.keys(m.topics).map(t => `<a class="chip" href="${esc(test({topic: t, n: 15, mode: 'practice'}))}">${esc(m.topics[t].en)}</a>`).join('')}</div>`;
+  }
+
+  renderTools() {
+    $('tools').innerHTML = '<h2>Tools and references</h2>' +
+      this.cfg.TOOLS.map(t => `<a class="item" href="${esc(t.href)}"><b>${esc(t.title)}</b><span>${esc(t.note)}</span></a>`).join('');
+  }
+
+  async renderBoard() {
+    const res = await board.top('');
+    $('board').innerHTML = '<h2>Scoreboard</h2>' +
+      board.table(res) +
+      (Board.valid(board.nick)
+        ? `<p class="note">Playing as <b>${esc(board.nick)}</b> · <a href="#" id="chg">change nickname</a></p>`
+        : '') +
+      `<div id="nickForm" ${Board.valid(board.nick) ? 'hidden' : ''}><p class="note">Pick a nickname (2 to 16 letters or digits). Your scores from timed tests use it.</p>` +
+      `<div class="row"><input id="nick" maxlength="16" placeholder="Nickname" value="${esc(board.nick)}"><button class="btn" id="saveNick" type="button">Save</button></div><p class="note" id="nickMsg"></p></div>`;
+    if ($('chg')) $('chg').onclick = e => { e.preventDefault(); $('nickForm').hidden = false; $('nick').focus(); };
+    $('saveNick').onclick = () => {
+      const v = $('nick').value.trim();
+      if (!Board.valid(v)) { $('nickMsg').textContent = 'Use 2 to 16 letters, digits, spaces, - or _.'; return; }
+      board.nick = v; this.renderBoard();
+    };
+  }
+
+  init() {
+    $('links').innerHTML = this.cfg.LINKS.map(l => `<a href="${esc(l.href)}">${esc(l.label)}</a>`).join('');
+    this.renderBuilder(); this.renderTools(); this.renderBoard();
+  }
+}
+
+new HomePage(CONFIG, window.M2_META).init();
+</script>
+</body>
+</html>
