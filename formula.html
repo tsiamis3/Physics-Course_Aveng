@@ -16,12 +16,16 @@ header a{color:#fff;text-underline-offset:3px}
 main{max-width:900px;margin:20px auto;padding:0 16px;columns:2 380px;column-gap:18px}
 section{break-inside:avoid;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px 16px;margin-bottom:14px}
 h2{font:700 22px "Barlow Condensed",sans-serif;margin:0 0 6px;color:var(--blue)}
+.part{column-span:all;margin:22px 0 12px;padding-bottom:4px;border-bottom:2px solid var(--amber);font:700 26px/1.1 "Barlow Condensed",sans-serif;letter-spacing:.04em;text-transform:uppercase}
+.part:first-child{margin-top:4px}
+.part small{font:400 15px "Source Sans 3",sans-serif;color:var(--mute);text-transform:none;letter-spacing:0;margin-left:8px}
+.jump{column-span:all;display:flex;flex-wrap:wrap;gap:6px 14px;margin:0 0 6px;font-size:15px}
+.jump a{color:inherit}
 ul{margin:0;padding-left:18px}
 li{margin-bottom:3px}
-.note{color:var(--mute);font-size:15px}
-.soon{font:600 12px "Source Sans 3",sans-serif;background:var(--amber);color:var(--ink);padding:2px 8px;border-radius:10px;margin-left:8px;vertical-align:middle;letter-spacing:.03em}
+.note{color:var(--mute);font-size:15px;column-span:all}
 button{font:inherit;font-weight:600;padding:8px 14px;border:0;border-radius:4px;background:var(--amber);color:var(--ink);cursor:pointer;margin-left:12px}
-@media print{header p,button{display:none}body{background:#fff}header{background:#fff;color:#000;border-bottom:2px solid #000}.soon{border:1px solid #000;background:#fff}}
+@media print{header p,button,.jump{display:none}body{background:#fff}header{background:#fff;color:#000;border-bottom:2px solid #000}.part{border-bottom:2px solid #000}}
 </style>
 <link rel="stylesheet" href="assets/theme.css">
 </head>
@@ -31,131 +35,228 @@ button{font:inherit;font-weight:600;padding:8px 14px;border:0;border-radius:4px;
   <p>Imperial units first, SI in brackets. <a href="index.html">← Home</a> · <a href="test.html">Test builder</a> · <a href="units.html">Unit conversions</a></p>
 </header>
 <main>
-<section><h2>Constants</h2><ul>
-<li>g = 32.2 ft/s² (SI: 9.81 m/s²; standard 32.174 ft/s²)</li>
-<li>Water: 62.4 lb/ft³ (1000 kg/m³) = 1.94 slug/ft³</li>
-<li>Air at sea level: ρ = 0.002377 slug/ft³</li>
-<li>1 atm = 14.7 psi (101 325 Pa) · 1 ft² = 144 in²</li>
-<li>1 hp = 550 ft·lb/s (745.7 W) · 1 BTU ≈ 778 ft·lb</li>
-<li>1 slug has a weight of 32.2 lb (mass in slugs = W/32.2)</li>
-<li>1 US gallon = 0.1337 ft³ · 1 knot = 1.688 ft/s · 1 mph = 1.467 ft/s</li></ul></section>
+<nav class="jump" aria-label="Sub-modules"><a href="#constants">Constants</a><a href="#m201">2.01 Matter</a><a href="#m202">2.02 Mechanics</a><a href="#m203">2.03 Thermodynamics</a><a href="#m204">2.04 Optics</a><a href="#m205">2.05 Waves &amp; Sound</a></nav>
 
-<section><h2>Kinematics</h2><ul>
-<li>Velocity: v = x/t</li>
-<li>Uniform motion: v = const, x = v·t</li>
-<li>Uniform acceleration: v = v₀ + a·t</li><li>x = x₀ + v₀·t + ½·a·t²</li><li>v² = v₀² + 2·a·Δx</li>
-<li>Free fall: a = g = 32.2 ft/s²</li></ul></section>
+<h2 class="part" id="constants">Constants &amp; key values</h2>
 
-<section><h2>Newton’s Laws &amp; Forces</h2><ul>
-<li>1st law (inertia): ΣF = 0 ⇔ constant velocity</li>
-<li>2nd law: ΣF = m·a, with m = W/g (m in slugs, F in lb, a in ft/s²)</li>
-<li>3rd law, action–reaction: equal in size, opposite in direction</li>
-<li>Weight: W = m·g</li></ul></section>
+<section><h2>Mechanics &amp; fluids</h2><ul>
+<li>g = 32.2 ft/s² (9.81 m/s²; standard 32.174 ft/s² = 9.80665 m/s²)</li>
+<li>Mass in slugs = W/32.2 (1 slug weighs 32.2 lb = 14.59 kg)</li>
+<li>Water: 62.4 lb/ft³ = 1.94 slug/ft³ (1000 kg/m³) · 8.34 lb/gal · 0.433 psi per ft of depth</li>
+<li>Air at sea level (ISA): ρ = 0.002377 slug/ft³ (1.225 kg/m³); at 10,000 ft 0.001756 slug/ft³</li>
+<li>Standard atmosphere: 14.7 psi = 29.92 inHg = 1013 hPa (101 325 Pa) · 1 ft² = 144 in²</li>
+<li>1 lb = 4.448 N · 1 ft·lb = 1.356 J (1 J = 0.738 ft·lb)</li>
+<li>1 hp = 550 ft·lb/s = 33,000 ft·lb/min = 746 W</li>
+<li>1 US gallon = 0.1337 ft³ = 231 in³ ≈ 3.785 L</li>
+<li>1 kt = 1.688 ft/s · 1 mph = 1.467 ft/s</li></ul></section>
 
-<section><h2>Friction</h2><ul>
-<li>Static friction: equal and opposite to the applied force, up to its maximum, the limiting friction</li>
-<li>Starting (limiting) friction: F = k·N</li>
-<li>Sliding (kinetic) friction: F_f = μ·N (a little smaller than the limiting friction; μ = friction coefficient, N = normal force)</li>
-<li>On a level surface N = W; on a slope N = W·cos θ</li>
-<li>Rolling friction (wheels, rollers) is much smaller than sliding friction</li></ul></section>
+<section><h2>Heat, light &amp; sound</h2><ul>
+<li>1 BTU = 778 ft·lb ≈ 1055 J ≈ 252 cal</li>
+<li>Water: c = 1 BTU/(lb·°F) (4186 J/(kg·K)) · L_vap ≈ 970 BTU/lb (2260 kJ/kg) · L_fus ≈ 144 BTU/lb (334 kJ/kg)</li>
+<li>Gas constant R = 8.314 J/(mol·K)</li>
+<li>Speed of light c = 186,282 mi/s (299 792 458 m/s ≈ 3 × 10⁸ m/s)</li>
+<li>Speed of sound, sea level 15 °C: 1,116 ft/s = 661 kt = 761 mph (340 m/s = 1,225 km/h)</li>
+<li>1 Å = 10⁻¹⁰ m = 0.1 nm · visible light 400–700 nm</li>
+<li>Threshold of hearing I₀ = 10⁻¹² W/m² (0 dB)</li></ul></section>
 
-<section><h2>Work, Power &amp; Energy</h2><ul>
-<li>Work: W = F·x (force along the displacement x); in general W = F·x·cos θ  [ft·lb]</li>
-<li>Kinetic energy: KE = ½·m·v² = ½·(W/g)·v²</li>
-<li>Potential energy (gravitational): PE = m·g·h = W·h</li>
-<li>Conservation of mechanical energy: E = KE + PE = const (no friction or heat losses)</li>
-<li>Power: P = Work/t = F·v  [ft·lb/s; ÷ 550 for hp; SI: W = J/s]</li>
-<li>Efficiency = P_out/P_in = W_out/W_in (always below 100 %)</li></ul></section>
+<h2 class="part" id="m201">2.01 Matter</h2>
 
-<section><h2>Momentum &amp; Collisions</h2><ul>
-<li>Momentum: p = m·v (a vector); m in slugs, p in slug·ft/s = lb·s</li>
-<li>Impulse: F·Δt = Δp = m·Δv, so a longer stopping time means a smaller average force</li>
-<li>Conservation: with no external force, m₁v₁ + m₂v₂ = total momentum before = after (sign the velocities)</li>
-<li>Stick together: v = (m₁v₁ + m₂v₂)/(m₁ + m₂)</li>
-<li>Total momentum is conserved in every collision; kinetic energy only if elastic</li>
-<li>Jet thrust ≈ (mass flow of air) × Δv, in slug/s × ft/s = lb</li></ul></section>
-
-<section><h2>Gyroscopes <span class="soon">21 Oct</span></h2><ul>
-<li>Rigidity in space: a spinning free gyro keeps its direction; it grows with mass, spin speed, mass near the rim and low bearing friction (attitude and directional indicators)</li>
-<li>Precession: the gyro reacts as if the force were applied 90° ahead in the direction of rotation (turn and bank)</li></ul></section>
-
-<section><h2>Torque &amp; Equilibrium</h2><ul>
-<li>Torque: τ = F·d (d = perpendicular distance, the lever arm)  [lb·ft or lb·in; N·m]</li>
-<li>Torque wrench with an extension E on a wrench of length L: reading = applied torque × L/(L + E)</li>
-<li>Equilibrium of a rigid body: ΣF = 0 and Στ = 0</li>
-<li>Work by a torque: W = τ·θ (θ in rad)</li>
-<li>Shaft power: P = τ·ω</li>
-<li>Engine: hp = τ [lb·ft] × n [rpm] ÷ 5252, so τ = hp × 5252 ÷ rpm. SI: P [kW] = τ [N·m] × n [rpm] ÷ 9549</li>
-<li>At constant power, higher rpm means lower torque</li>
-<li>Do not mix lb·ft (torque) with ft·lb (work), and rpm with rad/s</li></ul></section>
-
-<section><h2>Circular &amp; Rotational Motion</h2><ul>
-<li>ω = 2π·n/60 (n in rpm, ω in rad/s)</li><li>v = ω·r</li>
-<li>a_c = v²/r</li><li>Centripetal force: F_c = m·v²/r = (W/g)·v²/r, always perpendicular to v, pointing to the centre</li>
-<li>Centrifugal force: a fictitious force, needed only in the rotating frame</li></ul></section>
-
-<section><h2>Oscillations &amp; Waves</h2><ul>
-<li>T = 1/f</li><li>v = f·λ</li>
-<li>Spring: F = k·x</li><li>Mass on a spring: T = 2π·√(m/k)</li>
-<li>Pendulum (small oscillations): T = 2π·√(L/g); depends on length, not on mass</li>
-<li>Periodic motion: period T, frequency f, amplitude</li></ul></section>
-
-<section><h2>Stress</h2><ul>
-<li>σ = F/A (stress), units of pressure: psi (Pa = N/m²), but not the same quantity as pressure</li>
-<li>Types: tension, compression, shear, torsion (twisting), bending (tension on one side, compression on the other)</li>
-<li>Elasticity: the material returns to its shape when the load is removed</li></ul></section>
-
-<section><h2>Simple Machines</h2><ul>
-<li>A machine trades force for distance (or speed); it does not create work or energy</li>
-<li>Mechanical advantage: MA = F_load / F_effort</li>
-<li>Velocity ratio: VR = distance moved by the effort / distance moved by the load</li>
-<li>Ideal machine: MA = VR</li>
-<li>Real machine: efficiency = MA/VR = W_out/W_in</li>
-<li>Lever: F_e·L_e = F_l·L_l, ideal MA = L_e/L_l (effort arm / load arm)</li>
-<li>1st class: fulcrum between effort and load (seesaw, crowbar, pliers)</li>
-<li>2nd class: load between fulcrum and effort (wheelbarrow, nutcracker), MA &gt; 1</li>
-<li>3rd class: effort between fulcrum and load (tweezers, forearm, landing gear), MA &lt; 1</li>
-<li>Pulleys: fixed MA = 1; movable MA = 2; block and tackle ideal MA = number of rope segments supporting the load</li>
-<li>Gears: ratio = N_driven/N_drive = n_drive/n_driven; ideal torque out = torque in × ratio</li>
-<li>Inclined plane: ideal MA = length/height</li>
-<li>Wedge: ideal MA = length/thickness · Screw: ideal MA = 2π·r/pitch</li></ul></section>
-
-<section><h2>Fluids &amp; Pressure</h2><ul>
-<li>P = F/A  [psi = lb/in²]</li>
-<li>Static pressure of a liquid: P = ρ·g·h (depends only on depth and density; ρ in slug/ft³ gives lb/ft²); with the atmosphere P = P₀ + ρ·g·h = P₀ + γ·h (γ = weight density, water 62.4 lb/ft³ ≈ 0.433 psi per ft of depth)</li>
-<li>Dynamic pressure (ram): q = ½·ρ·v²</li>
-<li>Buoyancy (Archimedes): F_b = ρ_fluid·g·V_displaced = γ_fluid·V_displaced (weight of the displaced fluid)</li></ul></section>
-
-<section><h2>Pascal &amp; Hydraulics <span class="soon">22 Oct</span></h2><ul>
-<li>Pascal: pressure in a confined fluid acts equally in all directions, at right angles to the walls</li>
-<li>F = P·A, P = F/A, A = F/P (lb, psi, in²)</li>
-<li>Hydraulic MA = F_out/F_in = A_out/A_in = d_in/d_out</li>
-<li>Volume in = volume out: A_in·d_in = A_out·d_out (we gain force, lose distance; no gain in work)</li>
-<li>Piston area A = π·d²/4</li></ul></section>
-
-<section><h2>Fluid Properties &amp; Flow <span class="soon">23 Oct</span></h2><ul>
-<li>Density: ρ = m/V · weight density γ = W/V (water 62.4 lb/ft³)</li>
-<li>Specific gravity SG = ρ/ρ_water (no units); hydrometer reading 1.275 = SG 1.275</li>
-<li>Viscosity: resistance to flow; for liquids it increases when the temperature falls</li>
-<li>Compressibility: liquids are almost incompressible, gases are compressible</li>
-<li>Continuity: A₁·v₁ = A₂·v₂ (a narrower duct means a faster flow)</li>
-<li>Bernoulli: where v increases, static pressure decreases</li>
-<li>Total pressure = static pressure + dynamic pressure (q = ½·ρ·v²)</li>
-<li>Pitot-static: q = P_total − P_static, v = √(2q/ρ)</li></ul></section>
-
-<section><h2>Matter &amp; Atomic Structure</h2><ul>
+<section><h2>Atomic structure</h2><ul>
 <li>A = Z + N (mass number = protons + neutrons), N = A − Z</li>
 <li>Neutral atom: number of electrons = Z; an ion has gained or lost electrons</li>
 <li>Notation <sup>A</sup><sub>Z</sub>X, e.g. <sup>27</sup><sub>13</sub>Al: 13 protons, 14 neutrons, 13 electrons</li>
 <li>Isotopes: same Z, different N</li>
-<li>Mass density ρ = m/V · weight density γ = W/V</li>
-<li>Specific gravity SG = ρ/ρ_water</li></ul></section>
+<li>Maximum electrons in shell n: 2n² (2, 8, 18, 32)</li></ul></section>
 
-<section><h2>Thermodynamics &amp; Heat</h2><ul>
-<li>Q = m·c·ΔT (water: c ≈ 1 BTU/(lb·°F))</li>
-<li>Gas law: P₁V₁/T₁ = P₂V₂/T₂ (T absolute)</li>
-<li>°R = °F + 459.67</li><li>K = °C + 273.15</li><li>°F = °C × 9/5 + 32</li></ul></section>
-<p class="note">Reference sheet for the course, matched to the lessons up to 20 October 2026. Orange tags mark topics planned for the next lessons. Always follow the constants given in the exam.</p>
+<section><h2>States of matter</h2><ul>
+<li>Mass density ρ = m/V · weight density γ = W/V</li>
+<li>Specific gravity SG = ρ/ρ_water (no units)</li>
+<li>Boiling point rises with pressure: water 100 °C at 14.7 psi, about 108 °C at 20 psi, about 90 °C at 10 psi</li></ul></section>
+
+<h2 class="part" id="m202">2.02 Mechanics</h2>
+
+<section><h2>Kinematics</h2><ul>
+<li>Uniform motion: x = v·t</li>
+<li>Acceleration: a = (v_f − v_i)/t</li>
+<li>Uniform acceleration: v = v₀ + a·t</li><li>x = v₀·t + ½·a·t²</li><li>v² = v₀² + 2·a·x</li>
+<li>Free fall: a = g; from rest v = √(2·g·h)</li></ul></section>
+
+<section><h2>Newton’s laws &amp; forces</h2><ul>
+<li>1st law (inertia): ΣF = 0 ⇔ constant velocity</li>
+<li>2nd law: ΣF = m·a, with m = W/g (m in slugs, F in lb, a in ft/s²)</li>
+<li>3rd law, action–reaction: equal in size, opposite in direction</li>
+<li>Weight: W = m·g</li>
+<li>Thrust to accelerate: F = (W/g)·(V_f − V_i)/t</li></ul></section>
+
+<section><h2>Friction</h2><ul>
+<li>Static friction: equal and opposite to the applied force, up to its maximum, the limiting friction</li>
+<li>Limiting (starting) friction: F = μ_s·N</li>
+<li>Sliding (kinetic) friction: F = μ_k·N, a little smaller (μ = coefficient of friction, N = normal force)</li>
+<li>On a level surface N = W; on a slope N = W·cos θ</li>
+<li>Rolling friction is much smaller (tyre on concrete μ ≈ 0.02)</li></ul></section>
+
+<section><h2>Stress &amp; strain</h2><ul>
+<li>Stress σ = F/A  [psi; Pa = N/m²], same units as pressure but not the same quantity</li>
+<li>Strain ε = ΔL/L (no units)</li>
+<li>Hooke’s law (elastic range): σ = E·ε</li>
+<li>E: steel 30 × 10⁶ psi (200 GPa), aluminium 10 × 10⁶ psi (70 GPa)</li>
+<li>Types: tension, compression, shear, torsion, bending</li></ul></section>
+
+<section><h2>Torque &amp; equilibrium</h2><ul>
+<li>Torque (moment): τ = F·d (d = perpendicular distance, the lever arm)  [lb·ft, lb·in; N·m]</li>
+<li>Equilibrium: ΣF = 0 and Στ = 0</li>
+<li>Centre of gravity: CG = ΣM/ΣW (sum of moments ÷ total weight)</li>
+<li>Torque wrench with extension E on a wrench of length L: reading = applied torque × L/(L + E)</li>
+<li>Do not mix lb·ft (torque) with ft·lb (work)</li></ul></section>
+
+<section><h2>Work, power &amp; energy</h2><ul>
+<li>Work: W = F·d (force along the displacement); in general W = F·d·cos θ  [ft·lb; J]</li>
+<li>Kinetic energy: KE = ½·m·v² = ½·(W/g)·v²</li>
+<li>Potential energy: PE = m·g·h = W·h</li>
+<li>Conservation: KE + PE = const (no friction or heat losses)</li>
+<li>Power: P = Work/t = F·v = τ·ω  [ft·lb/s ÷ 550 = hp; W = J/s]</li>
+<li>Efficiency η = W_out/W_in = P_out/P_in (always below 100 %)</li></ul></section>
+
+<section><h2>Circular &amp; rotational motion</h2><ul>
+<li>ω = 2π·n/60 (n in rpm, ω in rad/s) · v = ω·r</li>
+<li>a_c = v²/r · centripetal force F_c = m·v²/r = (W/g)·v²/r, towards the centre</li>
+<li>Centrifugal force: a fictitious force, needed only in the rotating frame</li>
+<li>Engine: hp = τ [lb·ft] × n [rpm] ÷ 5252 (SI: kW = τ [N·m] × n [rpm] ÷ 9549)</li>
+<li>At constant power, higher rpm means lower torque</li></ul></section>
+
+<section><h2>Gyroscopes</h2><ul>
+<li>Rigidity in space: a spinning gyro keeps its direction; it grows with mass, spin speed, mass near the rim and low bearing friction (attitude and directional indicators)</li>
+<li>Precession: the gyro reacts as if the force were applied 90° ahead in the direction of rotation (turn and bank)</li></ul></section>
+
+<section><h2>Oscillations</h2><ul>
+<li>T = 1/f</li>
+<li>Spring: F = k·x · mass on a spring: T = 2π·√(m/k)</li>
+<li>Pendulum (small swings): T = 2π·√(L/g); depends on length, not on mass</li></ul></section>
+
+<section><h2>Simple machines</h2><ul>
+<li>A machine trades force for distance; it does not create work or energy</li>
+<li>Mechanical advantage MA = F_load/F_effort · velocity ratio VR = d_effort/d_load</li>
+<li>Ideal machine MA = VR · real machine η = MA/VR = W_out/W_in</li>
+<li>Lever: F_e·L_e = F_l·L_l, ideal MA = L_e/L_l</li>
+<li>Classes: 1st fulcrum in the middle (crowbar, pliers); 2nd load in the middle (wheelbarrow), MA &gt; 1; 3rd effort in the middle (tweezers, landing gear), MA &lt; 1</li>
+<li>Pulleys: fixed MA = 1, movable MA = 2; block and tackle ideal MA = number of supporting rope segments</li>
+<li>Gears: ratio = N_driven/N_drive = n_drive/n_driven; torque out = torque in × ratio</li>
+<li>Planetary: carrier fixed, ring output: N_ring/N_sun; ring fixed, carrier output: 1 + N_ring/N_sun</li>
+<li>Inclined plane: ideal MA = length/height · wedge: length/thickness</li>
+<li>Screw: ideal MA = circumference/pitch = 2π·r/pitch</li></ul></section>
+
+<section><h2>Momentum &amp; collisions</h2><ul>
+<li>Momentum p = m·v (a vector); m in slugs, p in slug·ft/s = lb·s</li>
+<li>Impulse: F·t = m·Δv, so a longer stopping time means a smaller average force</li>
+<li>Conservation (no external force): m₁v₁ + m₂v₂ = const (sign the velocities)</li>
+<li>Stick together: v = (m₁v₁ + m₂v₂)/(m₁ + m₂)</li>
+<li>Kinetic energy is conserved only in elastic collisions</li>
+<li>Jet thrust F = ṁ·Δv (slug/s × ft/s = lb)</li></ul></section>
+
+<section><h2>Pressure &amp; buoyancy</h2><ul>
+<li>P = F/A  [psi = lb/in²; Pa]</li>
+<li>Liquid pressure: P = ρ·g·h = γ·h (water 0.433 psi per ft); depends only on depth and density</li>
+<li>Absolute pressure: psia = psig + 14.7</li>
+<li>Buoyancy (Archimedes): B = ρ_fluid·g·V = weight of the displaced fluid</li>
+<li>Weight of a liquid: W = SG × 62.4 × V (V in ft³)</li></ul></section>
+
+<section><h2>Pascal &amp; hydraulics</h2><ul>
+<li>Pascal: pressure in a confined fluid acts equally in all directions, at right angles to the walls</li>
+<li>F = P·A, P = F/A, A = F/P (lb, psi, in²) · piston area A = π·d²/4</li>
+<li>Hydraulic MA = F_out/F_in = A_out/A_in = d_in/d_out</li>
+<li>Volume in = volume out: A_in·d_in = A_out·d_out (force gained, distance lost)</li>
+<li>Real system: F_out = η × F_in × A_out/A_in</li></ul></section>
+
+<section><h2>Fluid properties &amp; flow</h2><ul>
+<li>Viscosity: resistance to flow; for liquids it rises when the temperature falls</li>
+<li>Liquids are almost incompressible, gases are compressible</li>
+<li>Continuity: A₁·v₁ = A₂·v₂ (narrower duct, faster flow)</li>
+<li>Bernoulli: p + ½ρv² + ρgh = const; where v rises, static pressure falls</li>
+<li>Total pressure = static + dynamic, q = ½·ρ·v²</li>
+<li>Pitot-static: q = P_total − P_static, v = √(2q/ρ)</li></ul></section>
+
+<h2 class="part" id="m203">2.03 Thermodynamics</h2>
+
+<section><h2>Temperature &amp; expansion</h2><ul>
+<li>°F = 1.8·°C + 32 · °C = (°F − 32) × 5/9</li>
+<li>Absolute: K = °C + 273 (273.15) · °R = °F + 460 (459.67)</li>
+<li>A change of 1 °C = 1 K = 1.8 °F = 1.8 °R</li>
+<li>Linear expansion: ΔL = α·L·ΔT (steel α ≈ 11 × 10⁻⁶ /°C)</li>
+<li>Resistance thermometer: R = R₀(1 + α_R·ΔT), range −70 to 150 °C</li>
+<li>Thermocouple: E ≈ S·(T_hot − T_cold); chromel–alumel ≈ 41 µV/°C</li></ul></section>
+
+<section><h2>Heat</h2><ul>
+<li>Q = m·c·ΔT (water c = 1 BTU/(lb·°F) = 4186 J/(kg·K))</li>
+<li>Specific heat of a substance relative to water: c/c_water</li>
+<li>Latent heat (no temperature change): Q = m·L</li>
+<li>Heat transfer: conduction, convection, radiation</li>
+<li>Fuel: avgas 18,900 BTU/lb; petroleum fuel ≈ 20,000 BTU/lb = 15,560,000 ft·lb</li></ul></section>
+
+<section><h2>Laws &amp; gases</h2><ul>
+<li>0th law: two bodies in equilibrium with a third are in equilibrium with each other (thermometers)</li>
+<li>1st law: Q = ΔU + W</li>
+<li>2nd law: heat flows by itself only from hot to cold; no engine converts all heat into work</li>
+<li>3rd law: absolute zero cannot be reached</li>
+<li>Boyle (T const): P₁V₁ = P₂V₂ · Charles: V₁/T₁ = V₂/T₂, P₁/T₁ = P₂/T₂</li>
+<li>General gas law: P₁V₁/T₁ = P₂V₂/T₂ (absolute P and T)</li>
+<li>Dalton: P_total = ΣPᵢ · ideal gas PV = nRT</li></ul></section>
+
+<section><h2>Engines</h2><ul>
+<li>Thermal efficiency η = useful work / heat from fuel</li>
+<li>η = HP × 33,000 / (lb fuel per min × BTU/lb × 778) (IHP or BHP)</li>
+<li>Compression ratio CR = (V_d + V_c)/V_c</li>
+<li>Carnot (maximum) efficiency: η = 1 − T_c/T_h (absolute temperatures)</li></ul></section>
+
+<h2 class="part" id="m204">2.04 Optics</h2>
+
+<section><h2>Light &amp; reflection</h2><ul>
+<li>c = f·λ; frequency never changes between materials, λ and speed do</li>
+<li>Refractive index n = c/v ≥ 1 (air 1.00029, water 1.33, acrylic 1.49, glass 1.5–1.6, diamond 2.42)</li>
+<li>Reflection: θᵢ = θᵣ, angles measured from the normal</li>
+<li>Plane mirror: virtual, upright, same size, as far behind as in front</li>
+<li>Spherical mirror: f = R/2 · 1/f = 1/u + 1/v · m = v/u</li>
+<li>Concave converges (magnifies when close); convex diverges (always smaller)</li></ul></section>
+
+<section><h2>Refraction &amp; lenses</h2><ul>
+<li>Snell: n₁·sin θ₁ = n₂·sin θ₂ (into a denser medium the ray bends towards the normal)</li>
+<li>Critical angle: sin θc = n₂/n₁ (into air: water 48.8°, glass 41.8°, diamond 24.4°)</li>
+<li>Apparent depth = real depth / n</li>
+<li>Lens: 1/f = 1/u + 1/v · m = v/u · power P = 1/f (dioptres, f in m)</li>
+<li>Convex (converging) lens: f &gt; 0 · concave (diverging): f &lt; 0</li></ul></section>
+
+<section><h2>Fibre optics</h2><ul>
+<li>Total internal reflection: sin θc = n_cladding/n_core</li>
+<li>Numerical aperture NA = √(n_core² − n_cladding²)</li>
+<li>Speed in fibre v = c/n (n ≈ 1.5: 200,000 km/s, 5 µs per km)</li>
+<li>Link loss = dB/km × km + connectors + splices (fusion splice ≈ 0.1 dB)</li>
+<li>Power ratio: −3 dB = ½, −10 dB = 1/10, −20 dB = 1/100</li>
+<li>Minimum bend radius about 30 mm</li></ul></section>
+
+<h2 class="part" id="m205">2.05 Wave Motion &amp; Sound</h2>
+
+<section><h2>Waves</h2><ul>
+<li>f = 1/T · v = f·λ = λ/T</li>
+<li>Sine wave y = A·sin(2π·f·t); energy ∝ A²</li>
+<li>Transverse: particles move at right angles to the wave · longitudinal: along it (sound in air)</li>
+<li>Interference: constructive Δd = n·λ; destructive Δd = (n + ½)·λ</li>
+<li>Beats: f_beat = |f₁ − f₂|</li>
+<li>Standing waves: nodes ½λ apart · string / open pipe f_n = n·v/(2L) · closed pipe f_n = n·v/(4L), n odd</li></ul></section>
+
+<section><h2>Sound</h2><ul>
+<li>Speed of sound: solids &gt; liquids &gt; gases; in air it depends on temperature, not pressure</li>
+<li>Air: v ≈ 1,087 + 2·T ft/s (331 + 0.6·T m/s), T in °C</li>
+<li>Echo d = v·t/2 · one way (thunder) d = v·t</li>
+<li>Mach number M = v/a (a = local speed of sound) · Mach cone sin μ = 1/M</li>
+<li>Hearing 20 Hz – 20 kHz · pitch = frequency, loudness = amplitude</li>
+<li>Blade-passing frequency = rpm/60 × number of blades</li></ul></section>
+
+<section><h2>Intensity &amp; Doppler</h2><ul>
+<li>Sound level L = 10·log₁₀(I/I₀) dB</li>
+<li>+3 dB = × 2 intensity (two equal sources) · +10 dB = × 10 (≈ twice as loud) · +20 dB = × 100 (≈ four times as loud)</li>
+<li>Inverse square law I ∝ 1/r²: double the distance, −6 dB</li>
+<li>Doppler, source approaching: f′ = f·v/(v − v_s) · receding: f′ = f·v/(v + v_s)</li></ul></section>
+
+<p class="note">Reference sheet for Module 2, sub-modules 2.01 to 2.05, matched to the lesson notes (October 2026). Always use the constants and rounding given in the exam question.</p>
 </main>
 </body>
 </html>
