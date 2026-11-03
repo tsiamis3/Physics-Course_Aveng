@@ -5,44 +5,38 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Κύκλοι Otto και Brayton</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600&display=swap">
 <style>
 /* Layout: engine cutaway on the left, P–V diagram on the right, step narration and controls underneath. */
 :root{
-  --bg:#F2F4F6; --panel:#FFFFFF; --fg:#16202A; --muted:#5B6873; --line:#D3DAE0;
-  --accent:#0F766E; --accent-soft:rgba(15,118,110,.12);
-  --cold:#3B7DD8; --hot:#E4572E;
-  --metal:#B9C3CB; --metal-2:#8E9AA4; --port:#E8EDF1; --hub:#69757F; --plug:#EDE7DA;
-  --f-display:"Archivo","Helvetica Neue",Arial,sans-serif;
-  --f-body:"IBM Plex Sans","Segoe UI",Roboto,Arial,sans-serif;
-  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --bg:#0b0a09; --panel:#14120f; --fg:#e8e2d0; --muted:#a09882; --line:#4a3f26;
+  --accent:#d9a521; --accent-soft:rgba(217,165,33,.14);
+  --cold:#5B9BEF; --hot:#F2704A;
+  --metal:#4f4636; --metal-2:#7a6c50; --port:#1d1a14; --hub:#8f7f5c; --plug:#cfc6ae;
+  --f-display:"Rajdhani","Barlow Condensed",sans-serif;
+  --f-body:"Source Sans 3",system-ui,sans-serif;
+  --f-mono:"Share Tech Mono",ui-monospace,Consolas,monospace;
+  color-scheme:dark;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#0E1317; --panel:#161D23; --fg:#E5EBEF; --muted:#94A2AD; --line:#2A353D;
-  --accent:#2DD4BF; --accent-soft:rgba(45,212,191,.14);
-  --cold:#5B9BEF; --hot:#F2704A;
-  --metal:#4B5761; --metal-2:#66737E; --port:#1F282F; --hub:#82909B; --plug:#9C968B; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#0E1317; --panel:#161D23; --fg:#E5EBEF; --muted:#94A2AD; --line:#2A353D;
-  --accent:#2DD4BF; --accent-soft:rgba(45,212,191,.14);
-  --cold:#5B9BEF; --hot:#F2704A;
-  --metal:#4B5761; --metal-2:#66737E; --port:#1F282F; --hub:#82909B; --plug:#9C968B; color-scheme:dark}
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--fg);font:15px/1.55 var(--f-body);
-  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 var(--f-body)}
+header{padding:22px max(20px,env(safe-area-inset-left,0px)) 30px}
+header h1{margin:0;font-size:clamp(28px,5vw,44px);line-height:1.05}
+header p{margin:6px 0 0}
+header nav{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:10px}
+main{padding:20px max(16px,env(safe-area-inset-left,0px)) 40px}
 .wrap{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
-header{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px}
-h1{font:700 clamp(24px,4vw,34px)/1.1 var(--f-display);margin:0;letter-spacing:-.01em;text-wrap:balance}
-.sub{color:var(--muted);margin:4px 0 0;max-width:62ch}
+.topbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.cyc-name{font:700 22px var(--f-display);text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin:0}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
-.seg button{border:0;background:none;color:var(--fg);font:600 14px var(--f-body);padding:8px 14px;cursor:pointer}
-.seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.seg{clip-path:none!important}.seg button{border:0;background:none;color:var(--fg);font:700 15px var(--f-display);letter-spacing:.08em;text-transform:uppercase;padding:8px 16px;cursor:pointer;clip-path:none;box-shadow:none}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#0b0a09}
 .seg button:focus-visible,.btn:focus-visible,.pill:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .tools{display:flex;gap:10px;flex-wrap:wrap}
 .stage{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
 @media (max-width:820px){.stage{grid-template-columns:1fr}}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;min-width:0}
-.card h2{font:600 12px var(--f-body);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:2px 4px 6px}
+.card{background:var(--panel);border:1px solid var(--line);padding:16px 20px;min-width:0;margin:0}
+.card h2{font:700 14px var(--f-display);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:2px 4px 6px}
 svg{display:block;width:100%;height:auto}
 .read{display:flex;flex-wrap:wrap;gap:6px 18px;font:13px var(--f-mono);color:var(--muted);margin:6px 4px 0;font-variant-numeric:tabular-nums}
 .read b{color:var(--fg);font-weight:500}
@@ -51,19 +45,19 @@ svg{display:block;width:100%;height:auto}
 .narr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:start}
 @media (max-width:820px){.narr{grid-template-columns:1fr}}
 .steps{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
-.pill{border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:999px;padding:4px 10px;font:500 13px var(--f-body);cursor:pointer;font-variant-numeric:tabular-nums}
+.pill{border:1px solid var(--line);background:#0d0c0a;color:var(--muted);border-radius:0;padding:4px 12px;font:13px var(--f-mono);letter-spacing:.02em;text-transform:none;box-shadow:none;cursor:pointer;font-variant-numeric:tabular-nums}
 .pill[aria-current="step"]{border-color:var(--accent);background:var(--accent-soft);color:var(--fg)}
 .pill.done{color:var(--fg)}
-#stitle{font:700 21px/1.2 var(--f-display);margin:0 0 6px}
+#stitle{font:700 24px/1.2 var(--f-display);color:var(--accent);text-transform:uppercase;letter-spacing:.04em;margin:0 0 6px}
 #stext{margin:0;max-width:68ch}
 .badges{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0}
-.badge{font:500 12.5px var(--f-body);padding:3px 9px;border-radius:6px;border:1px solid var(--line);color:var(--fg)}
+.badge{font:13px var(--f-mono);padding:3px 9px;border-radius:0;border:1px solid var(--line);color:var(--fg)}
 .badge.q-in{border-color:var(--hot);color:var(--hot)}
 .badge.q-out{border-color:var(--cold);color:var(--cold)}
 .badge.w{border-color:var(--accent);color:var(--accent)}
 .ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.btn{border:1px solid var(--line);background:var(--panel);color:var(--fg);border-radius:8px;padding:8px 14px;font:600 14px var(--f-body);cursor:pointer;min-width:44px}
-.btn.primary{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.btn{cursor:pointer;min-width:44px;background:#1b1813;color:var(--fg);box-shadow:inset 0 0 0 1px var(--line)}
+.btn.primary{background:linear-gradient(#e3b232,#b98912);color:#0b0a09;box-shadow:inset 0 1px 0 rgba(255,255,255,.35)}
 .ctrl label{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center}
 select{font:500 13px var(--f-body);padding:6px 8px;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--fg)}
 .note{color:var(--muted);font-size:13px;margin:0}
@@ -72,17 +66,20 @@ select{font:500 13px var(--f-body);padding:6px 8px;border-radius:6px;border:1px 
 @media (prefers-reduced-motion:reduce){.flow{animation:none}}
 text{font-family:var(--f-body)}
 </style>
+<link rel="stylesheet" href="assets/theme.css">
 </head>
 <body>
 
 
+<header>
+  <h1 id="h1"></h1>
+  <p id="sub"></p>
+  <nav><a href="index.html">← Home</a><a href="formula.html">Formula sheet</a><a href="units.html">Unit conversions</a></nav>
+</header>
+<main>
 <div class="wrap">
-  <header>
-    <div>
-      <h1 id="h1"></h1>
-      <p class="sub" id="sub"></p>
-      <p class="sub"><a href="index.html" style="color:var(--accent)">← Home</a></p>
-    </div>
+  <div class="topbar">
+    <p class="cyc-name" id="cyc-name"></p>
     <div class="tools">
       <div class="seg" role="group" aria-label="Cycle">
         <button id="tab-otto" aria-pressed="true">Otto</button>
@@ -93,9 +90,9 @@ text{font-family:var(--f-body)}
         <button id="lang-en" aria-pressed="false">EN</button>
       </div>
     </div>
-  </header>
+  </div>
 
-  <div class="stage">
+<div class="stage">
     <section class="card">
       <h2 id="eng-h"></h2>
       <div id="engine"></div>
@@ -127,6 +124,7 @@ text{font-family:var(--f-body)}
   </section>
   <p class="note" id="foot"></p>
 </div>
+</main>
 
 <script>
 const $ = id => document.getElementById(id);
@@ -418,7 +416,7 @@ function buildPills(){
 function buildAll(){
   const l=L();
   document.documentElement.lang = S.lang;
-  $('h1').textContent=l.h1; $('sub').textContent=l.sub; $('pv-h').textContent=l.pv;
+  $('h1').textContent=l.h1; $('cyc-name').textContent = S.cycle==='otto'?'Otto':'Brayton'; $('sub').textContent=l.sub; $('pv-h').textContent=l.pv;
   $('eng-h').textContent = S.cycle==='otto'?l.engOtto:l.engBray;
   $('t-cold').textContent=l.cold; $('t-hot').textContent=l.hot; $('speed-l').textContent=l.speed;
   $('foot').textContent = S.cycle==='otto'?l.footOtto:l.footBray;
