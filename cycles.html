@@ -2,12 +2,11 @@
 <html lang="el">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Κύκλοι Otto και Brayton</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Θερμοδυναμικοί κύκλοι</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600&display=swap">
 <style>
-/* Layout: engine cutaway on the left, P–V diagram on the right, step narration and controls underneath. */
+/* Layout: machine drawing on the left, P–V or P–T diagram on the right, step narration and controls underneath. */
 :root{
   --bg:#0b0a09; --panel:#14120f; --fg:#e8e2d0; --muted:#a09882; --line:#4a3f26;
   --accent:#d9a521; --accent-soft:rgba(217,165,33,.14);
@@ -25,41 +24,44 @@ header h1{margin:0;font-size:clamp(28px,5vw,44px);line-height:1.05}
 header p{margin:6px 0 0}
 header nav{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:10px}
 main{padding:20px max(16px,env(safe-area-inset-left,0px)) 40px}
-.wrap{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
-.topbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.wrap{max-width:1160px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.topbar{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px}
 .cyc-name{font:700 22px var(--f-display);text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin:0}
-.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
-.seg{clip-path:none!important}.seg button{border:0;background:none;color:var(--fg);font:700 15px var(--f-display);letter-spacing:.08em;text-transform:uppercase;padding:8px 16px;cursor:pointer;clip-path:none;box-shadow:none}
+.tools{display:flex;gap:12px;flex-wrap:wrap;align-items:end}
+.grp{display:flex;flex-direction:column;gap:3px}
+.grp small{font:12px var(--f-mono);color:var(--muted);letter-spacing:.04em}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:0;overflow:hidden;background:var(--panel);clip-path:none!important}
+.seg button{border:0;background:none;color:var(--fg);font:700 15px var(--f-display);letter-spacing:.08em;text-transform:uppercase;padding:8px 14px;cursor:pointer;clip-path:none;box-shadow:none}
 .seg button[aria-pressed="true"]{background:var(--accent);color:#0b0a09}
 .seg button:focus-visible,.btn:focus-visible,.pill:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.tools{display:flex;gap:10px;flex-wrap:wrap}
-.stage{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
-@media (max-width:820px){.stage{grid-template-columns:1fr}}
+.stage{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px}
+@media (max-width:860px){.stage{grid-template-columns:1fr}}
 .card{background:var(--panel);border:1px solid var(--line);padding:16px 20px;min-width:0;margin:0}
 .card h2{font:700 14px var(--f-display);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:2px 4px 6px}
 svg{display:block;width:100%;height:auto}
 .read{display:flex;flex-wrap:wrap;gap:6px 18px;font:13px var(--f-mono);color:var(--muted);margin:6px 4px 0;font-variant-numeric:tabular-nums}
 .read b{color:var(--fg);font-weight:500}
+.qbar{display:inline-flex;align-items:center;gap:6px}
+.qbar i{display:inline-block;width:90px;height:8px;border:1px solid var(--line);background:linear-gradient(90deg,var(--cold) var(--q),transparent var(--q))}
 .tbar{display:flex;align-items:center;gap:8px;font:12px var(--f-body);color:var(--muted);margin:8px 4px 0}
-.tbar i{display:block;width:120px;height:8px;border-radius:4px;background:linear-gradient(90deg,hsl(220 72% 52%),hsl(275 72% 54%),hsl(330 72% 56%),hsl(25 72% 52%))}
+.tbar i{display:block;width:120px;height:8px;background:linear-gradient(90deg,hsl(220 72% 52%),hsl(275 72% 54%),hsl(330 72% 56%),hsl(25 72% 52%))}
 .narr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:start}
-@media (max-width:820px){.narr{grid-template-columns:1fr}}
+@media (max-width:860px){.narr{grid-template-columns:1fr}}
 .steps{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
 .pill{border:1px solid var(--line);background:#0d0c0a;color:var(--muted);border-radius:0;padding:4px 12px;font:13px var(--f-mono);letter-spacing:.02em;text-transform:none;box-shadow:none;cursor:pointer;font-variant-numeric:tabular-nums}
 .pill[aria-current="step"]{border-color:var(--accent);background:var(--accent-soft);color:var(--fg)}
 .pill.done{color:var(--fg)}
 #stitle{font:700 24px/1.2 var(--f-display);color:var(--accent);text-transform:uppercase;letter-spacing:.04em;margin:0 0 6px}
-#stext{margin:0;max-width:68ch}
+#stext{margin:0;max-width:70ch}
 .badges{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0}
 .badge{font:13px var(--f-mono);padding:3px 9px;border-radius:0;border:1px solid var(--line);color:var(--fg)}
 .badge.q-in{border-color:var(--hot);color:var(--hot)}
 .badge.q-out{border-color:var(--cold);color:var(--cold)}
 .badge.w{border-color:var(--accent);color:var(--accent)}
 .ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.btn{cursor:pointer;min-width:44px;background:#1b1813;color:var(--fg);box-shadow:inset 0 0 0 1px var(--line)}
-.btn.primary{background:linear-gradient(#e3b232,#b98912);color:#0b0a09;box-shadow:inset 0 1px 0 rgba(255,255,255,.35)}
+.btn{cursor:pointer;min-width:44px}
 .ctrl label{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center}
-select{font:500 13px var(--f-body);padding:6px 8px;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--fg)}
+select{font:13px var(--f-mono);padding:6px 8px;border:1px solid var(--line);background:#0d0c0a;color:var(--fg)}
 .note{color:var(--muted);font-size:13px;margin:0}
 .flow{stroke-dasharray:6 6;animation:flow .6s linear infinite}
 @keyframes flow{to{stroke-dashoffset:-12}}
@@ -69,8 +71,6 @@ text{font-family:var(--f-body)}
 <link rel="stylesheet" href="assets/theme.css">
 </head>
 <body>
-
-
 <header>
   <h1 id="h1"></h1>
   <p id="sub"></p>
@@ -81,18 +81,22 @@ text{font-family:var(--f-body)}
   <div class="topbar">
     <p class="cyc-name" id="cyc-name"></p>
     <div class="tools">
-      <div class="seg" role="group" aria-label="Cycle">
-        <button id="tab-otto" aria-pressed="true">Otto</button>
-        <button id="tab-brayton" aria-pressed="false">Brayton</button>
-      </div>
-      <div class="seg" role="group" aria-label="Language">
-        <button id="lang-el" aria-pressed="true">ΕΛ</button>
-        <button id="lang-en" aria-pressed="false">EN</button>
-      </div>
+      <div class="grp"><small id="g-eng"></small>
+        <div class="seg" role="group" aria-label="Engines">
+          <button data-c="otto">Otto</button><button data-c="diesel">Diesel</button><button data-c="brayton">Brayton</button>
+        </div></div>
+      <div class="grp"><small id="g-cool"></small>
+        <div class="seg" role="group" aria-label="Cooling">
+          <button data-c="acm">ACM</button><button data-c="fridge" id="tab-fridge"></button>
+        </div></div>
+      <div class="grp"><small>&nbsp;</small>
+        <div class="seg" role="group" aria-label="Language">
+          <button id="lang-el">ΕΛ</button><button id="lang-en">EN</button>
+        </div></div>
     </div>
   </div>
 
-<div class="stage">
+  <div class="stage">
     <section class="card">
       <h2 id="eng-h"></h2>
       <div id="engine"></div>
@@ -130,329 +134,471 @@ text{font-family:var(--f-body)}
 const $ = id => document.getElementById(id);
 const clamp = (x,a=0,b=1)=>Math.max(a,Math.min(b,x));
 const ease = u => u<.5 ? 2*u*u : 1-Math.pow(-2*u+2,2)/2;
-
-/* ---------- text ---------- */
-const T = {
- el:{
-  h1:'Κύκλοι Otto και Brayton', sub:'Βήμα-βήμα: τι κάνει ο κινητήρας και πού βρίσκεται το αέριο στο διάγραμμα πίεσης–όγκου.',
-  engOtto:'Εμβολοφόρος κινητήρας, τετράχρονος', engBray:'Στροβιλοκινητήρας (turbojet), τομή', pv:'Διάγραμμα P–V',
-  cold:'κρύο', hot:'ζεστό', play:'Αναπαραγωγή', pause:'Παύση', speed:'Ταχύτητα',
-  step:'Βήμα', of:'από', P:'P', V:'V', Tn:'T', atm:'× ατμ.', crank:'Στρόφαλος', rev:'περιστροφή',
-  intake:'Εισαγωγή', exhaust:'Εξαγωγή', spark:'Μπουζί', tdc:'ΑΝΣ', bdc:'ΚΝΣ',
-  pAxis:'Πίεση P (× ατμοσφαιρική)', vAxis:'Όγκος V', work:'εμβαδόν = έργο',
-  secIn:'Είσοδος – συμπιεστής', secCb:'Θάλαμος καύσης', secTu:'Στρόβιλος', secNz:'Ακροφύσιο', secAt:'Ατμόσφαιρα',
-  parcel:'Παρακολουθούμε ένα «πακέτο» αέρα',
-  footOtto:'Οι αριθμοί είναι ενδεικτικοί: λόγος συμπίεσης 8, ιδανικός κύκλος με γ = 1,4. Στο διάγραμμα η απόσταση των γραμμών εισαγωγής και εξαγωγής είναι μεγεθυμένη για να φαίνονται.',
-  footBray:'Οι αριθμοί είναι ενδεικτικοί: λόγος πίεσης 14, ιδανικός κύκλος με γ = 1,4. Όλα τα στάδια γίνονται ταυτόχρονα σε διαφορετικά σημεία του κινητήρα· ακολουθούμε ένα πακέτο αέρα καθώς τα περνά.',
-  proc:{isobaric:'ισοβαρής', adiab:'αδιαβατική', isoch:'ισόχωρη', atmLine:'πίεση ≈ ατμοσφαιρική'},
-  q0:'Q = 0', qin:'μπαίνει θερμότητα', qout:'φεύγει θερμότητα', win:'μπαίνει έργο', wout:'βγαίνει έργο', w0:'έργο ≈ 0'
- },
- en:{
-  h1:'Otto and Brayton cycles', sub:'Step by step: what the engine is doing, and where the gas sits on the pressure–volume diagram.',
-  engOtto:'Four-stroke piston engine', engBray:'Gas turbine (turbojet), cross-section', pv:'P–V diagram',
-  cold:'cold', hot:'hot', play:'Play', pause:'Pause', speed:'Speed',
-  step:'Step', of:'of', P:'P', V:'V', Tn:'T', atm:'× atm', crank:'Crank', rev:'revolution',
-  intake:'Intake', exhaust:'Exhaust', spark:'Spark plug', tdc:'TDC', bdc:'BDC',
-  pAxis:'Pressure P (× atmospheric)', vAxis:'Volume V', work:'area = work',
-  secIn:'Inlet – compressor', secCb:'Combustor', secTu:'Turbine', secNz:'Nozzle', secAt:'Atmosphere',
-  parcel:'Following one parcel of air',
-  footOtto:'Numbers are illustrative: compression ratio 8, ideal cycle with γ = 1.4. The gap between the intake and exhaust lines is exaggerated so both can be seen.',
-  footBray:'Numbers are illustrative: pressure ratio 14, ideal cycle with γ = 1.4. All stages run at the same time in different parts of the engine; we follow one parcel of air through them.',
-  proc:{isobaric:'isobaric', adiab:'adiabatic', isoch:'isochoric', atmLine:'pressure ≈ atmospheric'},
-  q0:'Q = 0', qin:'heat in', qout:'heat out', win:'work in', wout:'work out', w0:'work ≈ 0'
- }
-};
-
-const OTTO_STEPS = [
- {from:'1',to:'2',dur:2.6,th:[0,180],proc:'atmLine',q:'q0',w:'w0',
-  el:['Εισαγωγή','Η βαλβίδα εισαγωγής είναι ανοιχτή. Το έμβολο κατεβαίνει από το ΑΝΣ στο ΚΝΣ και αναρροφά μίγμα καυσίμου–αέρα. Ο όγκος μεγαλώνει, η πίεση μένει περίπου ατμοσφαιρική: στο διάγραμμα, οριζόντια γραμμή στο κάτω μέρος.'],
-  en:['Intake','The intake valve is open. The piston moves from TDC to BDC and draws in the fuel–air mixture. Volume grows while pressure stays about atmospheric: a horizontal line along the bottom of the diagram.']},
- {from:'2',to:'3',dur:2.6,th:[180,360],proc:'adiab',q:'q0',w:'win',
-  el:['Συμπίεση','Και οι δύο βαλβίδες κλείνουν. Το έμβολο ανεβαίνει και συμπιέζει το μίγμα τόσο γρήγορα που δεν προλαβαίνει να φύγει θερμότητα: αδιαβατική συμπίεση. Η πίεση και η θερμοκρασία ανεβαίνουν. Το έργο για τη συμπίεση το δίνει η ορμή του στροφάλου.'],
-  en:['Compression','Both valves close. The piston rises and compresses the mixture so fast that no heat can escape: adiabatic compression. Pressure and temperature rise. The work comes from the momentum of the crankshaft.']},
- {from:'3',to:'4',dur:1.3,th:[360,360],proc:'isoch',q:'qin',w:'w0',
-  el:['Καύση (σπινθήρας)','Στο ΑΝΣ το μπουζί δίνει σπινθήρα. Το μίγμα καίγεται τόσο γρήγορα που το έμβολο δεν προλαβαίνει να κινηθεί: η θερμότητα μπαίνει σε σταθερό όγκο. Η πίεση εκτινάσσεται, κατακόρυφη γραμμή στο διάγραμμα.'],
-  en:['Combustion (spark)','At TDC the spark plug fires. The mixture burns so fast that the piston has no time to move: heat is added at constant volume. Pressure shoots up, a vertical line on the diagram.']},
- {from:'4',to:'5',dur:2.6,th:[360,540],proc:'adiab',q:'q0',w:'wout',
-  el:['Ισχύς (εκτόνωση)','Τα καυτά αέρια σπρώχνουν το έμβολο προς τα κάτω και γυρίζουν τον στρόφαλο. Η εκτόνωση είναι αδιαβατική: η πίεση και η θερμοκρασία πέφτουν καθώς το αέριο δίνει έργο. Είναι ο μόνος χρόνος που παράγει έργο.'],
-  en:['Power (expansion)','The hot gases push the piston down and turn the crankshaft. The expansion is adiabatic: pressure and temperature fall as the gas does work. This is the only stroke that produces work.']},
- {from:'5',to:'6',dur:1.1,th:[540,540],proc:'isoch',q:'qout',w:'w0',
-  el:['Ανοίγει η βαλβίδα εξαγωγής','Στο ΚΝΣ ανοίγει η βαλβίδα εξαγωγής. Η πίεση πέφτει απότομα στην ατμοσφαιρική και η θερμότητα που περισσεύει φεύγει με τα καυσαέρια. Ο όγκος δεν αλλάζει: κατακόρυφη γραμμή προς τα κάτω.'],
-  en:['Exhaust valve opens','At BDC the exhaust valve opens. Pressure drops suddenly to atmospheric and the leftover heat leaves with the exhaust gas. Volume does not change: a vertical line downward.']},
- {from:'6',to:'1',dur:2.6,th:[540,720],proc:'atmLine',q:'q0',w:'w0',
-  el:['Εξαγωγή','Το έμβολο ανεβαίνει και σπρώχνει τα καυσαέρια έξω, σε πίεση περίπου ατμοσφαιρική. Στο ΑΝΣ ο κύκλος ξαναρχίζει. Ένας πλήρης κύκλος χρειάζεται δύο περιστροφές του στροφάλου.'],
-  en:['Exhaust','The piston rises and pushes the exhaust out at about atmospheric pressure. At TDC the cycle starts again. One full cycle takes two crankshaft revolutions.']}
-];
-const BRAY_STEPS = [
- {from:'1',to:'2',dur:3.0,proc:'adiab',q:'q0',w:'win',sec:0,
-  el:['Συμπίεση','Ο αέρας μπαίνει από την είσοδο σε ατμοσφαιρική πίεση. Τα πτερύγια του συμπιεστή τον συμπιέζουν γρήγορα, αδιαβατικά: η πίεση ανεβαίνει πολύ, ο όγκος μικραίνει, ο αέρας ζεσταίνεται. Το έργο το δίνει ο στρόβιλος μέσω του άξονα.'],
-  en:['Compression','Air enters the inlet at atmospheric pressure. The compressor blades squeeze it quickly and adiabatically: pressure rises a lot, volume shrinks, the air warms up. The work comes from the turbine through the shaft.']},
- {from:'2',to:'3',dur:2.4,proc:'isobaric',q:'qin',w:'w0',sec:1,
-  el:['Καύση','Στον θάλαμο καύσης ψεκάζεται καύσιμο και καίγεται συνεχώς. Ο θάλαμος είναι ανοιχτός μπρος και πίσω, οπότε το αέριο δεν κρατιέται σε σταθερό όγκο: διαστέλλεται και ρέει. Η θερμότητα μπαίνει σε σταθερή πίεση, οριζόντια γραμμή στο διάγραμμα.'],
-  en:['Combustion','Fuel is sprayed into the combustor and burns continuously. The combustor is open at both ends, so the gas cannot be held at constant volume: it expands and flows on. Heat is added at constant pressure, a horizontal line on the diagram.']},
- {from:'3',to:'4',dur:3.2,proc:'adiab',q:'q0',w:'wout',sec:2,
-  el:['Εκτόνωση: στρόβιλος και ακροφύσιο','Το καυτό αέριο εκτονώνεται αδιαβατικά. Πρώτα στον στρόβιλο, που παίρνει όσο έργο χρειάζεται ο συμπιεστής (ως το σημείο t). Το υπόλοιπο εκτονώνεται στο ακροφύσιο και γίνεται ταχύτητα: αυτή είναι η ώση.'],
-  en:['Expansion: turbine and nozzle','The hot gas expands adiabatically. First through the turbine, which takes the work the compressor needs (up to point t). The rest expands in the nozzle and becomes velocity: that is the thrust.']},
- {from:'4',to:'1',dur:2.4,proc:'isobaric',q:'qout',w:'w0',sec:4,
-  el:['Απόρριψη θερμότητας στην ατμόσφαιρα','Τα καυσαέρια βγαίνουν και ψύχονται ανακατεύοντας με τον αέρα, σε ατμοσφαιρική πίεση. Αυτό το βήμα γίνεται έξω από τον κινητήρα, γι’ αυτό ο κύκλος λέγεται ανοιχτός. Φρέσκος αέρας μπαίνει στην είσοδο.'],
-  en:['Heat rejected to the atmosphere','The exhaust leaves and cools by mixing with the air, at atmospheric pressure. This step happens outside the engine, which is why the cycle is called open. Fresh air enters the inlet.']}
-];
-
-/* ---------- state ---------- */
-const S = {cycle:'otto', lang:'el', step:0, u:0, playing:false, mode:'all', speed:1};
-try{ const l=localStorage.getItem('cyc-lang'); if(l==='en'||l==='el') S.lang=l; }catch(e){}
-const L = () => T[S.lang];
-const steps = () => S.cycle==='otto' ? OTTO_STEPS : BRAY_STEPS;
-
-/* temperature colour: cold blue → amber → hot red */
+const lerp = (a,b,u)=>a+(b-a)*u;
+const SVGNS='http://www.w3.org/2000/svg';
 function tcol(t){ t=clamp(t); const h=(220+t*165)%360; return `hsl(${h.toFixed(0)} 72% ${52+4*Math.sin(Math.PI*t)}%)`; }
 
-/* ---------- Otto model ---------- */
-const OT = {r:70,l:170,cy:360,headY:72,clr:20,stroke:140, Pc:Math.pow(8,1.4), Pmax:46, Pex:1.25};
-OT.P5 = OT.Pmax/Math.pow(8,1.4);
-function crankFrac(deg){ const a=deg*Math.PI/180, r=OT.r, l=OT.l;
-  const s=r*(1-Math.cos(a))+l-Math.sqrt(l*l-r*r*Math.sin(a)**2); return s/(2*r); }
-function ottoState(i,u){
-  const st=OTTO_STEPS[i], th=st.th[0]+(st.th[1]-st.th[0])*u, f=crankFrac(th), V=1+7*f;
-  let P, t;
-  if(i===0){P=1; t=0;}
-  else if(i===1){P=Math.pow(8/V,1.4); t=(P*V-8)/38;}
-  else if(i===2){P=OT.Pc+(OT.Pmax-OT.Pc)*ease(u); t=(P*V-8)/38;}
-  else if(i===3){P=OT.Pmax*Math.pow(1/V,1.4); t=(P*V-8)/38;}
-  else if(i===4){P=OT.P5+(OT.Pex-OT.P5)*ease(u); t=.32-.04*u;}
-  else {P=OT.Pex; t=.28;}
-  return {th,V,P,t:clamp(t),f};
-}
+/* ======================= text ======================= */
+const T = {
+ el:{ h1:'Θερμοδυναμικοί κύκλοι', sub:'Βήμα-βήμα: τι κάνει η μηχανή και πού βρίσκεται το αέριο στο διάγραμμα.',
+  gEng:'Μηχανές', gCool:'Ψύξη', fridge:'Ψυγείο',
+  cold:'κρύο', hot:'ζεστό', play:'Αναπαραγωγή', pause:'Παύση', speed:'Ταχύτητα', of:'από', atm:'× ατμ.',
+  crank:'Στρόφαλος', rev:'περιστροφή', intake:'Εισαγωγή', exhaust:'Εξαγωγή', tdc:'ΑΝΣ', bdc:'ΚΝΣ', air:'αέρας', mix:'μίγμα',
+  pAxis:'Πίεση P (× ατμοσφαιρική)', vAxis:'Όγκος V', ptP:'Πίεση P (bar)', ptT:'Θερμοκρασία (°C)',
+  work:'εμβαδόν = έργο', workIn:'εμβαδόν = έργο που ξοδεύουμε', liquid:'ΥΓΡΟ', vapour:'ΑΤΜΟΣ', boilLine:'γραμμή βρασμού',
+  liqS:'υγρό', vapS:'ατμός', mixS:'μίγμα', state:'Κατάσταση',
+  parcel:'Παρακολουθούμε ένα «πακέτο» αέρα', diagPV:'Διάγραμμα P–V', diagPT:'Διάγραμμα φάσεων P–T',
+  proc:{isobaric:'ισοβαρής', adiab:'αδιαβατική', isoch:'ισόχωρη', atmLine:'ισοβαρής · πίεση ≈ ατμοσφαιρική', boil:'ισοβαρής · βρασμός σε σταθερή T', cond:'ισοβαρής · συμπύκνωση', throttle:'στραγγαλισμός (πτώση πίεσης)'},
+  q0:'Q = 0', qin:'μπαίνει θερμότητα', qout:'φεύγει θερμότητα', win:'μπαίνει έργο', wout:'βγαίνει έργο', w0:'έργο ≈ 0' },
+ en:{ h1:'Thermodynamic cycles', sub:'Step by step: what the machine does, and where the gas sits on the diagram.',
+  gEng:'Engines', gCool:'Cooling', fridge:'Fridge',
+  cold:'cold', hot:'hot', play:'Play', pause:'Pause', speed:'Speed', of:'of', atm:'× atm',
+  crank:'Crank', rev:'revolution', intake:'Intake', exhaust:'Exhaust', tdc:'TDC', bdc:'BDC', air:'air', mix:'mixture',
+  pAxis:'Pressure P (× atmospheric)', vAxis:'Volume V', ptP:'Pressure P (bar)', ptT:'Temperature (°C)',
+  work:'area = work', workIn:'area = work we spend', liquid:'LIQUID', vapour:'VAPOUR', boilLine:'boiling line',
+  liqS:'liquid', vapS:'vapour', mixS:'mixture', state:'State',
+  parcel:'Following one parcel of air', diagPV:'P–V diagram', diagPT:'P–T phase diagram',
+  proc:{isobaric:'isobaric', adiab:'adiabatic', isoch:'isochoric', atmLine:'isobaric · pressure ≈ atmospheric', boil:'isobaric · boiling at constant T', cond:'isobaric · condensing', throttle:'throttling (pressure drop)'},
+  q0:'Q = 0', qin:'heat in', qout:'heat out', win:'work in', wout:'work out', w0:'work ≈ 0' }
+};
 
-/* ---------- Brayton model ---------- */
-const BR = {P2:14, V1:8, V3:3};
-BR.V2 = 8/Math.pow(14,1/1.4); BR.V4 = 3*Math.pow(14,1/1.4); BR.Vt = 3*Math.pow(14/4,1/1.4);
-function brayState(i,u){
-  let x,V,P,op=1;
-  if(i===0){ x=20+240*u; const w=clamp((u-.25)/.75); V=8*Math.pow(BR.V2/8,w); P=Math.pow(8/V,1.4); }
-  else if(i===1){ x=260+110*u; V=BR.V2+(3-BR.V2)*u; P=14; }
-  else if(i===2){ if(u<.4){const w=u/.4; x=370+80*w; V=3*Math.pow(BR.Vt/3,w);} else {const w=(u-.4)/.6; x=450+110*w; V=BR.Vt*Math.pow(BR.V4/BR.Vt,w);} P=14*Math.pow(3/V,1.4); }
-  else { x=560+90*u; V=BR.V4+(8-BR.V4)*u; P=1; op=u<.5?1:1-(u-.5)/.5; }
-  return {x,V,P,t:clamp((P*V-8)/34),op};
-}
-const model = (i,u) => S.cycle==='otto' ? ottoState(i,u) : brayState(i,u);
+/* ======================= piston engines (Otto, Diesel) ======================= */
+const PG = {r:70,l:170,cy:360};
+function crankFrac(deg){ const a=deg*Math.PI/180, r=PG.r, l=PG.l;
+  return (r*(1-Math.cos(a))+l-Math.sqrt(l*l-r*r*Math.sin(a)**2))/(2*r); }
 
-/* ---------- P–V diagram ---------- */
-const PV = {x0:58,x1:400,y0:298,y1:22};
-function pvCfg(){ return S.cycle==='otto'
-  ? {Vmax:9,Pmax:50,pt:[0,10,20,30,40,50],vt:[1,2,3,4,5,6,7,8],fill:[1,2,3,4],
-     labels:[['1',1,1,-16,6],['2',8,1,10,16],['3',1,OT.Pc,-16,5],['4',1,OT.Pmax,-16,5],['5',8,OT.P5,10,-8],['6',8,OT.Pex,10,3]]}
-  : {Vmax:21,Pmax:16,pt:[0,4,8,12,16],vt:[0,5,10,15,20],fill:[0,1,2,3],
-     labels:[['1',8,1,-4,18],['2',BR.V2,14,-16,5],['3',3,14,4,-9],['4',BR.V4,1,8,-8],['t',BR.Vt,4,9,-6]]}; }
-const sx = V => PV.x0+V/pvCfg().Vmax*(PV.x1-PV.x0);
-const sy = P => PV.y0-P/pvCfg().Pmax*(PV.y0-PV.y1);
-let SAMPLES = [];
-function sample(){ SAMPLES = steps().map((_,i)=>{ const a=[]; for(let k=0;k<=48;k++){ const s=model(i,k/48); a.push([sx(s.V),sy(s.P)]);} return a; }); }
-const pathOf = pts => pts.map((p,k)=>(k?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+const OT = {CR:8, clr:20, Pc:Math.pow(8,1.4), Pmax:46, Pex:1.25}; OT.P5=OT.Pmax/Math.pow(8,1.4);
+const DI = {CR:18, clr:140/17, rc:2, thc:360+23.68, Pex:1.6}; DI.Pc=Math.pow(18,1.4); DI.P5=DI.Pc*Math.pow(2/18,1.4);
 
-function buildPV(){
-  const c=pvCfg(), l=L(); sample();
-  let g='';
-  c.pt.forEach(p=>{ g+=`<line x1="${PV.x0}" x2="${PV.x1}" y1="${sy(p)}" y2="${sy(p)}" stroke="var(--line)" stroke-width="1"/>
-    <text x="${PV.x0-8}" y="${sy(p)+4}" text-anchor="end" font-size="11" fill="var(--muted)">${p}</text>`; });
-  c.vt.forEach(v=>{ g+=`<text x="${sx(v)}" y="${PV.y0+16}" text-anchor="middle" font-size="11" fill="var(--muted)">${v}</text>`; });
-  const fillPts = c.fill.flatMap(i=>SAMPLES[i]);
-  const lab = c.labels.map(([n,V,P,dx,dy])=>`<circle cx="${sx(V)}" cy="${sy(P)}" r="${n==='t'?3:3.5}" fill="${n==='t'?'none':'var(--fg)'}" stroke="var(--fg)" stroke-width="1.2"/>
-    <text x="${sx(V)+dx}" y="${sy(P)+dy}" font-size="13" font-weight="600" fill="var(--fg)">${n}</text>`).join('');
-  $('pv').innerHTML = `<svg viewBox="0 0 420 340" role="img" aria-label="${l.pv}">
-   <defs><marker id="ax" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--muted)"/></marker></defs>
-   ${g}
-   <line x1="${PV.x0}" y1="${PV.y0}" x2="${PV.x1+12}" y2="${PV.y0}" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#ax)"/>
-   <line x1="${PV.x0}" y1="${PV.y0}" x2="${PV.x0}" y2="${PV.y1-10}" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#ax)"/>
-   <text x="${PV.x0}" y="12" font-size="12" fill="var(--muted)">${l.pAxis}</text>
-   <text x="${PV.x1}" y="${PV.y0+32}" text-anchor="end" font-size="12" fill="var(--muted)">${l.vAxis}</text>
-   <path d="${pathOf(fillPts)} Z" fill="var(--accent)" fill-opacity=".09"/>
-   <path d="${pathOf(SAMPLES.flat())}" fill="none" stroke="var(--muted)" stroke-opacity=".45" stroke-width="1.5" stroke-dasharray="4 4"/>
-   <path id="pv-done" fill="none" stroke="var(--fg)" stroke-width="2"/>
-   <path id="pv-cur" fill="none" stroke="var(--accent)" stroke-width="4" stroke-linecap="round"/>
-   ${lab}
-   <circle id="pv-dot" r="8" stroke="var(--fg)" stroke-width="2"/>
-   <text x="${S.cycle==='otto'?sx(3.2):sx(6.5)}" y="${S.cycle==='otto'?sy(12):sy(9.5)}" font-size="12" fill="var(--accent)">${l.work}</text>
-  </svg>`;
-}
-
-/* ---------- engines ---------- */
-function buildOtto(){
-  const l=L();
-  $('engine').innerHTML = `<svg viewBox="0 0 360 450" role="img" aria-label="${l.engOtto}">
+function pistonEngineSVG(kind,l){
+  const top = kind==='otto'
+   ? `<rect x="174" y="2" width="12" height="28" rx="3" fill="var(--plug)" stroke="var(--metal-2)"/><rect x="177" y="30" width="6" height="42" fill="var(--metal-2)"/>
+      <polygon id="spark" points="180,74 184,82 192,80 186,86 190,94 181,88 174,96 176,86 168,84 177,81" fill="#F9D23C" opacity="0"/>`
+   : `<rect x="171" y="0" width="18" height="34" rx="2" fill="var(--hub)"/><rect x="176" y="34" width="8" height="38" fill="var(--metal-2)"/>
+      <g id="spray" opacity="0" fill="#E9D8A6">${[...Array(16)].map((_,k)=>{const a=(-55+k*7.3)*Math.PI/180,d=8+((k*7)%5)*5;return `<circle cx="${(180+Math.sin(a)*d*1.6).toFixed(1)}" cy="${(74+Math.cos(a)*d).toFixed(1)}" r="1.8"/>`}).join('')}</g>`;
+  return `<svg viewBox="0 0 360 450" role="img" aria-label="${kind}">
    <defs><marker id="fa" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="context-stroke"/></marker></defs>
-   <text x="24" y="20" font-size="12" fill="var(--muted)">${l.intake}</text>
+   <text x="24" y="20" font-size="12" fill="var(--muted)">${l.intake} (${kind==='otto'?l.mix:l.air})</text>
    <text x="336" y="20" text-anchor="end" font-size="12" fill="var(--muted)">${l.exhaust}</text>
    <rect x="96" y="24" width="168" height="48" rx="4" fill="var(--metal)"/>
    <rect x="20" y="34" width="124" height="20" fill="var(--port)"/><rect x="128" y="34" width="24" height="38" fill="var(--port)"/>
    <rect x="216" y="34" width="124" height="20" fill="var(--port)"/><rect x="208" y="34" width="24" height="38" fill="var(--port)"/>
-   <rect x="20" y="31" width="76" height="3" fill="var(--metal-2)"/><rect x="20" y="54" width="76" height="3" fill="var(--metal-2)"/>
-   <rect x="264" y="31" width="76" height="3" fill="var(--metal-2)"/><rect x="264" y="54" width="76" height="3" fill="var(--metal-2)"/>
    <rect x="96" y="72" width="14" height="220" fill="var(--metal)"/><rect x="250" y="72" width="14" height="220" fill="var(--metal)"/>
    <rect id="gas" x="110" y="72" width="140" height="20"/>
-   <circle id="flame" cx="180" cy="74" r="0" fill="#F2A33A"/>
+   <ellipse id="flame" cx="180" cy="74" rx="0" ry="0" fill="#F2A33A"/>
    <path id="inflow" class="flow" d="M26 44 H140 V100" fill="none" stroke="var(--cold)" stroke-width="2.5" marker-end="url(#fa)"/>
    <path id="outflow" class="flow" d="M220 100 V44 H334" fill="none" stroke="var(--hot)" stroke-width="2.5" marker-end="url(#fa)"/>
    <g id="vin"><line x1="140" y1="4" x2="140" y2="66" stroke="var(--metal-2)" stroke-width="4"/><rect x="125" y="66" width="30" height="6" rx="2" fill="var(--metal-2)"/></g>
    <g id="vex"><line x1="220" y1="4" x2="220" y2="66" stroke="var(--metal-2)" stroke-width="4"/><rect x="205" y="66" width="30" height="6" rx="2" fill="var(--metal-2)"/></g>
-   <rect x="174" y="2" width="12" height="28" rx="3" fill="var(--plug)" stroke="var(--metal-2)"/>
-   <rect x="177" y="30" width="6" height="42" fill="var(--metal-2)"/>
-   <polygon id="spark" points="180,74 184,82 192,80 186,86 190,94 181,88 174,96 176,86 168,84 177,81" fill="#F9D23C" opacity="0"/>
+   ${top}
    <g id="piston"><rect x="112" y="92" width="136" height="50" rx="3" fill="var(--metal-2)"/>
      <line x1="112" y1="100" x2="248" y2="100" stroke="var(--metal)" stroke-width="2"/><line x1="112" y1="107" x2="248" y2="107" stroke="var(--metal)" stroke-width="2"/>
      <circle cx="180" cy="120" r="7" fill="var(--metal)"/></g>
-   <circle cx="180" cy="${OT.cy}" r="76" fill="none" stroke="var(--line)" stroke-width="1.5" stroke-dasharray="3 5"/>
+   <circle cx="180" cy="${PG.cy}" r="76" fill="none" stroke="var(--line)" stroke-width="1.5" stroke-dasharray="3 5"/>
    <line id="rod" stroke="var(--hub)" stroke-width="11" stroke-linecap="round"/>
-   <line id="arm" x1="180" y1="${OT.cy}" stroke="var(--metal-2)" stroke-width="18" stroke-linecap="round"/>
-   <circle cx="180" cy="${OT.cy}" r="10" fill="var(--hub)"/>
+   <line id="arm" x1="180" y1="${PG.cy}" stroke="var(--metal-2)" stroke-width="18" stroke-linecap="round"/>
+   <circle cx="180" cy="${PG.cy}" r="10" fill="var(--hub)"/>
    <circle id="cpin" r="8" fill="var(--metal)" stroke="var(--hub)" stroke-width="2"/>
-   <line x1="270" y1="92" x2="284" y2="92" stroke="var(--muted)"/><text x="290" y="96" font-size="11" fill="var(--muted)">${l.tdc}</text>
-   <line x1="270" y1="232" x2="284" y2="232" stroke="var(--muted)"/><text x="290" y="236" font-size="11" fill="var(--muted)">${l.bdc}</text>
+   <line x1="270" y1="${72+(kind==='otto'?OT.clr:DI.clr)}" x2="284" y2="${72+(kind==='otto'?OT.clr:DI.clr)}" stroke="var(--muted)"/><text x="290" y="${76+(kind==='otto'?OT.clr:DI.clr)}" font-size="11" fill="var(--muted)">${l.tdc}</text>
+   <line x1="270" y1="${212+(kind==='otto'?OT.clr:DI.clr)}" x2="284" y2="${212+(kind==='otto'?OT.clr:DI.clr)}" stroke="var(--muted)"/><text x="290" y="${216+(kind==='otto'?OT.clr:DI.clr)}" font-size="11" fill="var(--muted)">${l.bdc}</text>
   </svg>`;
 }
+function renderPiston(kind,s,i,u,l){
+  const clr = kind==='otto'?OT.clr:DI.clr, y=72+clr+140*s.f;
+  $('gas').setAttribute('height', y-72); $('gas').setAttribute('fill', tcol(s.t));
+  $('piston').setAttribute('transform',`translate(0 ${y-92})`);
+  const a=s.th*Math.PI/180, px=180+PG.r*Math.sin(a), py=PG.cy-PG.r*Math.cos(a);
+  $('rod').setAttribute('x1',180); $('rod').setAttribute('y1',y+28); $('rod').setAttribute('x2',px); $('rod').setAttribute('y2',py);
+  $('arm').setAttribute('x2',px); $('arm').setAttribute('y2',py); $('cpin').setAttribute('cx',px); $('cpin').setAttribute('cy',py);
+  const inL = i===0 ? 12*Math.sin(Math.PI*u) : 0;
+  const exL = i===4 ? 12*ease(u) : i===5 ? 12*Math.sqrt(Math.cos(Math.PI*u/2)) : 0;
+  $('vin').setAttribute('transform',`translate(0 ${inL})`); $('vex').setAttribute('transform',`translate(0 ${exL})`);
+  $('inflow').style.opacity = i===0 ? 1 : 0; $('outflow').style.opacity = (i===4||i===5) ? 1 : 0;
+  const fl=$('flame');
+  if(kind==='otto'){
+    $('spark').setAttribute('opacity', i===2 && u<.35 ? 1 : 0);
+    fl.setAttribute('rx', i===2 ? 10+58*ease(u) : 0); fl.setAttribute('ry', i===2 ? Math.min(8+58*ease(u), clr+2) : 0); fl.setAttribute('opacity', i===2 ? .6*(1-u*.5) : 0);
+  } else {
+    $('spray').setAttribute('opacity', i===2 ? (u<.85?1:0) : 0);
+    const h=y-72; fl.setAttribute('cy',72+h/2); fl.setAttribute('rx', i===2 ? 20+48*u : 0); fl.setAttribute('ry', i===2 ? h/2 : 0); fl.setAttribute('opacity', i===2 ? .55 : 0);
+  }
+  $('eng-read').innerHTML = `<span>${l.crank} θ = <b>${Math.round(s.th)}°</b></span><span><b>${s.th<360?1:2}</b>η ${l.rev} ${l.of} 2</span>`;
+}
 
+/* ======================= Brayton engine ======================= */
 const BX = {cy:140, casing:[[20,62],[110,62],[260,40],[285,52],[370,52],[450,58],[560,36]]};
 function Rx(x){ const c=BX.casing; if(x<=c[0][0]) return 62; if(x>=560) return 36+(x-560)*.35;
   for(let k=1;k<c.length;k++) if(x<=c[k][0]){ const [a,ra]=c[k-1],[b,rb]=c[k]; return ra+(rb-ra)*(x-a)/(b-a);} }
 function Rh(x){ if(x<80||x>520) return 0; if(x<120) return 16*(x-80)/40; if(x<=450) return 16; return 16*(1-(x-450)/70); }
-function tAt(x){ const seg=[[0,0],[110,0],[260,.26],[285,1],[370,1],[450,.62],[560,.34],[660,.12]];
-  for(let k=1;k<seg.length;k++) if(x<=seg[k][0]){ const [a,ta]=seg[k-1],[b,tb]=seg[k]; return ta+(tb-ta)*(x-a)/(b-a);} return .1; }
-function vAt(x){ return x<110?70:x<260?62:x<370?80:x<450?115:x<560?175:200; }
-const SECS = [[20,260,'secIn'],[260,370,'secCb'],[370,450,'secTu'],[450,560,'secNz'],[560,640,'secAt']];
-let PARTS = [];
-function buildBray(){
-  const l=L(), cy=BX.cy, c=BX.casing;
+function piece(seg,x,def){ for(let k=1;k<seg.length;k++) if(x<=seg[k][0]){ const [a,ta]=seg[k-1],[b,tb]=seg[k]; return ta+(tb-ta)*(x-a)/(b-a);} return def; }
+const BR = {P2:14}; BR.V2=8/Math.pow(14,1/1.4); BR.V4=3*Math.pow(14,1/1.4); BR.Vt=3*Math.pow(14/4,1/1.4);
+const BSECS = {el:['Είσοδος – συμπιεστής','Θάλαμος καύσης','Στρόβιλος','Ακροφύσιο','Ατμόσφαιρα'], en:['Inlet – compressor','Combustor','Turbine','Nozzle','Atmosphere']};
+const BSX = [[20,260],[260,370],[370,450],[450,560],[560,640]];
+function braytonSVG(l){
+  const cy=BX.cy, c=BX.casing, sn=BSECS[S.lang];
   const up=c.map(([x,r])=>`${x},${cy-r}`).join(' '), dn=c.map(([x,r])=>`${x},${cy+r}`).join(' ');
-  let blades='';
-  for(let i=0;i<7;i++){ const x=122+i*19, r=Rx(x)-4; blades+=`<line x1="${x}" y1="${cy-16}" x2="${x}" y2="${cy-r}" /><line x1="${x}" y1="${cy+16}" x2="${x}" y2="${cy+r}" />`; }
-  let tb=''; for(let i=0;i<4;i++){ const x=382+i*20, r=Rx(x)-4; tb+=`<line x1="${x}" y1="${cy-16}" x2="${x}" y2="${cy-r}" /><line x1="${x}" y1="${cy+16}" x2="${x}" y2="${cy+r}" />`; }
-  let fl=''; [300,322,344].forEach(x=>{ [-1,1].forEach(s=>{ const y=cy+s*34; fl+=`<path d="M${x-8} ${y} Q${x} ${y-s*18} ${x+10} ${y} Q${x+2} ${y+s*6} ${x-8} ${y}Z"/>`; }); });
-  const bands=SECS.map(([a,b,k],i)=>`<rect class="band" data-i="${i}" x="${a}" y="66" width="${b-a}" height="148" fill="var(--accent)" fill-opacity="0"/>
-     <text class="blab" data-i="${i}" x="${(a+b)/2}" y="52" text-anchor="middle" font-size="11.5" fill="var(--muted)">${l[k]}</text>`).join('');
-  const hub=`M80 ${cy} L120 ${cy-16} L450 ${cy-16} L520 ${cy} L450 ${cy+16} L120 ${cy+16} Z`;
-  $('engine').innerHTML = `<svg viewBox="0 0 650 270" role="img" aria-label="${l.engBray}">
-    ${bands}
-    <g id="parts"></g>
+  let bl=''; for(let i=0;i<7;i++){ const x=122+i*19, r=Rx(x)-4; bl+=`<line x1="${x}" y1="${cy-16}" x2="${x}" y2="${cy-r}"/><line x1="${x}" y1="${cy+16}" x2="${x}" y2="${cy+r}"/>`; }
+  for(let i=0;i<4;i++){ const x=382+i*20, r=Rx(x)-4; bl+=`<line x1="${x}" y1="${cy-16}" x2="${x}" y2="${cy-r}"/><line x1="${x}" y1="${cy+16}" x2="${x}" y2="${cy+r}"/>`; }
+  let fl=''; [300,322,344].forEach(x=>[-1,1].forEach(s=>{ const y=cy+s*34; fl+=`<path d="M${x-8} ${y} Q${x} ${y-s*18} ${x+10} ${y} Q${x+2} ${y+s*6} ${x-8} ${y}Z"/>`; }));
+  const bands=BSX.map(([a,b],i)=>`<rect class="band" data-i="${i}" x="${a}" y="66" width="${b-a}" height="148" fill="var(--accent)" fill-opacity="0"/>
+     <text class="blab" data-i="${i}" x="${(a+b)/2}" y="52" text-anchor="middle" font-size="11.5" fill="var(--muted)">${sn[i]}</text>`).join('');
+  return `<svg viewBox="0 0 650 270" role="img" aria-label="Brayton">
+    ${bands}<g id="parts"></g>
     <g fill="#F2A33A" id="flames" opacity=".55">${fl}</g>
-    <g stroke="var(--metal-2)" stroke-width="3">${blades}${tb}</g>
-    <path d="${hub}" fill="var(--hub)"/>
+    <g stroke="var(--metal-2)" stroke-width="3">${bl}</g>
+    <path d="M80 ${cy} L120 ${cy-16} L450 ${cy-16} L520 ${cy} L450 ${cy+16} L120 ${cy+16} Z" fill="var(--hub)"/>
     <polyline points="${up}" fill="none" stroke="var(--metal-2)" stroke-width="6" stroke-linejoin="round"/>
     <polyline points="${dn}" fill="none" stroke="var(--metal-2)" stroke-width="6" stroke-linejoin="round"/>
     <line x1="120" y1="${cy}" x2="450" y2="${cy}" stroke="var(--metal)" stroke-width="2" stroke-dasharray="6 4"/>
     <circle id="parcel" r="8" stroke="var(--fg)" stroke-width="2.5"/>
     <text x="20" y="258" font-size="11.5" fill="var(--muted)">◯ ${l.parcel}</text>
   </svg>`;
-  PARTS = [];
-  const g=$('parts');
-  for(let k=0;k<70;k++){
-    const el=document.createElementNS('http://www.w3.org/2000/svg','circle'); el.setAttribute('r','2.3'); g.appendChild(el);
-    PARTS.push({el,x:Math.random()*650,f:Math.random(),s:Math.random()<.5?-1:1});
-  }
+}
+function braytonParts(){
+  const g=$('parts'); PARTS=[];
+  const tAt=x=>piece([[0,0],[110,0],[260,.26],[285,1],[370,1],[450,.62],[560,.34],[660,.12]],x,.1);
+  const vAt=x=>x<110?70:x<260?62:x<370?80:x<450?115:x<560?175:200;
+  for(let k=0;k<70;k++){ const el=document.createElementNS(SVGNS,'circle'); el.setAttribute('r','2.3'); g.appendChild(el);
+    PARTS.push({el,x:Math.random()*650,f:Math.random(),s:Math.random()<.5?-1:1}); }
+  PMOVE = dt => PARTS.forEach(p=>{ p.x+=vAt(p.x)*dt; if(p.x>650){p.x=0;p.f=Math.random();p.s=Math.random()<.5?-1:1;}
+    const r=Rx(p.x), h=Rh(p.x), rr=h+3+p.f*Math.max(2,r-h-7);
+    p.el.setAttribute('cx',p.x.toFixed(1)); p.el.setAttribute('cy',(BX.cy+p.s*rr).toFixed(1)); p.el.setAttribute('fill',tcol(tAt(p.x)));
+    p.el.setAttribute('opacity', p.x>560?clamp(1-(p.x-560)/90):.85); });
+}
+function renderBrayton(s,i,u,l){
+  const sec=[0,1,2,4][i];
+  document.querySelectorAll('.band').forEach(b=>{ const k=+b.dataset.i, on=k===sec||(i===2&&k===3); b.setAttribute('fill-opacity', on?.12:0); });
+  document.querySelectorAll('.blab').forEach(b=>{ const k=+b.dataset.i, on=k===sec||(i===2&&k===3); b.setAttribute('fill', on?'var(--fg)':'var(--muted)'); b.setAttribute('font-weight', on?600:400); });
+  $('flames').setAttribute('opacity', i===1?.95:.5);
+  const p=$('parcel'), r=Rx(s.x), h=Rh(s.x), y=BX.cy-(h+.62*(r-h));
+  p.setAttribute('cx',s.x); p.setAttribute('cy',y); p.setAttribute('r',4+2*Math.sqrt(s.V)); p.setAttribute('fill',tcol(s.t)); p.setAttribute('opacity',s.op);
+  const sn=BSECS[S.lang]; $('eng-read').innerHTML = `<span>${sn[sec]}${i===2?' → '+sn[3]:''}</span>`;
 }
 
-/* ---------- render ---------- */
+/* ======================= ACM (air cycle machine) ======================= */
+const AK = 30.3; /* T(K) = P·V·AK */
+const AC = (()=>{ const T=[303,369,323,340,318,248], P=[1,2,2,2.4,2.4,1]; return {T,P,V:T.map((t,k)=>t/(P[k]*AK))}; })();
+const AX = [[20,80],[80,175],[175,245],[245,340],[340,410],[410,630]]; /* x-range of each step along the pipe */
+function acmSVG(l){
+  const el = S.lang==='el';
+  const n = el ? {eng:['Συμπιεστής','κινητήρα (bleed)'],phx:['Πρωτεύων','εναλλάκτης'],comp:['Συμπιεστής','ACM'],shx:['Δευτερεύων','εναλλάκτης'],turb:['Στρόβιλος','ACM'],ws:['Διαχωριστής','νερού'],cab:'Καμπίνα',ram:'ram air',shaft:'κοινός άξονας: ο στρόβιλος κινεί τον συμπιεστή',over:'έξω'}
+               : {eng:['Engine','compressor (bleed)'],phx:['Primary','heat exchanger'],comp:['ACM','compressor'],shx:['Secondary','heat exchanger'],turb:['ACM','turbine'],ws:['Water','separator'],cab:'Cabin',ram:'ram air',shaft:'common shaft: the turbine drives the compressor',over:'overboard'};
+  const hx = (x,w,id)=>`<g id="${id}"><rect x="${x}" y="88" width="${w}" height="44" fill="var(--port)" stroke="var(--metal-2)" stroke-width="2"/>${[...Array(Math.floor(w/8))].map((_,k)=>`<line x1="${x+6+k*8}" y1="90" x2="${x+6+k*8}" y2="130" stroke="var(--metal)" stroke-width="2"/>`).join('')}</g>`;
+  const ram = x=>`<path class="flow ramf" d="M${x} 34 V84 M${x} 136 V150" fill="none" stroke="var(--cold)" stroke-width="2" marker-end="url(#fa2)"/>`;
+  const lab=(x,a)=>`<text x="${x}" y="170" text-anchor="middle" font-size="11" fill="var(--muted)">${a[0]}</text><text x="${x}" y="183" text-anchor="middle" font-size="11" fill="var(--muted)">${a[1]}</text>`;
+  return `<svg viewBox="0 0 650 270" role="img" aria-label="ACM">
+   <defs><marker id="fa2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="context-stroke"/></marker></defs>
+   <line x1="20" y1="110" x2="500" y2="110" stroke="var(--metal)" stroke-width="12" stroke-linecap="round"/>
+   <g id="parts"></g>
+   <rect class="hl" data-i="0" x="14" y="80" width="72" height="60" fill="var(--accent)" fill-opacity="0"/>
+   <rect x="20" y="86" width="60" height="48" rx="4" fill="var(--hub)"/><path d="M28 94 L72 104 L72 116 L28 126Z" fill="var(--metal)"/>
+   ${ram(127)}${ram(292)}
+   <text x="127" y="28" text-anchor="middle" font-size="11" fill="var(--cold)">${n.ram}</text><text x="292" y="28" text-anchor="middle" font-size="11" fill="var(--cold)">${n.ram}</text>
+   <rect class="hl" data-i="1" x="94" y="80" width="68" height="60" fill="var(--accent)" fill-opacity="0"/>${hx(100,56,'phx')}
+   <rect class="hl" data-i="2" x="180" y="80" width="56" height="60" fill="var(--accent)" fill-opacity="0"/>
+   <path d="M186 90 L230 100 L230 120 L186 130Z" fill="var(--hub)"/>
+   <rect class="hl" data-i="3" x="258" y="80" width="68" height="60" fill="var(--accent)" fill-opacity="0"/>${hx(264,56,'shx')}
+   <rect class="hl" data-i="4" x="344" y="80" width="56" height="60" fill="var(--accent)" fill-opacity="0"/>
+   <path d="M350 100 L394 90 L394 130 L350 120Z" fill="var(--hub)"/>
+   <rect x="420" y="94" width="40" height="32" rx="14" fill="var(--hub)"/>
+   <path d="M208 132 V150 M208 192 V214 H372 V192 M372 150 V132" fill="none" stroke="var(--hub)" stroke-width="4" stroke-dasharray="8 5"/>
+   <text x="290" y="232" text-anchor="middle" font-size="11" fill="var(--muted)">${n.shaft}</text>
+   <rect class="hl" data-i="5" x="496" y="56" width="140" height="108" fill="var(--accent)" fill-opacity="0"/>
+   <rect x="500" y="60" width="132" height="100" rx="10" fill="none" stroke="var(--metal-2)" stroke-width="3"/>
+   ${[0,1,2,3].map(k=>`<circle cx="${520+k*31}" cy="76" r="6" fill="none" stroke="var(--metal-2)" stroke-width="1.5"/>`).join('')}
+   <rect id="cabin" x="503" y="88" width="126" height="69" rx="6" fill="var(--cold)" fill-opacity=".15"/>
+   <text x="566" y="150" text-anchor="middle" font-size="12" fill="var(--fg)" font-weight="600">${n.cab}</text>
+   ${lab(50,n.eng)}${lab(128,n.phx)}${lab(208,n.comp)}${lab(292,n.shx)}${lab(372,n.turb)}${lab(440,n.ws)}
+   <circle id="parcel" r="8" stroke="var(--fg)" stroke-width="2.5"/>
+   <text x="20" y="258" font-size="11.5" fill="var(--muted)">◯ ${l.parcel}</text>
+  </svg>`;
+}
+function acmTn(Tk){ return clamp((Tk-273+30)/130); }
+function acmParts(){
+  const g=$('parts'); PARTS=[];
+  const pts=[]; AX.forEach(([a,b],k)=>{ const s1=AC.T[k], s2=AC.T[(k+1)%6]; pts.push([a,s1]); pts.push([b,s2]); });
+  const TkAt = x => piece(pts,x,303);
+  for(let k=0;k<44;k++){ const el=document.createElementNS(SVGNS,'circle'); el.setAttribute('r','2.2'); g.appendChild(el);
+    PARTS.push({el,x:20+Math.random()*480,o:(Math.random()-.5)*7}); }
+  for(let k=0;k<24;k++){ const el=document.createElementNS(SVGNS,'circle'); el.setAttribute('r','2'); g.appendChild(el);
+    PARTS.push({el,ram:true,x:k<12?127:292,y:30+Math.random()*150,o:(Math.random()-.5)*36}); }
+  PMOVE = dt => PARTS.forEach(p=>{
+    if(p.ram){ p.y+=55*dt; if(p.y>180) p.y=30; p.el.setAttribute('cx',(p.x+p.o).toFixed(1)); p.el.setAttribute('cy',p.y.toFixed(1));
+      const warm = p.y>88 ? clamp((p.y-88)/40) : 0; p.el.setAttribute('fill', tcol(warm*.45)); p.el.setAttribute('opacity',.7); return; }
+    p.x+=70*dt; if(p.x>500) p.x=20;
+    p.el.setAttribute('cx',p.x.toFixed(1)); p.el.setAttribute('cy',(110+p.o).toFixed(1)); p.el.setAttribute('fill',tcol(acmTn(TkAt(p.x)))); p.el.setAttribute('opacity',.9); });
+}
+function renderACM(s,i,u,l){
+  document.querySelectorAll('.hl').forEach(b=>b.setAttribute('fill-opacity', +b.dataset.i===i?.14:0));
+  const p=$('parcel'); const y = s.x>500 ? 110+Math.sin((s.x-500)/130*Math.PI)*12 : 110;
+  p.setAttribute('cx',Math.min(s.x,600)); p.setAttribute('cy',y); p.setAttribute('r',4+1.6*Math.sqrt(s.V)); p.setAttribute('fill',tcol(s.t)); p.setAttribute('opacity',s.op);
+  $('cabin').setAttribute('fill-opacity', i===5 ? .15+.15*u : .15);
+  $('eng-read').innerHTML = `<span>T = <b>${Math.round(s.Tk-273)} °C</b></span><span>P = <b>${s.P.toFixed(2)}</b> ${l.atm}</span>`;
+}
+
+/* ======================= fridge (vapour compression, R-600a) ======================= */
+const FR = {a:10.12, b:2644};
+const psat = Tc => Math.exp(FR.a - FR.b/(Tc+273));
+const tsat = P => FR.b/(FR.a-Math.log(P))-273;
+FR.Tl=-25; FR.Th=40; FR.Pl=psat(-25); FR.Ph=psat(40); FR.Tsh=-15; FR.Tdis=70; FR.Tsc=35; FR.x4=.35;
+/* loop path, split into the four steps */
+const FPATH = [
+  [[60,62],[220,62],[220,84],[60,84],[60,106],[220,106],[278,106],[278,236],[330,236]],  /* evaporator + suction line */
+  [[330,236],[402,236],[446,236],[446,224]],                                              /* compressor + discharge */
+  [[446,224],[606,224],[606,192],[446,192],[446,160],[606,160],[606,128],[446,128],[446,96],[606,96],[606,44]], /* condenser */
+  [[606,44],[44,44],[44,62],[60,62]]                                                      /* capillary tube */
+];
+function along(pts,u){ const d=[0]; for(let k=1;k<pts.length;k++) d.push(d[k-1]+Math.hypot(pts[k][0]-pts[k-1][0],pts[k][1]-pts[k-1][1]));
+  const L=d.at(-1)*clamp(u); for(let k=1;k<pts.length;k++) if(L<=d[k]){ const w=(L-d[k-1])/(d[k]-d[k-1]||1); return [lerp(pts[k-1][0],pts[k][0],w),lerp(pts[k-1][1],pts[k][1],w)]; } return pts.at(-1); }
+function fridgeSVG(l){
+  const el=S.lang==='el';
+  const n = el ? {evap:'Εξατμιστής (μέσα, −25 °C)',comp:'Συμπιεστής',cond:'Συμπυκνωτής (πίσω, ζεστός)',cap:'Τριχοειδής σωλήνας (βαλβίδα εκτόνωσης)',inside:'μέσα +4 °C',room:'κουζίνα 25 °C',food:'τρόφιμα'}
+               : {evap:'Evaporator (inside, −25 °C)',comp:'Compressor',cond:'Condenser (back, hot)',cap:'Capillary tube (expansion valve)',inside:'inside +4 °C',room:'kitchen 25 °C',food:'food'};
+  const pl = pts=>pts.map(p=>p.join(',')).join(' ');
+  return `<svg viewBox="0 0 650 300" role="img" aria-label="Fridge">
+   <defs><marker id="fa3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="context-stroke"/></marker></defs>
+   <rect class="fhl" data-i="0" x="30" y="50" width="200" height="70" fill="var(--accent)" fill-opacity="0"/>
+   <rect class="fhl" data-i="1" x="320" y="214" width="96" height="44" fill="var(--accent)" fill-opacity="0"/>
+   <rect class="fhl" data-i="2" x="436" y="88" width="180" height="144" fill="var(--accent)" fill-opacity="0"/>
+   <rect class="fhl" data-i="3" x="30" y="34" width="590" height="18" fill="var(--accent)" fill-opacity="0"/>
+   <rect x="24" y="30" width="244" height="248" rx="6" fill="none" stroke="var(--metal-2)" stroke-width="5"/>
+   <rect x="28" y="34" width="236" height="240" fill="var(--cold)" fill-opacity=".07"/>
+   <text x="146" y="262" text-anchor="middle" font-size="12" fill="var(--cold)">${n.inside}</text>
+   ${[0,1,2].map(k=>`<rect x="${60+k*58}" y="${190-k*8}" width="40" height="${40+k*8}" rx="4" fill="var(--metal)"/>`).join('')}
+   <text x="146" y="244" text-anchor="middle" font-size="11" fill="var(--muted)">${n.food}</text>
+   <path class="flow" d="M146 178 V138" fill="none" stroke="var(--hot)" stroke-width="2" marker-end="url(#fa3)"/>
+   <polyline points="${pl(FPATH[0].slice(0,6))}" fill="none" stroke="var(--metal-2)" stroke-width="7" stroke-linejoin="round"/>
+   <polyline points="${pl(FPATH[0].slice(5))}" fill="none" stroke="var(--metal-2)" stroke-width="5" stroke-linejoin="round"/>
+   <polyline points="${pl(FPATH[1])}" fill="none" stroke="var(--metal-2)" stroke-width="5"/>
+   <polyline points="${pl(FPATH[2])}" fill="none" stroke="var(--metal-2)" stroke-width="6" stroke-linejoin="round"/>
+   <polyline points="${pl(FPATH[3])}" fill="none" stroke="var(--metal-2)" stroke-width="2" stroke-dasharray="5 3"/>
+   <rect x="330" y="220" width="72" height="34" rx="14" fill="var(--hub)"/>
+   <text x="366" y="274" text-anchor="middle" font-size="12" fill="var(--muted)">${n.comp} ⚡</text>
+   <text x="526" y="250" text-anchor="middle" font-size="12" fill="var(--muted)">${n.cond}</text>
+   <path class="flow" d="M620 160 H644" fill="none" stroke="var(--hot)" stroke-width="2" marker-end="url(#fa3)"/>
+   <text x="630" y="290" text-anchor="end" font-size="12" fill="var(--hot)">${n.room}</text>
+   <text x="330" y="24" text-anchor="middle" font-size="12" fill="var(--muted)">${n.cap}</text>
+   <text x="146" y="127" text-anchor="middle" font-size="12" fill="var(--muted)">${n.evap}</text>
+   <circle id="parcel" r="8" stroke="var(--fg)" stroke-width="2.5"/>
+  </svg>`;
+}
+function renderFridge(s,i,u,l){
+  document.querySelectorAll('.fhl').forEach(b=>b.setAttribute('fill-opacity', +b.dataset.i===i?.12:0));
+  const [x,y]=along(FPATH[i],u), p=$('parcel');
+  p.setAttribute('cx',x); p.setAttribute('cy',y); p.setAttribute('fill',tcol(s.t));
+  p.setAttribute('stroke-dasharray', s.x>=1 ? '3 3' : 'none'); p.setAttribute('fill-opacity', s.x>=1 ? .45 : 1);
+  const st = s.x<=0 ? l.liqS : s.x>=1 ? l.vapS : l.mixS;
+  $('eng-read').innerHTML = `<span>T = <b>${s.T.toFixed(0)} °C</b></span><span>P = <b>${s.P.toFixed(2)}</b> bar</span>
+    <span class="qbar">${l.state}: <b>${st}</b> <i style="--q:${(100*s.x).toFixed(0)}%"></i> ${(100*s.x).toFixed(0)}% ${l.vapS}</span>`;
+}
+
+/* ======================= cycle registry ======================= */
+const STEP = (from,to,dur,proc,q,w,el,en,extra={}) => Object.assign({from,to,dur,proc,q,w,el,en},extra);
+const CYC = {
+ otto:{ name:'Otto', eng:{el:'Εμβολοφόρος κινητήρας βενζίνης, τετράχρονος',en:'Four-stroke petrol piston engine'}, diag:'pv',
+  foot:{el:'Οι αριθμοί είναι ενδεικτικοί: λόγος συμπίεσης 8, ιδανικός κύκλος με γ = 1,4. Στο διάγραμμα η απόσταση των γραμμών εισαγωγής και εξαγωγής είναι μεγεθυμένη για να φαίνονται.',
+        en:'Numbers are illustrative: compression ratio 8, ideal cycle with γ = 1.4. The gap between the intake and exhaust lines is exaggerated so both can be seen.'},
+  steps:[
+   STEP('1','2',2.6,'atmLine','q0','w0',['Εισαγωγή','Η βαλβίδα εισαγωγής είναι ανοιχτή. Το έμβολο κατεβαίνει από το ΑΝΣ στο ΚΝΣ και αναρροφά μίγμα καυσίμου–αέρα. Ο όγκος μεγαλώνει, η πίεση μένει περίπου ατμοσφαιρική: οριζόντια γραμμή στο κάτω μέρος του διαγράμματος.'],['Intake','The intake valve is open. The piston moves from TDC to BDC and draws in the fuel–air mixture. Volume grows while pressure stays about atmospheric: a horizontal line along the bottom of the diagram.'],{th:[0,180]}),
+   STEP('2','3',2.6,'adiab','q0','win',['Συμπίεση','Και οι δύο βαλβίδες κλείνουν. Το έμβολο ανεβαίνει και συμπιέζει το μίγμα τόσο γρήγορα που δεν προλαβαίνει να φύγει θερμότητα: αδιαβατική συμπίεση. Η πίεση και η θερμοκρασία ανεβαίνουν. Το έργο για τη συμπίεση το δίνει η ορμή του στροφάλου.'],['Compression','Both valves close. The piston rises and compresses the mixture so fast that no heat can escape: adiabatic compression. Pressure and temperature rise. The work comes from the momentum of the crankshaft.'],{th:[180,360]}),
+   STEP('3','4',1.3,'isoch','qin','w0',['Καύση (σπινθήρας)','Στο ΑΝΣ το μπουζί δίνει σπινθήρα. Το μίγμα καίγεται τόσο γρήγορα που το έμβολο δεν προλαβαίνει να κινηθεί: η θερμότητα μπαίνει σε σταθερό όγκο. Η πίεση εκτινάσσεται, κατακόρυφη γραμμή στο διάγραμμα.'],['Combustion (spark)','At TDC the spark plug fires. The mixture burns so fast that the piston has no time to move: heat is added at constant volume. Pressure shoots up, a vertical line on the diagram.'],{th:[360,360]}),
+   STEP('4','5',2.6,'adiab','q0','wout',['Ισχύς (εκτόνωση)','Τα καυτά αέρια σπρώχνουν το έμβολο προς τα κάτω και γυρίζουν τον στρόφαλο. Η εκτόνωση είναι αδιαβατική: η πίεση και η θερμοκρασία πέφτουν καθώς το αέριο δίνει έργο. Είναι ο μόνος χρόνος που παράγει έργο.'],['Power (expansion)','The hot gases push the piston down and turn the crankshaft. The expansion is adiabatic: pressure and temperature fall as the gas does work. This is the only stroke that produces work.'],{th:[360,540]}),
+   STEP('5','6',1.1,'isoch','qout','w0',['Ανοίγει η βαλβίδα εξαγωγής','Στο ΚΝΣ ανοίγει η βαλβίδα εξαγωγής. Η πίεση πέφτει απότομα στην ατμοσφαιρική και η θερμότητα που περισσεύει φεύγει με τα καυσαέρια. Ο όγκος δεν αλλάζει: κατακόρυφη γραμμή προς τα κάτω.'],['Exhaust valve opens','At BDC the exhaust valve opens. Pressure drops suddenly to atmospheric and the leftover heat leaves with the exhaust gas. Volume does not change: a vertical line downward.'],{th:[540,540]}),
+   STEP('6','1',2.6,'atmLine','q0','w0',['Εξαγωγή','Το έμβολο ανεβαίνει και σπρώχνει τα καυσαέρια έξω, σε πίεση περίπου ατμοσφαιρική. Στο ΑΝΣ ο κύκλος ξαναρχίζει. Ένας πλήρης κύκλος χρειάζεται δύο περιστροφές του στροφάλου.'],['Exhaust','The piston rises and pushes the exhaust out at about atmospheric pressure. At TDC the cycle starts again. One full cycle takes two crankshaft revolutions.'],{th:[540,720]})],
+  model(i,u){ const st=this.steps[i], th=lerp(st.th[0],st.th[1],u), f=crankFrac(th), V=1+7*f; let P,t;
+   if(i===0){P=1;t=0;} else if(i===1){P=Math.pow(8/V,1.4);t=(P*V-8)/38;} else if(i===2){P=lerp(OT.Pc,OT.Pmax,ease(u));t=(P*V-8)/38;}
+   else if(i===3){P=OT.Pmax*Math.pow(1/V,1.4);t=(P*V-8)/38;} else if(i===4){P=lerp(OT.P5,OT.Pex,ease(u));t=.32-.04*u;} else {P=OT.Pex;t=.28;}
+   return {th,f,X:V,Y:P,V,P,t:clamp(t)}; },
+  plot:{xmin:0,xmax:9,ymax:50,yt:[0,10,20,30,40,50],xt:[1,2,3,4,5,6,7,8],fill:[1,2,3,4],workLab:[3.2,12],
+   labels:[['1',1,1,-16,6],['2',8,1,10,16],['3',1,OT.Pc,-16,5],['4',1,OT.Pmax,-16,5],['5',8,OT.P5,10,-8],['6',8,OT.Pex,10,3]]},
+  build(l){ return pistonEngineSVG('otto',l); }, render(s,i,u,l){ renderPiston('otto',s,i,u,l); },
+  read(s,l){ return `<span>P = <b>${s.P.toFixed(1)}</b> ${l.atm}</span><span>V = <b>${s.V.toFixed(2)}</b></span>`; } },
+
+ diesel:{ name:'Diesel', eng:{el:'Εμβολοφόρος κινητήρας diesel, τετράχρονος',en:'Four-stroke diesel piston engine'}, diag:'pv',
+  foot:{el:'Ενδεικτικοί αριθμοί: λόγος συμπίεσης 18, ο ψεκασμός σταματά όταν ο όγκος διπλασιαστεί, γ = 1,4. Αεροπορικοί diesel που καίνε Jet A-1: Austro AE300 (Diamond DA42), Continental CD-155.',
+        en:'Illustrative numbers: compression ratio 18, injection stops when the volume has doubled, γ = 1.4. Aviation diesels burning Jet A-1: Austro AE300 (Diamond DA42), Continental CD-155.'},
+  steps:[
+   STEP('1','2',2.6,'atmLine','q0','w0',['Εισαγωγή (μόνο αέρας)','Η βαλβίδα εισαγωγής ανοίγει και το έμβολο κατεβαίνει. Μπαίνει μόνο αέρας, χωρίς καύσιμο. Η πίεση μένει περίπου ατμοσφαιρική.'],['Intake (air only)','The intake valve opens and the piston moves down. Only air comes in, no fuel. Pressure stays about atmospheric.'],{th:[0,180]}),
+   STEP('2','3',2.6,'adiab','q0','win',['Συμπίεση','Αδιαβατική συμπίεση με πολύ μεγαλύτερο λόγο από τον Otto (περίπου 18 αντί για 8). Ο αέρας ζεσταίνεται πάνω από 500 °C, πάνω από τη θερμοκρασία αυτανάφλεξης του καυσίμου. Αφού συμπιέζεται μόνο αέρας, δεν υπάρχει κίνδυνος κρουστικής καύσης.'],['Compression','Adiabatic compression with a much higher ratio than Otto (about 18 instead of 8). The air heats above 500 °C, above the fuel’s self-ignition temperature. Since only air is compressed, there is no risk of detonation.'],{th:[180,360]}),
+   STEP('3','4',2.0,'isobaric','qin','wout',['Ψεκασμός και καύση','Ο ψεκαστήρας ψεκάζει καύσιμο στον καυτό αέρα και αναφλέγεται μόνο του, χωρίς μπουζί. Η καύση κρατά όσο διαρκεί ο ψεκασμός και το έμβολο έχει ήδη αρχίσει να κατεβαίνει. Η θερμότητα μπαίνει περίπου σε σταθερή πίεση: οριζόντια γραμμή, όχι κατακόρυφη όπως στον Otto.'],['Injection and combustion','The injector sprays fuel into the hot air and it ignites by itself, with no spark plug. Combustion lasts as long as injection, and the piston is already moving down. Heat goes in at about constant pressure: a horizontal line, not a vertical one as in Otto.'],{th:[360,DI.thc]}),
+   STEP('4','5',2.6,'adiab','q0','wout',['Ισχύς (εκτόνωση)','Μετά το τέλος του ψεκασμού τα αέρια συνεχίζουν να εκτονώνονται αδιαβατικά και σπρώχνουν το έμβολο. Η πίεση και η θερμοκρασία πέφτουν.'],['Power (expansion)','After injection ends the gases keep expanding adiabatically and push the piston. Pressure and temperature fall.'],{th:[DI.thc,540]}),
+   STEP('5','6',1.1,'isoch','qout','w0',['Ανοίγει η βαλβίδα εξαγωγής','Στο ΚΝΣ η πίεση πέφτει στην ατμοσφαιρική και η θερμότητα που περισσεύει φεύγει με τα καυσαέρια.'],['Exhaust valve opens','At BDC the pressure drops to atmospheric and the leftover heat leaves with the exhaust gas.'],{th:[540,540]}),
+   STEP('6','1',2.6,'atmLine','q0','w0',['Εξαγωγή','Το έμβολο ανεβαίνει και σπρώχνει τα καυσαέρια έξω. Ο κύκλος ξαναρχίζει.'],['Exhaust','The piston rises and pushes the exhaust out. The cycle starts again.'],{th:[540,720]})],
+  model(i,u){ const st=this.steps[i], th=lerp(st.th[0],st.th[1],u), f=crankFrac(th), V=1+17*f; let P,t;
+   const tn=(P,V)=>(P*V-18)/96;
+   if(i===0){P=1;t=0;} else if(i===1){P=Math.pow(18/V,1.4);t=tn(P,V);} else if(i===2){P=DI.Pc;t=tn(P,V);}
+   else if(i===3){P=DI.Pc*Math.pow(2/V,1.4);t=tn(P,V);} else if(i===4){P=lerp(DI.P5,DI.Pex,ease(u));t=.3-.04*u;} else {P=DI.Pex;t=.26;}
+   return {th,f,X:V,Y:P,V,P,t:clamp(t)}; },
+  plot:{xmin:0,xmax:19,ymax:60,yt:[0,10,20,30,40,50,60],xt:[1,3,6,9,12,15,18],fill:[1,2,3,4],workLab:[5.5,16],
+   labels:[['1',1,1,-16,6],['2',18,1,6,18],['3',1,DI.Pc,-16,5],['4',2,DI.Pc,4,-9],['5',18,DI.P5,8,-8],['6',18,DI.Pex,10,4]]},
+  build(l){ return pistonEngineSVG('diesel',l); }, render(s,i,u,l){ renderPiston('diesel',s,i,u,l); },
+  read(s,l){ return `<span>P = <b>${s.P.toFixed(1)}</b> ${l.atm}</span><span>V = <b>${s.V.toFixed(2)}</b></span>`; } },
+
+ brayton:{ name:'Brayton', eng:{el:'Στροβιλοκινητήρας (turbojet), τομή',en:'Gas turbine (turbojet), cross-section'}, diag:'pv',
+  foot:{el:'Ενδεικτικοί αριθμοί: λόγος πίεσης 14, γ = 1,4. Όλα τα στάδια γίνονται ταυτόχρονα σε διαφορετικά σημεία του κινητήρα· ακολουθούμε ένα πακέτο αέρα καθώς τα περνά.',
+        en:'Illustrative numbers: pressure ratio 14, γ = 1.4. All stages run at the same time in different parts of the engine; we follow one parcel of air through them.'},
+  steps:[
+   STEP('1','2',3.0,'adiab','q0','win',['Συμπίεση','Ο αέρας μπαίνει από την είσοδο σε ατμοσφαιρική πίεση. Τα πτερύγια του συμπιεστή τον συμπιέζουν γρήγορα, αδιαβατικά: η πίεση ανεβαίνει πολύ, ο όγκος μικραίνει, ο αέρας ζεσταίνεται. Το έργο το δίνει ο στρόβιλος μέσω του άξονα.'],['Compression','Air enters the inlet at atmospheric pressure. The compressor blades squeeze it quickly and adiabatically: pressure rises a lot, volume shrinks, the air warms up. The work comes from the turbine through the shaft.']),
+   STEP('2','3',2.4,'isobaric','qin','w0',['Καύση','Στον θάλαμο καύσης ψεκάζεται καύσιμο και καίγεται συνεχώς. Ο θάλαμος είναι ανοιχτός μπρος και πίσω, οπότε το αέριο δεν κρατιέται σε σταθερό όγκο: διαστέλλεται και ρέει. Η θερμότητα μπαίνει σε σταθερή πίεση, οριζόντια γραμμή στο διάγραμμα.'],['Combustion','Fuel is sprayed into the combustor and burns continuously. The combustor is open at both ends, so the gas cannot be held at constant volume: it expands and flows on. Heat is added at constant pressure, a horizontal line on the diagram.']),
+   STEP('3','4',3.2,'adiab','q0','wout',['Εκτόνωση: στρόβιλος και ακροφύσιο','Το καυτό αέριο εκτονώνεται αδιαβατικά. Πρώτα στον στρόβιλο, που παίρνει όσο έργο χρειάζεται ο συμπιεστής (ως το σημείο t). Το υπόλοιπο εκτονώνεται στο ακροφύσιο και γίνεται ταχύτητα: αυτή είναι η ώση.'],['Expansion: turbine and nozzle','The hot gas expands adiabatically. First through the turbine, which takes the work the compressor needs (up to point t). The rest expands in the nozzle and becomes velocity: that is the thrust.']),
+   STEP('4','1',2.4,'isobaric','qout','w0',['Απόρριψη θερμότητας στην ατμόσφαιρα','Τα καυσαέρια βγαίνουν και ψύχονται ανακατεύοντας με τον αέρα, σε ατμοσφαιρική πίεση. Αυτό γίνεται έξω από τον κινητήρα, γι’ αυτό ο κύκλος λέγεται ανοιχτός. Φρέσκος αέρας μπαίνει στην είσοδο.'],['Heat rejected to the atmosphere','The exhaust leaves and cools by mixing with the air, at atmospheric pressure. This happens outside the engine, which is why the cycle is called open. Fresh air enters the inlet.'])],
+  model(i,u){ let x,V,P,op=1;
+   if(i===0){ x=20+240*u; const w=clamp((u-.25)/.75); V=8*Math.pow(BR.V2/8,w); P=Math.pow(8/V,1.4); }
+   else if(i===1){ x=260+110*u; V=lerp(BR.V2,3,u); P=14; }
+   else if(i===2){ if(u<.4){const w=u/.4; x=370+80*w; V=3*Math.pow(BR.Vt/3,w);} else {const w=(u-.4)/.6; x=450+110*w; V=BR.Vt*Math.pow(BR.V4/BR.Vt,w);} P=14*Math.pow(3/V,1.4); }
+   else { x=560+90*u; V=lerp(BR.V4,8,u); P=1; op=u<.5?1:1-(u-.5)/.5; }
+   return {x,V,P,X:V,Y:P,op,t:clamp((P*V-8)/34)}; },
+  plot:{xmin:0,xmax:21,ymax:16,yt:[0,4,8,12,16],xt:[0,5,10,15,20],fill:[0,1,2,3],workLab:[6.5,9.5],
+   labels:[['1',8,1,-4,18],['2',BR.V2,14,-16,5],['3',3,14,4,-9],['4',BR.V4,1,8,-8],['t',BR.Vt,4,9,-6]]},
+  build(l){ return braytonSVG(l); }, after(){ braytonParts(); }, render(s,i,u,l){ renderBrayton(s,i,u,l); },
+  read(s,l){ return `<span>P = <b>${s.P.toFixed(1)}</b> ${l.atm}</span><span>V = <b>${s.V.toFixed(2)}</b></span>`; } },
+
+ acm:{ name:'ACM', eng:{el:'Air cycle machine: το «pack» κλιματισμού ενός airliner',en:'Air cycle machine: an airliner air conditioning pack'}, diag:'pv',
+  foot:{el:'Το ACM είναι ο κύκλος Brayton ανάποδα: ο βρόχος στο P–V διαγράφεται αριστερόστροφα, άρα ξοδεύουμε έργο για να μεταφέρουμε θερμότητα από την καμπίνα στον εξωτερικό αέρα. Αριθμοί ενδεικτικοί, ιδανικό μοντέλο με εξωτερική θερμοκρασία 30 °C. Στα πραγματικά packs η θερμοκρασία εξόδου ρυθμίζεται ώστε να μην παγώνει ο διαχωριστής νερού.',
+        en:'The ACM is the Brayton cycle run backwards: the loop on the P–V diagram runs anticlockwise, so we spend work to move heat from the cabin to the outside air. Illustrative numbers, ideal model with 30 °C outside. Real packs control the outlet temperature so the water separator does not freeze.'},
+  steps:[
+   STEP('1','2',2.4,'adiab','q0','win',['Bleed από τον κινητήρα','Ο συμπιεστής του κινητήρα συμπιέζει τον εξωτερικό αέρα αδιαβατικά και ένα μέρος του αφαιρείται ως bleed air. Βγαίνει ζεστός και υπό πίεση. Αυτή είναι η ενέργεια που «πληρώνουμε» από τον κινητήρα.'],['Bleed from the engine','The engine compressor squeezes outside air adiabatically and part of it is taken off as bleed air. It comes out hot and under pressure. This is the energy we “pay” from the engine.']),
+   STEP('2','3',2.2,'isobaric','qout','w0',['Πρωτεύων εναλλάκτης','Ram air από έξω περνά μέσα από τον εναλλάκτη και ψύχει τον bleed σε σταθερή πίεση. Θερμότητα φεύγει προς τον εξωτερικό αέρα.'],['Primary heat exchanger','Ram air from outside passes through the exchanger and cools the bleed air at constant pressure. Heat goes to the outside air.']),
+   STEP('3','4',2.2,'adiab','q0','win',['Συμπιεστής ACM','Ο αέρας συμπιέζεται ξανά, αδιαβατικά, και ζεσταίνεται πάλι. Τώρα όμως έχει μεγαλύτερη πίεση, άρα στον στρόβιλο θα μπορέσει να εκτονωθεί περισσότερο. Τον συμπιεστή τον κινεί ο στρόβιλος του ACM στον ίδιο άξονα.'],['ACM compressor','The air is compressed again, adiabatically, and warms up again. But now it has a higher pressure, so it can expand further in the turbine. The compressor is driven by the ACM turbine on the same shaft.']),
+   STEP('4','5',2.2,'isobaric','qout','w0',['Δευτερεύων (κύριος) εναλλάκτης','Πάλι ram air, πάλι ψύξη σε σταθερή πίεση. Ο αέρας φτάνει κοντά στη θερμοκρασία περιβάλλοντος, αλλά με υψηλή πίεση.'],['Secondary (main) heat exchanger','Ram air again, cooling again at constant pressure. The air is now close to outside temperature, but at high pressure.']),
+   STEP('5','6',2.4,'adiab','q0','wout',['Στρόβιλος ACM','Ο αέρας εκτονώνεται αδιαβατικά και δίνει έργο στον στρόβιλο, που κινεί τον συμπιεστή και τον ανεμιστήρα. Αφού δίνει έργο, χάνει εσωτερική ενέργεια και βγαίνει κάτω από 0 °C. Ο διαχωριστής αφαιρεί το νερό που συμπυκνώνεται.'],['ACM turbine','The air expands adiabatically and does work on the turbine, which drives the compressor and the fan. Since it gives up work, it loses internal energy and leaves below 0 °C. The separator removes the water that condenses.']),
+   STEP('6','1',2.6,'isobaric','qin','w0',['Καμπίνα','Ο κρύος αέρας ανακατεύεται με τον αέρα της καμπίνας και απορροφά θερμότητα από επιβάτες, ηλεκτρονικά και ήλιο, σε σταθερή πίεση. Τελικά φεύγει έξω από τη βαλβίδα outflow. Ο κύκλος είναι ανοιχτός, όπως ο Brayton.'],['Cabin','The cold air mixes with the cabin air and absorbs heat from passengers, electronics and sunshine, at constant pressure. Finally it leaves through the outflow valve. The cycle is open, like Brayton.'])],
+  model(i,u){ const j=(i+1)%6, adi = i===0||i===2||i===4;
+   const P = adi ? AC.P[i]*Math.pow(AC.P[j]/AC.P[i],u) : AC.P[i];
+   const V = adi ? AC.V[i]*Math.pow(AC.P[i]/P,1/1.4) : lerp(AC.V[i],AC.V[j],u);
+   const Tk = P*V*AK, x = lerp(AX[i][0],AX[i][1],u);
+   return {x,P,V,X:V,Y:P,Tk,t:acmTn(Tk),op: i===5&&u>.85 ? 1-(u-.85)/.15 : 1}; },
+  plot:{xmin:0,xmax:11,ymax:3,yt:[0,1,2,3],xt:[0,2,4,6,8,10],fill:[0,1,2,3,4,5],workLab:[0.4,2.85],workIn:true,
+   labels:[['1',AC.V[0],1,6,16],['2',AC.V[1],2,6,-6],['3',AC.V[2],2,-6,-10],['4',AC.V[3],2.4,4,-9],['5',AC.V[4],2.4,-16,5],['6',AC.V[5],1,-4,18]]},
+  build(l){ return acmSVG(l); }, after(){ acmParts(); }, render(s,i,u,l){ renderACM(s,i,u,l); },
+  read(s,l){ return `<span>P = <b>${s.P.toFixed(2)}</b> ${l.atm}</span><span>V = <b>${s.V.toFixed(2)}</b></span>`; } },
+
+ fridge:{ name:null, eng:{el:'Ψυγείο (κύκλος συμπίεσης ατμών)',en:'Refrigerator (vapour compression cycle)'}, diag:'pt',
+  foot:{el:'Ψυκτικό R-600a (ισοβουτάνιο), ενδεικτικές τιμές. Στο διάγραμμα P–T μια αλλαγή φάσης είναι ένα σημείο πάνω στη γραμμή βρασμού· γι’ αυτό η τελεία σταματά όσο το ψυκτικό βράζει ή συμπυκνώνεται, και αλλάζει μόνο το ποσοστό ατμού. Το ίδιο σύστημα είναι το vapour cycle air conditioning των διαφανειών.',
+        en:'Refrigerant R-600a (isobutane), illustrative values. On the P–T diagram a change of phase is a single point on the boiling line; that is why the dot stops while the refrigerant boils or condenses, and only the vapour share changes. The same system is the vapour cycle air conditioning of the slides.'},
+  steps:[
+   STEP('4','1',3.4,'boil','qin','w0',['Εξατμιστής: βρασμός μέσα στο ψυγείο','Το ψυκτικό μπαίνει ως κρύο μίγμα υγρού και ατμού σε χαμηλή πίεση. Παίρνει θερμότητα από το εσωτερικό του ψυγείου και βράζει. Όσο βράζει η θερμοκρασία του μένει σταθερή στους −25 °C: η τελεία μένει πάνω στη γραμμή βρασμού και αλλάζει μόνο το ποσοστό ατμού. Αυτή είναι η λανθάνουσα θερμότητα εξάτμισης.'],['Evaporator: boiling inside the fridge','The refrigerant enters as a cold mix of liquid and vapour at low pressure. It takes heat from inside the fridge and boils. While it boils its temperature stays at −25 °C: the dot stays on the boiling line and only the vapour share changes. This is the latent heat of vaporisation.']),
+   STEP('1','2',2.4,'adiab','q0','win',['Συμπιεστής','Ο συμπιεστής ρουφά τον ατμό και τον συμπιέζει γρήγορα, αδιαβατικά, από περίπου 0,6 σε 5 bar. Ο ατμός ζεσταίνεται στους 70 °C, πιο ζεστός από την κουζίνα. Εδώ μπαίνει το έργο: το ρεύμα που πληρώνουμε.'],['Compressor','The compressor draws in the vapour and compresses it quickly, adiabatically, from about 0.6 to 5 bar. The vapour heats to 70 °C, hotter than the kitchen. This is where the work goes in: the electricity we pay for.']),
+   STEP('2','3',3.4,'cond','qout','w0',['Συμπυκνωτής: η ζεστή πλάτη','Ο καυτός ατμός δίνει θερμότητα στον αέρα της κουζίνας. Πρώτα ψύχεται ως τους 40 °C, τη θερμοκρασία βρασμού σε αυτή την πίεση. Μετά συμπυκνώνεται σε σταθερή θερμοκρασία και αποδίδει τη λανθάνουσα θερμότητα. Βγαίνει υγρό.'],['Condenser: the warm back panel','The hot vapour gives heat to the kitchen air. First it cools to 40 °C, the boiling temperature at this pressure. Then it condenses at constant temperature and gives off the latent heat. It leaves as a liquid.']),
+   STEP('3','4',2.2,'throttle','q0','w0',['Τριχοειδής σωλήνας: πτώση πίεσης','Το υγρό περνά από έναν πολύ λεπτό σωλήνα και η πίεση πέφτει απότομα. Το σημείο βρασμού πέφτει μαζί της: ένα μέρος του υγρού βράζει ακαριαία και ψύχει το υπόλοιπο στους −25 °C. Η τελεία κατεβαίνει πάνω στη γραμμή βρασμού.'],['Capillary tube: pressure drop','The liquid passes through a very thin tube and its pressure drops suddenly. The boiling point drops with it: part of the liquid flashes to vapour and cools the rest to −25 °C. The dot slides down the boiling line.'])],
+  model(i,u){ let T,P,x;
+   if(i===0){ P=FR.Pl; if(u<.8){T=FR.Tl; x=lerp(FR.x4,1,u/.8);} else {T=lerp(FR.Tl,FR.Tsh,(u-.8)/.2); x=1;} }
+   else if(i===1){ P=FR.Pl*Math.pow(FR.Ph/FR.Pl,u); const k=Math.log((FR.Tdis+273)/(FR.Tsh+273))/Math.log(FR.Ph/FR.Pl); T=(FR.Tsh+273)*Math.pow(P/FR.Pl,k)-273; x=1; }
+   else if(i===2){ P=FR.Ph; if(u<.2){T=lerp(FR.Tdis,FR.Th,u/.2); x=1;} else if(u<.85){T=FR.Th; x=1-(u-.2)/.65;} else {T=lerp(FR.Th,FR.Tsc,(u-.85)/.15); x=0;} }
+   else { P=FR.Ph*Math.pow(FR.Pl/FR.Ph,u); const ts=tsat(P); T=Math.min(FR.Tsc,ts); x = ts<FR.Tsc ? FR.x4*(FR.Tsc-T)/(FR.Tsc-FR.Tl) : 0; }
+   return {T,P,x:clamp(x),X:T,Y:P,t:clamp((T+30)/105)}; },
+  plot:{xmin:-40,xmax:80,ymax:7,yt:[0,1,2,3,4,5,6,7],xt:[-40,-20,0,20,40,60,80],fill:[],
+   labels:[['1',FR.Tsh,FR.Pl,2,18],['2',FR.Tdis,FR.Ph,6,-8],['3',FR.Tsc,FR.Ph,-14,-8],['4',FR.Tl,FR.Pl,-16,-6]]},
+  build(l){ return fridgeSVG(l); }, render(s,i,u,l){ renderFridge(s,i,u,l); },
+  read(s,l){ return `<span>P = <b>${s.P.toFixed(2)}</b> bar</span><span>T = <b>${s.T.toFixed(0)}</b> °C</span>`; } }
+};
+
+/* ======================= state ======================= */
+const S = {cycle:'otto', lang:'el', step:0, u:0, playing:false, mode:'all', speed:1};
+try{ const g=localStorage.getItem('cyc-lang'); if(g==='en'||g==='el') S.lang=g; }catch(e){}
+try{ const c=location.hash.slice(1); if(CYC[c]) S.cycle=c; }catch(e){}
+const L = () => T[S.lang];
+const C = () => CYC[S.cycle];
+let PARTS=[], PMOVE=null;
+
+/* ======================= diagram ======================= */
+const PV = {x0:58,x1:400,y0:298,y1:22};
+const sx = X => { const p=C().plot; return PV.x0+(X-p.xmin)/(p.xmax-p.xmin)*(PV.x1-PV.x0); };
+const sy = Y => PV.y0-Y/C().plot.ymax*(PV.y0-PV.y1);
+let SAMPLES=[];
+const pathOf = pts => pts.map((p,k)=>(k?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+function buildDiag(){
+  const c=C(), p=c.plot, l=L(), pt=c.diag==='pt';
+  SAMPLES = c.steps.map((_,i)=>{ const a=[]; for(let k=0;k<=60;k++){ const s=c.model(i,k/60); a.push([sx(s.X),sy(s.Y)]);} return a; });
+  let g='';
+  p.yt.forEach(v=>{ g+=`<line x1="${PV.x0}" x2="${PV.x1}" y1="${sy(v)}" y2="${sy(v)}" stroke="var(--line)" stroke-width="1"/><text x="${PV.x0-8}" y="${sy(v)+4}" text-anchor="end" font-size="11" fill="var(--muted)">${v}</text>`; });
+  p.xt.forEach(v=>{ g+=`<text x="${sx(v)}" y="${PV.y0+16}" text-anchor="middle" font-size="11" fill="var(--muted)">${v}</text>`; });
+  let extra='';
+  if(pt){ const bp=[]; for(let T=-40;T<=74;T+=2) bp.push([sx(T),sy(psat(T))]);
+    extra = `<path d="${pathOf(bp)}" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+     <text x="${sx(58)}" y="${sy(psat(66))-6}" text-anchor="end" font-size="11.5" fill="var(--accent)">${l.boilLine}</text>
+     <text x="${sx(-28)}" y="${sy(5.6)}" font-size="13" font-weight="600" fill="var(--muted)" letter-spacing="1">${l.liquid}</text>
+     <text x="${sx(50)}" y="${sy(1.6)}" font-size="13" font-weight="600" fill="var(--muted)" letter-spacing="1">${l.vapour}</text>`; }
+  else { const fp=p.fill.flatMap(i=>SAMPLES[i]);
+    extra = `<path d="${pathOf(fp)} Z" fill="var(--accent)" fill-opacity=".1"/>
+     <text x="${sx(p.workLab[0])}" y="${sy(p.workLab[1])}" font-size="12" fill="var(--accent)">${p.workIn?l.workIn:l.work}</text>`; }
+  const lab=p.labels.map(([n,X,Y,dx,dy])=>`<circle cx="${sx(X)}" cy="${sy(Y)}" r="${n==='t'?3:3.5}" fill="${n==='t'?'none':'var(--fg)'}" stroke="var(--fg)" stroke-width="1.2"/>
+    <text x="${sx(X)+dx}" y="${sy(Y)+dy}" font-size="13" font-weight="600" fill="var(--fg)">${n}</text>`).join('');
+  $('pv').innerHTML = `<svg viewBox="0 0 420 340" role="img" aria-label="${pt?l.diagPT:l.diagPV}">
+   <defs><marker id="ax" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--muted)"/></marker></defs>
+   ${g}
+   <line x1="${PV.x0}" y1="${PV.y0}" x2="${PV.x1+12}" y2="${PV.y0}" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#ax)"/>
+   <line x1="${PV.x0}" y1="${PV.y0}" x2="${PV.x0}" y2="${PV.y1-10}" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#ax)"/>
+   <text x="${PV.x0}" y="12" font-size="12" fill="var(--muted)">${pt?l.ptP:l.pAxis}</text>
+   <text x="${PV.x1}" y="${PV.y0+32}" text-anchor="end" font-size="12" fill="var(--muted)">${pt?l.ptT:l.vAxis}</text>
+   ${extra}
+   <path d="${pathOf(SAMPLES.flat())}" fill="none" stroke="var(--muted)" stroke-opacity=".5" stroke-width="1.5" stroke-dasharray="4 4"/>
+   <path id="pv-done" fill="none" stroke="var(--fg)" stroke-width="2"/>
+   <path id="pv-cur" fill="none" stroke="var(--accent)" stroke-width="4" stroke-linecap="round" stroke-opacity=".85"/>
+   ${lab}
+   <circle id="pv-dot" r="8" stroke="var(--fg)" stroke-width="2"/>
+  </svg>`;
+}
+
+/* ======================= render ======================= */
 function render(){
-  const i=S.step, u=S.u, s=model(i,u), l=L();
-  // P–V
-  const done = SAMPLES.slice(0,i).flat();
-  const cur = SAMPLES[i].filter((_,k)=>k/48<=u); cur.push([sx(s.V),sy(s.P)]);
-  $('pv-done').setAttribute('d', pathOf(done.concat(cur)));
-  $('pv-cur').setAttribute('d', pathOf(SAMPLES[i]));
-  const dot=$('pv-dot'); dot.setAttribute('cx',sx(s.V)); dot.setAttribute('cy',sy(s.P)); dot.setAttribute('fill',tcol(s.t));
-  $('pv-read').innerHTML = `<span>${l.P} = <b>${s.P.toFixed(1)}</b> ${l.atm}</span><span>${l.V} = <b>${s.V.toFixed(2)}</b></span><span>${l.Tn}: <b style="color:${tcol(s.t)}">●</b></span>`;
-  if(S.cycle==='otto'){
-    const y = 72+20*s.V; $('gas').setAttribute('height', y-72); $('gas').setAttribute('fill', tcol(s.t));
-    $('piston').setAttribute('transform',`translate(0 ${y-92})`);
-    const a=s.th*Math.PI/180, px=180+OT.r*Math.sin(a), py=OT.cy-OT.r*Math.cos(a);
-    $('rod').setAttribute('x1',180); $('rod').setAttribute('y1',y+28); $('rod').setAttribute('x2',px); $('rod').setAttribute('y2',py);
-    $('arm').setAttribute('x2',px); $('arm').setAttribute('y2',py); $('cpin').setAttribute('cx',px); $('cpin').setAttribute('cy',py);
-    const lift = (st,k)=> st===0 ? 12*Math.sin(Math.PI*u) : 0;
-    const inL = i===0 ? 12*Math.sin(Math.PI*u) : 0;
-    const exL = i===4 ? 12*ease(u) : i===5 ? 12*Math.cos(Math.PI*u/2)**.5 : 0;
-    $('vin').setAttribute('transform',`translate(0 ${inL})`); $('vex').setAttribute('transform',`translate(0 ${exL})`);
-    $('inflow').style.opacity = i===0 ? 1 : 0; $('outflow').style.opacity = (i===4||i===5) ? 1 : 0;
-    $('spark').setAttribute('opacity', i===2 && u<.35 ? 1 : 0);
-    $('flame').setAttribute('r', i===2 ? 10+60*ease(u) : 0); $('flame').setAttribute('opacity', i===2 ? .55*(1-u*.6) : 0);
-    const rev = s.th<360 ? 1 : 2;
-    $('eng-read').innerHTML = `<span>${l.crank} θ = <b>${Math.round(s.th)}°</b></span><span><b>${rev}</b>η ${l.rev} ${l.of} 2</span>`;
-  } else {
-    const sec = BRAY_STEPS[i].sec;
-    document.querySelectorAll('.band').forEach(b=>{ const k=+b.dataset.i; const on = k===sec || (i===2 && k===3);
-      b.setAttribute('fill-opacity', on ? .12 : 0); });
-    document.querySelectorAll('.blab').forEach(b=>{ const k=+b.dataset.i; const on = k===sec || (i===2 && k===3);
-      b.setAttribute('fill', on ? 'var(--fg)' : 'var(--muted)'); b.setAttribute('font-weight', on?600:400); });
-    $('flames').setAttribute('opacity', i===1 ? .95 : .5);
-    const p=$('parcel'), r=Rx(s.x), h=Rh(s.x), y=BX.cy-(h+.62*(r-h));
-    p.setAttribute('cx', s.x); p.setAttribute('cy', y); p.setAttribute('r', 4+2*Math.sqrt(s.V)); p.setAttribute('fill', tcol(s.t)); p.setAttribute('opacity', s.op);
-    $('eng-read').innerHTML = `<span>${l[SECS[BRAY_STEPS[i].sec][2]]}${i===2?' → '+l.secNz:''}</span>`;
-  }
-  // narration
-  const st=steps()[i], tx=st[S.lang];
+  const c=C(), i=S.step, u=S.u, s=c.model(i,u), l=L();
+  const done=SAMPLES.slice(0,i).flat(), cur=SAMPLES[i].filter((_,k)=>k/60<=u); cur.push([sx(s.X),sy(s.Y)]);
+  $('pv-done').setAttribute('d',pathOf(done.concat(cur)));
+  $('pv-cur').setAttribute('d',pathOf(SAMPLES[i]));
+  const dot=$('pv-dot'); dot.setAttribute('cx',sx(s.X)); dot.setAttribute('cy',sy(s.Y)); dot.setAttribute('fill',tcol(s.t));
+  $('pv-read').innerHTML = c.read(s,l);
+  c.render(s,i,u,l);
+  const st=c.steps[i], tx=st[S.lang];
   $('stitle').textContent = `${st.from} → ${st.to} · ${tx[0]}`;
   $('stext').textContent = tx[1];
-  const pc = st.proc==='atmLine' ? 'isobaric' : st.proc;
-  $('badges').innerHTML = `<span class="badge">${l.proc[pc]}${st.proc==='atmLine'?' · '+l.proc.atmLine:''}</span>
+  $('badges').innerHTML = `<span class="badge">${l.proc[st.proc]}</span>
     <span class="badge ${st.q==='qin'?'q-in':st.q==='qout'?'q-out':''}">${l[st.q]}</span>
     <span class="badge ${st.w==='w0'?'':'w'}">${l[st.w]}</span>`;
-  document.querySelectorAll('.pill').forEach((b,k)=>{ b.toggleAttribute('aria-current', false);
-    if(k===i) b.setAttribute('aria-current','step'); b.classList.toggle('done', k<i); });
+  document.querySelectorAll('.pill').forEach((b,k)=>{ b.removeAttribute('aria-current'); if(k===i) b.setAttribute('aria-current','step'); b.classList.toggle('done',k<i); });
 }
 
-/* ---------- particles (Brayton, run always) ---------- */
-function moveParts(dt){
-  PARTS.forEach(p=>{ p.x += vAt(p.x)*dt*S.speed*(S.playing?1:0.0);
-    if(p.x>650){ p.x=0; p.f=Math.random(); p.s=Math.random()<.5?-1:1; }
-    const r=Rx(p.x), h=Rh(p.x), rr=h+3+p.f*Math.max(2,(r-h-7));
-    p.el.setAttribute('cx',p.x.toFixed(1)); p.el.setAttribute('cy',(BX.cy+p.s*rr).toFixed(1)); p.el.setAttribute('fill',tcol(tAt(p.x)));
-    p.el.setAttribute('opacity', p.x>560 ? clamp(1-(p.x-560)/90) : .85);
-  });
-}
-
-/* ---------- build / controls ---------- */
-function buildPills(){
-  $('steps').innerHTML = steps().map((st,k)=>`<button class="pill" data-k="${k}">${st.from}→${st.to}</button>`).join('');
-  document.querySelectorAll('.pill').forEach(b=>b.onclick=()=>go(+b.dataset.k));
-}
+/* ======================= build / controls ======================= */
 function buildAll(){
-  const l=L();
-  document.documentElement.lang = S.lang;
-  $('h1').textContent=l.h1; $('cyc-name').textContent = S.cycle==='otto'?'Otto':'Brayton'; $('sub').textContent=l.sub; $('pv-h').textContent=l.pv;
-  $('eng-h').textContent = S.cycle==='otto'?l.engOtto:l.engBray;
-  $('t-cold').textContent=l.cold; $('t-hot').textContent=l.hot; $('speed-l').textContent=l.speed;
-  $('foot').textContent = S.cycle==='otto'?l.footOtto:l.footBray;
-  S.cycle==='otto' ? buildOtto() : buildBray();
-  buildPV(); buildPills(); setPlay(S.playing); render(); if(S.cycle!=='otto') moveParts(0);
+  const l=L(), c=C();
+  document.documentElement.lang=S.lang; document.title=l.h1;
+  $('h1').textContent=l.h1; $('sub').textContent=l.sub; $('g-eng').textContent=l.gEng; $('g-cool').textContent=l.gCool; $('tab-fridge').textContent=l.fridge;
+  $('cyc-name').textContent = c.name || l.fridge;
+  $('pv-h').textContent = c.diag==='pt'?l.diagPT:l.diagPV; $('eng-h').textContent=c.eng[S.lang];
+  $('t-cold').textContent=l.cold; $('t-hot').textContent=l.hot; $('speed-l').textContent=l.speed; $('foot').textContent=c.foot[S.lang];
+  document.querySelectorAll('[data-c]').forEach(b=>b.setAttribute('aria-pressed', b.dataset.c===S.cycle));
+  $('lang-el').setAttribute('aria-pressed',S.lang==='el'); $('lang-en').setAttribute('aria-pressed',S.lang==='en');
+  PARTS=[]; PMOVE=null;
+  $('engine').innerHTML = c.build(l); if(c.after) c.after();
+  buildDiag();
+  $('steps').innerHTML = c.steps.map((st,k)=>`<button class="pill" data-k="${k}">${st.from}→${st.to}</button>`).join('');
+  document.querySelectorAll('.pill').forEach(b=>b.onclick=()=>go(+b.dataset.k));
+  setPlay(S.playing); render(); if(PMOVE) PMOVE(0);
 }
 function setPlay(on){ S.playing=on; $('play').textContent = on ? '❚❚ '+L().pause : '▶ '+L().play; }
-function go(k){ const n=steps().length; S.step=(k+n)%n; S.u=0; S.mode='one'; setPlay(true); render(); }
-$('play').onclick=()=>{ if(S.playing){ setPlay(false);} else { S.mode='all'; if(S.u>=1){S.u=0;} setPlay(true);} };
-$('next').onclick=()=>go(S.step+1);
-$('prev').onclick=()=>go(S.step-1);
+function go(k){ const n=C().steps.length; S.step=(k+n)%n; S.u=0; S.mode='one'; setPlay(true); render(); }
+$('play').onclick=()=>{ if(S.playing) setPlay(false); else { S.mode='all'; if(S.u>=1) S.u=0; setPlay(true); } };
+$('next').onclick=()=>go(S.step+1); $('prev').onclick=()=>go(S.step-1);
 $('speed').onchange=e=>S.speed=+e.target.value;
-function setCycle(c){ S.cycle=c; S.step=0; S.u=0; $('tab-otto').setAttribute('aria-pressed',c==='otto'); $('tab-brayton').setAttribute('aria-pressed',c==='brayton'); buildAll(); }
-$('tab-otto').onclick=()=>setCycle('otto'); $('tab-brayton').onclick=()=>setCycle('brayton');
-function setLang(g){ S.lang=g; try{localStorage.setItem('cyc-lang',g);}catch(e){} $('lang-el').setAttribute('aria-pressed',g==='el'); $('lang-en').setAttribute('aria-pressed',g==='en'); buildAll(); }
+document.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{ S.cycle=b.dataset.c; S.step=0; S.u=0; try{history.replaceState(null,'','#'+S.cycle);}catch(e){} buildAll(); });
+function setLang(g){ S.lang=g; try{localStorage.setItem('cyc-lang',g);}catch(e){} buildAll(); }
 $('lang-el').onclick=()=>setLang('el'); $('lang-en').onclick=()=>setLang('en');
 document.addEventListener('keydown',e=>{ if(e.target.tagName==='SELECT') return;
   if(e.key==='ArrowRight'){go(S.step+1);e.preventDefault();} else if(e.key==='ArrowLeft'){go(S.step-1);e.preventDefault();}
   else if(e.key===' '){ $('play').click(); e.preventDefault(); } });
+addEventListener('hashchange',()=>{ const c=location.hash.slice(1); if(CYC[c]&&c!==S.cycle){ S.cycle=c; S.step=0; S.u=0; buildAll(); } });
 
 let last=performance.now();
 function tick(now){
   const dt=Math.min(.05,(now-last)/1000); last=now;
-  if(S.playing){
-    S.u += dt*S.speed/steps()[S.step].dur;
-    if(S.u>=1){ if(S.mode==='one'){ S.u=1; setPlay(false); } else { S.u=0; S.step=(S.step+1)%steps().length; } }
-    render();
-  }
-  if(S.cycle==='brayton') moveParts(dt);
+  if(S.playing){ S.u+=dt*S.speed/C().steps[S.step].dur;
+    if(S.u>=1){ if(S.mode==='one'){ S.u=1; setPlay(false); } else { S.u=0; S.step=(S.step+1)%C().steps.length; } }
+    render(); if(PMOVE) PMOVE(dt*S.speed); }
   requestAnimationFrame(tick);
 }
-const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-$('lang-el').setAttribute('aria-pressed',S.lang==='el'); $('lang-en').setAttribute('aria-pressed',S.lang==='en');
-S.u = .45; buildAll(); if(!reduce){ S.mode='all'; setPlay(true); }
+S.u=.45; buildAll();
+if(!matchMedia('(prefers-reduced-motion: reduce)').matches){ S.mode='all'; setPlay(true); }
 requestAnimationFrame(tick);
 </script>
-
 </body>
 </html>
