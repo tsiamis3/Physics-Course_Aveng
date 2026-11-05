@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Κάτοπτρα και φακοί</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600&display=swap">
+<style>
+/* Ray diagram on top, image readout and object controls underneath. */
+:root{
+  --bg:#0b0a09; --panel:#14120f; --fg:#e8e2d0; --muted:#a09882; --line:#4a3f26;
+  --accent:#d9a521; --accent-soft:rgba(217,165,33,.14);
+  --r1:#F2704A; --r2:#5B9BEF; --r3:#62b886; --glass:rgba(140,190,230,.16); --glass-edge:#8fb8d8;
+  --f-display:"Rajdhani","Barlow Condensed",sans-serif;
+  --f-body:"Source Sans 3",system-ui,sans-serif;
+  --f-mono:"Share Tech Mono",ui-monospace,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 var(--f-body)}
+header{padding:22px max(20px,env(safe-area-inset-left,0px)) 30px}
+header h1{margin:0;font-size:clamp(28px,5vw,44px);line-height:1.05}
+header p{margin:6px 0 0}
+header nav{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:10px}
+main{padding:20px max(16px,env(safe-area-inset-left,0px)) 40px}
+.wrap{max-width:1160px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.topbar{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px}
+.el-name{font:700 22px var(--f-display);text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin:0}
+.tools{display:flex;gap:12px;flex-wrap:wrap;align-items:end}
+.grp{display:flex;flex-direction:column;gap:3px}
+.grp small{font:12px var(--f-mono);color:var(--muted);letter-spacing:.04em}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:0;overflow:hidden;background:var(--panel);clip-path:none!important}
+.seg button{border:0;background:none;color:var(--fg);font:700 15px var(--f-display);letter-spacing:.08em;text-transform:uppercase;padding:8px 14px;cursor:pointer;clip-path:none;box-shadow:none}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#0b0a09}
+.seg button:focus-visible,.btn:focus-visible,.pill:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.card{background:var(--panel);border:1px solid var(--line);padding:16px 20px;min-width:0;margin:0}
+.card h2{font:700 14px var(--f-display);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:2px 4px 6px}
+svg{display:block;width:100%;height:auto;touch-action:none}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font:13px var(--f-mono);color:var(--muted);margin:8px 4px 0}
+.legend i{display:inline-block;width:22px;height:0;border-top:3px solid;vertical-align:middle;margin-right:6px}
+.legend i.d{border-top-style:dashed}
+.lower{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media (max-width:860px){.lower{grid-template-columns:1fr}}
+.badges{display:flex;flex-wrap:wrap;gap:6px;margin:4px 4px 10px}
+.badge{font:14px var(--f-mono);padding:3px 10px;border:1px solid var(--line);color:var(--fg)}
+.badge.real{border-color:var(--r1);color:var(--r1)}
+.badge.virt{border-color:var(--r2);color:var(--r2)}
+.badge.acc{border-color:var(--accent);color:var(--accent)}
+.read{display:flex;flex-wrap:wrap;gap:6px 18px;font:14px var(--f-mono);color:var(--muted);margin:0 4px;font-variant-numeric:tabular-nums}
+.read b{color:var(--fg);font-weight:500}
+#zone{font:700 22px/1.2 var(--f-display);color:var(--accent);text-transform:uppercase;letter-spacing:.04em;margin:12px 4px 4px}
+#use{margin:0 4px;max-width:70ch}
+#formula{font:14px var(--f-mono);color:var(--muted);margin:10px 4px 0;border-left:3px solid var(--line);padding-left:10px}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin:0 4px 12px}
+.pill{border:1px solid var(--line);background:#0d0c0a;color:var(--muted);border-radius:0;padding:4px 12px;font:13px var(--f-mono);letter-spacing:.02em;text-transform:none;box-shadow:none;cursor:pointer;clip-path:none}
+.pill[aria-current="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--fg)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 4px 10px}
+#u{direction:rtl}
+.row input[type=range]{flex:1;min-width:180px;accent-color:var(--accent);box-shadow:none;border:0;background:none}
+.row label{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.btn{cursor:pointer;min-width:44px}
+.note{color:var(--muted);font-size:13px;margin:0}
+text{font-family:var(--f-body)}
+</style>
+<link rel="stylesheet" href="assets/theme.css">
+</head>
+<body>
+<header>
+  <h1 id="h1"></h1>
+  <p id="sub"></p>
+  <nav><a href="index.html">← Home</a><a href="formula.html">Formula sheet</a><a href="cycles.html">Thermodynamic Cycles</a></nav>
+</header>
+<main>
+<div class="wrap">
+  <div class="topbar">
+    <p class="el-name" id="el-name"></p>
+    <div class="tools">
+      <div class="grp"><small id="g-mir"></small>
+        <div class="seg" role="group" aria-label="Mirrors">
+          <button data-e="plane"></button><button data-e="concave"></button><button data-e="convex"></button>
+        </div></div>
+      <div class="grp"><small id="g-lens"></small>
+        <div class="seg" role="group" aria-label="Lenses">
+          <button data-e="conv"></button><button data-e="div"></button>
+        </div></div>
+      <div class="grp"><small>&nbsp;</small>
+        <div class="seg" role="group" aria-label="Language">
+          <button id="lang-el">ΕΛ</button><button id="lang-en">EN</button>
+        </div></div>
+    </div>
+  </div>
+
+  <section class="card">
+    <div id="diagram"></div>
+    <div class="legend" id="legend"></div>
+  </section>
+
+  <div class="lower">
+    <section class="card">
+      <h2 id="img-h"></h2>
+      <div class="badges" id="badges"></div>
+      <div class="read" id="read"></div>
+      <p id="zone"></p>
+      <p id="use"></p>
+      <p id="formula" hidden></p>
+    </section>
+    <section class="card">
+      <h2 id="obj-h"></h2>
+      <div class="pills" id="pills"></div>
+      <div class="row">
+        <input type="range" id="u" min="1" max="45" step="0.1" aria-label="Object distance">
+      </div>
+      <div class="row">
+        <button class="btn primary" id="play"></button>
+        <label><input type="checkbox" id="showf"> <span id="showf-l"></span></label>
+      </div>
+      <p class="note" id="hint"></p>
+    </section>
+  </div>
+  <p class="note" id="foot"></p>
+</div>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const clamp = (x,a,b)=>Math.max(a,Math.min(b,x));
+const fmt = (x,d=1)=>{ const s=(Math.round(x*10**d)/10**d).toFixed(d).replace(/\.0+$/,''); return S.lang==='el'?s.replace('.',','):s; };
+
+/* ======================= text ======================= */
+const T = {
+ el:{ h1:'Κάτοπτρα και φακοί', sub:'Μετακίνησε το αντικείμενο και δες πού και τι είδωλο σχηματίζεται.',
+  gMir:'Κάτοπτρα', gLens:'Φακοί', img:'Είδωλο', obj:'Θέση αντικειμένου',
+  names:{plane:'Επίπεδο κάτοπτρο', concave:'Κοίλο κάτοπτρο', convex:'Κυρτό κάτοπτρο', conv:'Συγκλίνων φακός', div:'Αποκλίνων φακός'},
+  tabs:{plane:'Επίπεδο', concave:'Κοίλο', convex:'Κυρτό', conv:'Συγκλίνων', div:'Αποκλίνων'},
+  real:'Πραγματικό', virt:'Φανταστικό', up:'Όρθιο', inv:'Ανεστραμμένο', larger:'Μεγαλύτερο', smaller:'Μικρότερο', same:'Ίδιο μέγεθος',
+  noImg:'Δεν σχηματίζεται είδωλο', inf:'στο άπειρο',
+  u:'Αντικείμενο', v:'Είδωλο', m:'Μεγέθυνση', front:'μπροστά από το κάτοπτρο', behind:'πίσω από το κάτοπτρο',
+  other:'στην άλλη πλευρά του φακού', sameSide:'στην ίδια πλευρά με το αντικείμενο', off:'(εκτός οθόνης)',
+  play:'Σάρωση', pause:'Παύση', showf:'Δείξε τον τύπο (για τον καθηγητή)',
+  hint:'Σύρε το βέλος του αντικειμένου πάνω στο διάγραμμα ή χρησιμοποίησε τη μπάρα. Η «σάρωση» το φέρνει σιγά-σιγά από μακριά προς το κάτοπτρο/φακό.',
+  r1:'παράλληλη → από το F', r2:'από το F → παράλληλη', r3m:'από το C → πίσω στον εαυτό της', r3l:'από το κέντρο → ευθεία', r3p:'στο κέντρο → συμμετρική',
+  ext:'προέκταση (φανταστικό)', object:'αντικείμενο',
+  foot:'Οι ακτίνες σχεδιάζονται κοντά στον άξονα (παραξονικές). f = 10 cm, άρα C = 2F = 20 cm. Οι γωνίες μετρούν από την κάθετο.' },
+ en:{ h1:'Mirrors and lenses', sub:'Move the object and see where the image forms and what it looks like.',
+  gMir:'Mirrors', gLens:'Lenses', img:'Image', obj:'Object position',
+  names:{plane:'Plane mirror', concave:'Concave mirror', convex:'Convex mirror', conv:'Converging lens', div:'Diverging lens'},
+  tabs:{plane:'Plane', concave:'Concave', convex:'Convex', conv:'Converging', div:'Diverging'},
+  real:'Real', virt:'Virtual', up:'Upright', inv:'Inverted', larger:'Larger', smaller:'Smaller', same:'Same size',
+  noImg:'No image forms', inf:'at infinity',
+  u:'Object', v:'Image', m:'Magnification', front:'in front of the mirror', behind:'behind the mirror',
+  other:'on the other side of the lens', sameSide:'on the same side as the object', off:'(off screen)',
+  play:'Sweep', pause:'Pause', showf:'Show the formula (teacher)',
+  hint:'Drag the object arrow on the diagram or use the slider. "Sweep" brings it slowly from far away towards the mirror/lens.',
+  r1:'parallel → through F', r2:'through F → parallel', r3m:'through C → straight back', r3l:'through the centre → straight on', r3p:'to the centre → symmetric',
+  ext:'extension (virtual)', object:'object',
+  foot:'Rays are drawn close to the axis (paraxial). f = 10 cm, so C = 2F = 20 cm. Angles are measured from the normal.' }
+};
+
+/* zones: [key, test, preset u, label el/en, use el/en] */
+const ZONES = {
+ concave:[
+  ['far',  u=>u>=40, 45, ['Πολύ μακριά','Very far away'],
+     ['Οι ακτίνες φτάνουν σχεδόν παράλληλες και συγκεντρώνονται στο F. Έτσι δουλεύει το κάτοπτρο του τηλεσκοπίου και ο ηλιακός φούρνος.','The rays arrive almost parallel and gather at F. This is how a telescope mirror and a solar furnace work.']],
+  ['beyond',u=>u>20.25, 30, ['Πέρα από το C','Beyond C'],
+     ['Το είδωλο σχηματίζεται ανάμεσα στο F και το C, πραγματικό, ανεστραμμένο και μικρότερο. Όσο απομακρύνεται το αντικείμενο, το είδωλο πλησιάζει το F.','The image forms between F and C: real, inverted and smaller. As the object moves away, the image moves towards F.']],
+  ['atC',  u=>u>=19.75, 20, ['Στο C','At C'],
+     ['Αντικείμενο και είδωλο συναντιούνται στο C: πραγματικό, ανεστραμμένο, ίδιο μέγεθος.','Object and image meet at C: real, inverted, same size.']],
+  ['between',u=>u>10.25, 15, ['Ανάμεσα σε C και F','Between C and F'],
+     ['Το είδωλο φεύγει πέρα από το C και μεγαλώνει: πραγματικό, ανεστραμμένο, μεγαλύτερο. Αρχή του προβολέα.','The image moves beyond C and grows: real, inverted, larger. The principle of a projector.']],
+  ['atF',  u=>u>=9.75, 10, ['Στο F','At F'],
+     ['Οι ανακλώμενες ακτίνες βγαίνουν παράλληλες: δεν σχηματίζεται είδωλο. Γι\' αυτό η λάμπα του προβολέα προσγείωσης και του φακού χειρός μπαίνει στο F.','The reflected rays leave parallel: no image forms. That is why the lamp of a landing light or torch sits at F.']],
+  ['inside',u=>true, 6, ['Μέσα στο F','Inside F'],
+     ['Το είδωλο είναι πίσω από το κάτοπτρο: φανταστικό, όρθιο, μεγεθυμένο. Καθρέφτης μακιγιάζ, ξυρίσματος και επιθεώρησης.','The image is behind the mirror: virtual, upright, magnified. Make-up, shaving and inspection mirrors.']]],
+ conv:[
+  ['far',  u=>u>=28, 31, ['Πολύ μακριά','Very far away'],
+     ['Οι ακτίνες φτάνουν σχεδόν παράλληλες και εστιάζουν στο F′. Έτσι εστιάζει η φωτογραφική μηχανή σε μακρινό θέμα και ο μεγεθυντικός φακός τον ήλιο.','The rays arrive almost parallel and focus at F′. This is how a camera focuses on a distant subject, and how a magnifying glass focuses the Sun.']],
+  ['beyond',u=>u>20.25, 25, ['Πέρα από το 2F','Beyond 2F'],
+     ['Πραγματικό, ανεστραμμένο, μικρότερο, ανάμεσα σε F′ και 2F′. Φωτογραφική μηχανή, το ανθρώπινο μάτι.','Real, inverted, smaller, between F′ and 2F′. Camera, the human eye.']],
+  ['atC',  u=>u>=19.75, 20, ['Στο 2F','At 2F'],
+     ['Πραγματικό, ανεστραμμένο, ίδιο μέγεθος, στο 2F′. Φωτοτυπικό 1:1.','Real, inverted, same size, at 2F′. A 1:1 photocopier.']],
+  ['between',u=>u>10.25, 15, ['Ανάμεσα σε 2F και F','Between 2F and F'],
+     ['Πραγματικό, ανεστραμμένο, μεγαλύτερο, πέρα από το 2F′. Προβολέας (projector).','Real, inverted, larger, beyond 2F′. Projector.']],
+  ['atF',  u=>u>=9.75, 10, ['Στο F','At F'],
+     ['Οι ακτίνες βγαίνουν παράλληλες: δεν σχηματίζεται είδωλο. Φακοί προβολέων και φάρων.','The rays leave parallel: no image forms. Searchlight and lighthouse lenses.']],
+  ['inside',u=>true, 5, ['Μέσα στο F','Inside F'],
+     ['Φανταστικό, όρθιο, μεγεθυμένο, στην ίδια πλευρά με το αντικείμενο. Μεγεθυντικός φακός και φακός επιθεώρησης για ρωγμές.','Virtual, upright, magnified, on the same side as the object. Magnifying glass and inspection loupe for cracks.']]],
+ convex:[
+  ['far',u=>u>=25, 40, ['Μακριά','Far'], null],
+  ['near',u=>u>=8, 15, ['Κοντά','Near'], null],
+  ['close',u=>true, 4, ['Πολύ κοντά','Very close'], null]],
+ div:[
+  ['far',u=>u>=20, 28, ['Μακριά','Far'], null],
+  ['near',u=>u>=7, 12, ['Κοντά','Near'], null],
+  ['close',u=>true, 4, ['Πολύ κοντά','Very close'], null]],
+ plane:[
+  ['far',u=>u>=25, 40, ['Μακριά','Far'], null],
+  ['near',u=>u>=8, 15, ['Κοντά','Near'], null],
+  ['close',u=>true, 4, ['Πολύ κοντά','Very close'], null]]
+};
+const USE1 = {
+ convex:['Όπου κι αν είναι το αντικείμενο, το είδωλο είναι πίσω από το κάτοπτρο: φανταστικό, όρθιο, μικρότερο, με μεγάλο οπτικό πεδίο. Πλαϊνοί καθρέφτες αυτοκινήτων, καθρέφτες ασφαλείας στο υπόστεγο.','Wherever the object is, the image is behind the mirror: virtual, upright, smaller, with a wide field of view. Car wing mirrors, security mirrors in the hangar.'],
+ div:['Όπου κι αν είναι το αντικείμενο, το είδωλο είναι φανταστικό, όρθιο, μικρότερο, στην ίδια πλευρά. Ματάκι πόρτας, γυαλιά μυωπίας.','Wherever the object is, the image is virtual, upright, smaller, on the same side. Door peephole, glasses for short sight.'],
+ plane:['Το είδωλο είναι φανταστικό, όρθιο, ίδιο μέγεθος, όσο πίσω από τον καθρέφτη όσο μπροστά είναι το αντικείμενο, με αντιστροφή αριστερά–δεξιά. Καθρέφτες επιθεώρησης, περισκόπιο.','The image is virtual, upright, the same size, as far behind the mirror as the object is in front, laterally inverted. Inspection mirrors, periscope.']
+};
+
+/* ======================= geometry ======================= */
+const W=1000, H=440, YA=220, SC=15, HOBJ=60, FCM=10;
+const EL = {
+ plane:  {mirror:true, f:Infinity, X0:560, umax:36},
+ concave:{mirror:true, f:FCM,  X0:700, umax:45},
+ convex: {mirror:true, f:-FCM, X0:620, umax:36},
+ conv:   {mirror:false,f:FCM,  X0:500, umax:31},
+ div:    {mirror:false,f:-FCM, X0:500, umax:31}
+};
+const S = {el:'concave', u:30, lang:'el', playing:false, showf:false};
+try{ const g=localStorage.getItem('opt-lang'); if(g==='en'||g==='el') S.lang=g; }catch(e){}
+const L = () => T[S.lang];
+
+function solve(){
+  const e=EL[S.el], u=S.u, f=e.f, k=1/f-1/u;               // 1/v = 1/f − 1/u
+  if (Math.abs(k)<1e-4) return {inf:true};
+  const v=1/k, m=-v/u;                                       // m > 0 upright, m < 0 inverted
+  return {inf:false, v, m, real:v>0};
+}
+
+/* draw a ray segment from (x1,y1) in direction (dx,dy) out to the frame */
+function toEdge(x,y,dx,dy){
+  const n=Math.hypot(dx,dy); dx/=n; dy/=n; let t=4000;
+  if (dx>1e-9) t=Math.min(t,(W+20-x)/dx); if (dx<-1e-9) t=Math.min(t,(-20-x)/dx);
+  if (dy>1e-9) t=Math.min(t,(H+20-y)/dy); if (dy<-1e-9) t=Math.min(t,(-20-y)/dy);
+  return [x+dx*t, y+dy*t];
+}
+const line=(x1,y1,x2,y2,c,dash,w=2.4,op=1)=>`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${c}" stroke-width="${w}" ${dash?'stroke-dasharray="7 6"':''} opacity="${op}" stroke-linecap="round"/>`;
+function arrow(x,h,c,dash,id){                                // vertical arrow from the axis, h>0 = up
+  const y2=YA-h, s=Math.sign(h)||1, hw=9;
+  return `<g ${id?`id="${id}"`:''}><line x1="${x}" y1="${YA}" x2="${x}" y2="${y2+s*10}" stroke="${c}" stroke-width="4" ${dash?'stroke-dasharray="8 6"':''}/>`+
+    `<path d="M${x-hw} ${y2+s*14}L${x} ${y2}L${x+hw} ${y2+s*14}Z" fill="${c}" ${dash?'fill-opacity=".55"':''}/></g>`;
+}
+function mark(x,lab,up){ return `<line x1="${x}" y1="${YA-6}" x2="${x}" y2="${YA+6}" stroke="var(--fg)" stroke-width="2"/><circle cx="${x}" cy="${YA}" r="4" fill="var(--fg)"/>`+
+  `<text x="${x}" y="${YA+(up?-14:26)}" text-anchor="middle" font-size="17" font-weight="600" fill="var(--fg)">${lab}</text>`; }
+
+function elementSVG(e){
+  const X=e.X0, h=170;
+  if (e.mirror){
+    const sag = S.el==='plane'?0:(S.el==='concave'?-22:22);
+    const p=`M${X+sag} ${YA-h} Q${X-sag} ${YA} ${X+sag} ${YA+h}`;
+    let hatch=''; for(let y=YA-h+8;y<YA+h;y+=16){ const xo=X+(sag*Math.pow((y-YA)/h,2))+3; hatch+=`<line x1="${xo}" y1="${y}" x2="${xo+12}" y2="${y-10}" stroke="var(--muted)" stroke-width="1.2"/>`; }
+    return hatch+`<path d="${p}" fill="none" stroke="var(--glass-edge)" stroke-width="5" stroke-linecap="round"/>`;
+  }
+  const b = S.el==='conv'?24:-14, t=S.el==='conv'?4:16;
+  const p=`M${X-t} ${YA-h} Q${X-t-b*2} ${YA} ${X-t} ${YA+h} L${X+t} ${YA+h} Q${X+t+b*2} ${YA} ${X+t} ${YA-h}Z`;
+  return `<path d="${p}" fill="var(--glass)" stroke="var(--glass-edge)" stroke-width="2.5"/>`;
+}
+
+function draw(){
+  const e=EL[S.el], X=e.X0, u=S.u, f=e.f, xo=X-u*SC, h=HOBJ, P=[xo,YA-h];
+  const sol=solve(), p=e.mirror?-1:1, lab=L();
+  let g='', rays='', virt='';
+  /* faint grid */
+  for(let x=0;x<=W;x+=SC*5) g+=`<line x1="${x}" y1="0" x2="${x}" y2="${H}" stroke="#ffffff" stroke-opacity=".035"/>`;
+  g+=`<line x1="0" y1="${YA}" x2="${W}" y2="${YA}" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="2 5"/>`;
+
+  /* focal points */
+  let marks='';
+  if (isFinite(f)){
+    const F=Math.abs(f)*SC;
+    if (e.mirror){
+      const s = f>0?-1:1;                                    // concave: F, C in front; convex: behind
+      marks+=mark(X+s*F,'F',f<0)+mark(X+s*2*F,'C',f<0);
+    } else {
+      marks+=mark(X-F,'F')+mark(X-2*F,'2F')+mark(X+F,'F′')+mark(X+2*F,'2F′');
+    }
+  }
+
+  /* where each incoming ray hits the element plane (height above the axis, px) */
+  const hits=[];
+  hits.push({h:h, c:'var(--r1)'});
+  if (isFinite(f) && Math.abs(u-f)>0.15) hits.push({h:-h*f/(u-f), c:'var(--r2)'});
+  if (!e.mirror) hits.push({h:0, c:'var(--r3)'});
+  else if (S.el==='plane') hits.push({h:0, c:'var(--r3)', vertex:true});
+  else if (Math.abs(u-2*f)>0.3) hits.push({h:-2*f*h/(u-2*f), c:'var(--r3)'});
+
+  let xi=null, hi=null;
+  if (!sol.inf){ xi = e.mirror ? X-sol.v*SC : X+sol.v*SC; hi = sol.m*h; }
+  for (const r of hits){
+    const Ex=X, Ey=YA-r.h;
+    rays+=line(P[0],P[1],Ex,Ey,r.c,false);
+    let dx,dy;
+    if (sol.inf){
+      dx = e.mirror ? -u*SC : u*SC; dy = h;                  // all outgoing rays parallel
+      const q=toEdge(Ex,Ey,dx,dy); rays+=line(Ex,Ey,q[0],q[1],r.c,false);
+      continue;
+    }
+    dx = xi-Ex; dy = (YA-hi)-Ey;
+    if (Math.abs(dx)<0.5) continue;
+    if (dx*p>0){                                              // real image: rays really pass through it
+      const q=toEdge(Ex,Ey,dx,dy); rays+=line(Ex,Ey,q[0],q[1],r.c,false);
+    } else {                                                  // virtual: rays diverge, extensions meet behind
+      const q=toEdge(Ex,Ey,-dx,-dy); rays+=line(Ex,Ey,q[0],q[1],r.c,false);
+      virt+=line(Ex,Ey,xi,YA-hi,r.c,true,1.8,.65);
+    }
+  }
+
+  let img='';
+  if (!sol.inf && xi>-50 && xi<W+50) img = arrow(xi,hi,sol.real?'var(--r1)':'var(--r2)',!sol.real);
+
+  const svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${lab.names[S.el]}" id="svg">
+    <defs><clipPath id="clip"><rect width="${W}" height="${H}"/></clipPath></defs>
+    <g clip-path="url(#clip)">${g}${elementSVG(e)}${virt}${rays}${marks}${img}
+    ${arrow(xo,h,'var(--accent)',false,'obj')}
+    <circle id="grab" cx="${xo}" cy="${YA-h}" r="22" fill="var(--accent)" fill-opacity=".12" stroke="var(--accent)" stroke-opacity=".5" style="cursor:grab"/>
+    <text x="${xo}" y="${YA-h-30}" text-anchor="middle" font-size="14" fill="var(--accent)">${lab.object}</text></g></svg>`;
+  $('diagram').innerHTML = svg;
+  bindDrag();
+  readout(sol);
+}
+
+function readout(sol){
+  const lab=L(), e=EL[S.el], b=[];
+  let read=`<span>${lab.u}: <b>u = ${fmt(S.u)} cm</b></span>`;
+  if (sol.inf){
+    b.push(`<span class="badge acc">${lab.noImg}</span>`);
+    read+=`<span>${lab.v}: <b>${lab.inf}</b></span>`;
+  } else {
+    const am=Math.abs(sol.m);
+    b.push(`<span class="badge ${sol.real?'real':'virt'}">${sol.real?lab.real:lab.virt}</span>`);
+    b.push(`<span class="badge">${sol.m>0?lab.up:lab.inv}</span>`);
+    b.push(`<span class="badge">${Math.abs(am-1)<0.03?lab.same:(am>1?lab.larger:lab.smaller)}</span>`);
+    const side = e.mirror ? (sol.v>0?lab.front:lab.behind) : (sol.v>0?lab.other:lab.sameSide);
+    const xi = e.mirror ? e.X0-sol.v*SC : e.X0+sol.v*SC;
+    const off = (xi<0||xi>W||Math.abs(sol.m*HOBJ)>YA) ? ' '+lab.off : '';
+    read+=`<span>${lab.v}: <b>${fmt(Math.abs(sol.v))} cm</b> ${side}${off}</span><span>${lab.m}: <b>${fmt(am,2)}×</b></span>`;
+  }
+  $('badges').innerHTML=b.join(''); $('read').innerHTML=read;
+  const z=zoneOf(); const zi=ZONES[S.el].find(r=>r[0]===z);
+  $('zone').textContent = zi[3][S.lang==='el'?0:1];
+  $('use').textContent = zi[4] ? zi[4][S.lang==='el'?0:1] : USE1[S.el][S.lang==='el'?0:1];
+  document.querySelectorAll('#pills .pill').forEach(x=>x.setAttribute('aria-current', x.dataset.z===z));
+  const F = $('formula'); F.hidden = !S.showf;
+  if (S.showf){
+    F.innerHTML = !isFinite(EL[S.el].f) ? 'v = −u' :
+      `1/f = 1/u + 1/v &nbsp;⇒&nbsp; 1/v = 1/${fmt(EL[S.el].f)} − 1/${fmt(S.u)}` + (sol.inf?' = 0 &nbsp;⇒&nbsp; v → ∞':` &nbsp;⇒&nbsp; v = ${fmt(sol.v)} cm, &nbsp;m = −v/u = ${fmt(sol.m,2)}`);
+  }
+}
+function zoneOf(){ return ZONES[S.el].find(r=>r[1](S.u))[0]; }
+
+/* ======================= interaction ======================= */
+function setU(u){ const e=EL[S.el]; u=clamp(u,1,e.umax);
+  for (const r of ZONES[S.el]) if (Math.abs(u-r[2])<0.25) u=r[2];  // snap onto the special points
+  S.u=Math.round(u*10)/10; $('u').value=S.u; draw(); }
+function bindDrag(){
+  const svg=$('svg'), grab=$('grab');
+  const toU=ev=>{ const r=svg.getBoundingClientRect(); const x=(ev.clientX-r.left)/r.width*W; return (EL[S.el].X0-x)/SC; };
+  grab.onpointerdown=ev=>{ ev.preventDefault(); stop(); grab.setPointerCapture(ev.pointerId);
+    grab.onpointermove=m=>setU(toU(m));
+    grab.onpointerup=()=>{ grab.onpointermove=null; }; };
+}
+let raf=null;
+function stop(){ S.playing=false; cancelAnimationFrame(raf); $('play').textContent=L().play; }
+function play(){
+  if (S.playing){ stop(); return; }
+  S.playing=true; $('play').textContent=L().pause;
+  if (S.u<3) S.u=EL[S.el].umax;
+  let last=performance.now();
+  const step=t=>{ if(!S.playing) return; const dt=(t-last)/1000; last=t;
+    S.u=Math.max(2, S.u-dt*3.2); $('u').value=S.u; draw();
+    if (S.u<=2) { stop(); return; } raf=requestAnimationFrame(step); };
+  raf=requestAnimationFrame(step);
+}
+function setEl(k){
+  stop(); S.el=k; const e=EL[k];
+  $('u').max=e.umax; S.u=ZONES[k][1][2];
+  try{ history.replaceState(null,'','#'+k); }catch(err){}
+  renderStatic(); setU(S.u);
+}
+function renderStatic(){
+  const lab=L();
+  document.documentElement.lang=S.lang;
+  $('h1').textContent=lab.h1; $('sub').textContent=lab.sub; document.title=lab.h1;
+  $('g-mir').textContent=lab.gMir; $('g-lens').textContent=lab.gLens;
+  $('img-h').textContent=lab.img; $('obj-h').textContent=lab.obj;
+  $('el-name').textContent=lab.names[S.el];
+  document.querySelectorAll('[data-e]').forEach(b=>{ b.textContent=lab.tabs[b.dataset.e]; b.setAttribute('aria-pressed', b.dataset.e===S.el); });
+  $('lang-el').setAttribute('aria-pressed',S.lang==='el'); $('lang-en').setAttribute('aria-pressed',S.lang==='en');
+  $('play').textContent=S.playing?lab.pause:lab.play; $('showf-l').textContent=lab.showf; $('hint').textContent=lab.hint; $('foot').textContent=lab.foot;
+  $('pills').innerHTML = ZONES[S.el].map(r=>`<button class="pill" data-z="${r[0]}" data-u="${r[2]}">${r[3][S.lang==='el'?0:1]}</button>`).join('');
+  document.querySelectorAll('#pills .pill').forEach(b=>b.onclick=()=>{ stop(); setU(+b.dataset.u); });
+  const r3 = S.el==='plane'?lab.r3p:(EL[S.el].mirror?lab.r3m:lab.r3l);
+  $('legend').innerHTML = (S.el==='plane'?`<span><i style="border-color:var(--r1)"></i>${S.lang==='el'?'παράλληλη → πίσω παράλληλη':'parallel → back parallel'}</span>`:
+    `<span><i style="border-color:var(--r1)"></i>${lab.r1}</span><span><i style="border-color:var(--r2)"></i>${lab.r2}</span>`)+
+    `<span><i style="border-color:var(--r3)"></i>${r3}</span><span><i class="d" style="border-color:var(--muted)"></i>${lab.ext}</span>`;
+}
+
+document.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>setEl(b.dataset.e));
+$('lang-el').onclick=()=>{ S.lang='el'; try{localStorage.setItem('opt-lang','el');}catch(e){} renderStatic(); draw(); };
+$('lang-en').onclick=()=>{ S.lang='en'; try{localStorage.setItem('opt-lang','en');}catch(e){} renderStatic(); draw(); };
+$('u').oninput=ev=>{ stop(); setU(+ev.target.value); };
+$('play').onclick=play;
+$('showf').onchange=ev=>{ S.showf=ev.target.checked; draw(); };
+
+const h0=(location.hash||'').slice(1);
+setEl(EL[h0]?h0:'concave');
+</script>
+</body>
+</html>
