@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Motion, Forces &amp; Energy</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600&display=swap">
+<link rel="stylesheet" href="assets/sim.css">
+<link rel="stylesheet" href="assets/theme.css">
+<style>
+/* The chain Newton → kinematics → energy, one box per step. */
+.chain{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 4px}
+@media (max-width:860px){.chain{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:480px){.chain{grid-template-columns:1fr}}
+.step{border:1px solid var(--line);background:#0d0c0a;padding:10px 12px;position:relative}
+.step h3{margin:0 0 6px;font:700 13px var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.step p{margin:2px 0;font:14px/1.6 var(--f-mono)}
+.step p.f{color:var(--muted);font-size:13px}
+.step b{color:var(--fg)}
+.timebar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 4px 0}
+.timebar input{flex:1;min-width:180px;accent-color:var(--accent);box-shadow:none;border:0;background:none}
+.timebar output{font:16px var(--f-mono);min-width:90px}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="h1"></h1>
+  <p id="sub"></p>
+  <nav><a href="index.html">← Home</a><a href="test.html">Test builder</a><a href="weight.html">Weight &amp; Balance</a><a href="machines.html">Simple Machines</a></nav>
+</header>
+<main>
+<div class="wrap">
+  <div class="topbar">
+    <p class="title" id="title"></p>
+    <div class="tools">
+      <div class="grp"><small id="g-mode"></small><div class="seg" role="group" id="modes"></div></div>
+      <div class="grp"><small id="g-units"></small><div class="seg" role="group" id="units"></div></div>
+      <div class="grp"><small>&nbsp;</small><div class="seg" role="group" aria-label="Language">
+        <button id="lang-el" type="button">ΕΛ</button><button id="lang-en" type="button">EN</button></div></div>
+    </div>
+  </div>
+
+  <section class="card">
+    <div class="fig"><svg id="view" viewBox="0 0 1000 300" role="img" aria-label="Motion diagram"><g id="scene"></g></svg></div>
+    <div class="timebar">
+      <button class="btn primary" id="play" type="button"></button>
+      <input type="range" id="t" min="0" max="1000" step="1" value="0" aria-label="time">
+      <output id="t-o"></output>
+    </div>
+    <p class="note" id="hint" style="margin:8px 4px 0"></p>
+  </section>
+
+  <section class="card">
+    <h2 id="chain-h"></h2>
+    <div class="chain" id="chain"></div>
+  </section>
+
+  <div class="lower">
+    <section class="card">
+      <h2 id="graph-h"></h2>
+      <div class="fig"><svg id="graph" viewBox="0 0 520 330" role="img" aria-label="Graphs"></svg></div>
+    </section>
+    <section class="card">
+      <h2 id="energy-h"></h2>
+      <div class="fig"><svg id="energy" viewBox="0 0 520 330" role="img" aria-label="Energy"></svg></div>
+      <p class="note" id="energy-note" style="margin:6px 4px 0"></p>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2 id="ctl-h"></h2>
+    <div id="presets" class="row"></div>
+    <div id="controls"></div>
+  </section>
+
+  <section class="card quiz" id="quiz"></section>
+  <p class="note" id="foot"></p>
+</div>
+</main>
+
+<script src="assets/sim.js"></script>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const {SimPage, Quiz, rnd, pick} = Sim;
+
+/* ============================ texts ============================ */
+const T = {
+ el: {
+  h1: 'Κίνηση, δυνάμεις, ενέργεια', sub: 'Από τη δύναμη στην επιτάχυνση, από την επιτάχυνση στην ταχύτητα και την απόσταση, και από εκεί στο έργο και την ενέργεια.',
+  gMode: 'Σενάριο', gUnits: 'Μονάδες', modes: {runway: 'Διάδρομος', fall: 'Πτώση & ρίψη'},
+  titles: {runway: 'Αεροσκάφος στον διάδρομο', fall: 'Ελεύθερη πτώση και κατακόρυφη ρίψη'},
+  play: 'Αναπαραγωγή', pause: 'Παύση', again: 'Από την αρχή',
+  hints: {runway: 'Διάλεξε σενάριο ή άλλαξε τις δυνάμεις. Πάτα αναπαραγωγή ή σύρε τον χρόνο. Ίδια δύναμη → ίδια επιτάχυνση → η ταχύτητα αυξάνεται γραμμικά.',
+          fall: 'Η μόνη δύναμη είναι το βάρος, άρα a = g για κάθε μάζα. Η δυναμική ενέργεια γίνεται κινητική· το άθροισμα μένει σταθερό.'},
+  chain: 'Η αλυσίδα: δύναμη → κίνηση → ενέργεια',
+  s1: '1. Δυνάμεις', s2: '2. Νόμος του Νεύτωνα', s3: '3. Κινηματική', s4: '4. Έργο & ενέργεια',
+  graph: 'Γραφήματα', energy: 'Ενέργεια',
+  ctl: 'Ρυθμίσεις', mass: 'Μάζα m', thrust: 'Ώθηση F', resist: 'Αντίσταση R (τριβή + οπισθέλκουσα + φρένα)', u0: 'Αρχική ταχύτητα u',
+  h0: 'Αρχικό ύψος h', up: 'Ταχύτητα ρίψης προς τα πάνω u',
+  presets: {take: 'Απογείωση', cruise: 'Σταθερή ταχύτητα', land: 'Προσγείωση (φρενάρισμα)', drop: 'Αφήνω να πέσει', throw: 'Ρίχνω προς τα πάνω'},
+  fnet: 'Συνισταμένη', area: 'εμβαδόν = απόσταση', vt: 'v–t', st: 's–t', ht: 'h–t',
+  noMove: 'Δεν κινείται: η ώθηση δεν ξεπερνά την αντίσταση.',
+  stopped: 'Σταμάτησε', ground: 'Στο έδαφος', top: 'Μέγιστο ύψος',
+  ke0: 'KE αρχική', wF: '+ έργο ώθησης', wR: '− έργο αντίστασης', ke: '= KE τώρα', pe: 'Δυναμική PE', keNow: 'Κινητική KE', tot: 'Σύνολο',
+  eNoteRun: 'Το έργο της συνισταμένης δύναμης ισούται με τη μεταβολή της κινητικής ενέργειας: (F − R)·s = ½mv² − ½mu². Το έργο της αντίστασης γίνεται θερμότητα.',
+  eNoteFall: 'Χωρίς αντίσταση αέρα: PE + KE = σταθερό. Στο μέγιστο ύψος KE = 0· στο έδαφος PE = 0.',
+  weight: 'βάρος', lift: 'κάθετη', n1: 'F = R: η συνισταμένη είναι μηδέν, άρα a = 0 και η ταχύτητα μένει σταθερή (1ος νόμος).',
+  foot: 'Οι εξισώσεις ισχύουν για σταθερή επιτάχυνση: v = u + a·t, s = u·t + ½·a·t², v² = u² + 2·a·s. g = 10 m/s² ή 32 ft/s², όπως στις ασκήσεις. Στο αγγλοσαξονικό σύστημα η μάζα μετριέται σε slug (1 slug = 1 lb·s²/ft).'
+ },
+ en: {
+  h1: 'Motion, forces, energy', sub: 'From force to acceleration, from acceleration to speed and distance, and from there to work and energy.',
+  gMode: 'Scenario', gUnits: 'Units', modes: {runway: 'Runway', fall: 'Fall & throw'},
+  titles: {runway: 'Aircraft on the runway', fall: 'Free fall and vertical throw'},
+  play: 'Play', pause: 'Pause', again: 'Start again',
+  hints: {runway: 'Pick a scenario or change the forces. Press play or drag the time. Same force → same acceleration → the speed grows linearly.',
+          fall: 'The only force is the weight, so a = g for any mass. Potential energy turns into kinetic; the sum stays constant.'},
+  chain: 'The chain: force → motion → energy',
+  s1: '1. Forces', s2: '2. Newton\'s law', s3: '3. Kinematics', s4: '4. Work & energy',
+  graph: 'Graphs', energy: 'Energy',
+  ctl: 'Controls', mass: 'Mass m', thrust: 'Thrust F', resist: 'Resistance R (friction + drag + brakes)', u0: 'Initial speed u',
+  h0: 'Initial height h', up: 'Upward launch speed u',
+  presets: {take: 'Take-off', cruise: 'Constant speed', land: 'Landing (braking)', drop: 'Drop', throw: 'Throw up'},
+  fnet: 'Net force', area: 'area = distance', vt: 'v–t', st: 's–t', ht: 'h–t',
+  noMove: 'It does not move: the thrust does not exceed the resistance.',
+  stopped: 'Stopped', ground: 'On the ground', top: 'Maximum height',
+  ke0: 'KE at start', wF: '+ work by thrust', wR: '− work by resistance', ke: '= KE now', pe: 'Potential PE', keNow: 'Kinetic KE', tot: 'Total',
+  eNoteRun: 'The work of the net force equals the change in kinetic energy: (F − R)·s = ½mv² − ½mu². The work of the resistance becomes heat.',
+  eNoteFall: 'No air resistance: PE + KE = constant. At the top KE = 0; at the ground PE = 0.',
+  weight: 'weight', lift: 'normal', n1: 'F = R: the net force is zero, so a = 0 and the speed stays constant (1st law).',
+  foot: 'The equations hold for constant acceleration: v = u + a·t, s = u·t + ½·a·t², v² = u² + 2·a·s. g = 10 m/s² or 32 ft/s², as in the questions. In imperial units mass is in slugs (1 slug = 1 lb·s²/ft).'
+ }
+};
+const page = new SimPage(T);
+const t = () => page.t, f = (x, d = 2) => page.fmt(x, d);
+const UN = {
+  SI:       {m: 'kg', F: 'N', s: 'm', v: 'm/s', a: 'm/s²', E: 'J', g: 10},
+  imperial: {m: 'slug', F: 'lb', s: 'ft', v: 'ft/s', a: 'ft/s²', E: 'ft·lb', g: 32}
+};
+
+/* ============================ models ============================ */
+// Horizontal motion with constant forces. Resistance never pushes the aircraft backwards once it has stopped.
+class RunwayModel {
+  constructor(p) { Object.assign(this, p); }
+  get Fnet() { return this.F - this.R; }
+  get a() { return (this.u === 0 && this.Fnet <= 0) ? 0 : this.Fnet / this.m; }
+  get still() { return this.u === 0 && this.Fnet <= 0; }
+  get tEnd() { return this.a < 0 ? this.u / -this.a : 20; }        // braking: until it stops; otherwise 20 s
+  at(time) {
+    const tt = Math.min(time, this.tEnd), v = this.u + this.a * tt, s = this.u * tt + 0.5 * this.a * tt * tt;
+    return {t: tt, v, s, KE: 0.5 * this.m * v * v, KE0: 0.5 * this.m * this.u * this.u, WF: this.F * s, WR: this.still ? 0 : this.R * s};
+  }
+}
+// Vertical motion under gravity only, up = positive.
+class FallModel {
+  constructor(p) { Object.assign(this, p); }
+  get tEnd() { const g = this.g; return (this.u + Math.sqrt(this.u * this.u + 2 * g * this.h)) / g; }
+  get tTop() { return this.u / this.g; }
+  get hMax() { return this.h + this.u * this.u / (2 * this.g); }
+  at(time) {
+    const tt = Math.min(time, this.tEnd), g = this.g, v = this.u - g * tt, y = Math.max(0, this.h + this.u * tt - 0.5 * g * tt * tt);
+    return {t: tt, v, y, PE: this.m * g * y, KE: 0.5 * this.m * v * v, E: this.m * g * this.h + 0.5 * this.m * this.u * this.u};
+  }
+}
+
+const PRESETS = {
+  SI: {
+    take: {m: 2000, F: 5000, R: 1000, u: 0}, cruise: {m: 2000, F: 3000, R: 3000, u: 30}, land: {m: 2000, F: 0, R: 8000, u: 60},
+    drop: {m: 2, h: 80, u: 0}, throw: {m: 2, h: 0, u: 30}
+  },
+  imperial: {
+    take: {m: 150, F: 900, R: 150, u: 0}, cruise: {m: 150, F: 600, R: 600, u: 100}, land: {m: 150, F: 0, R: 1800, u: 180},
+    drop: {m: 2, h: 256, u: 0}, throw: {m: 2, h: 0, u: 96}
+  }
+};
+const RANGES = {
+  SI:       {m: [500, 5000, 100], F: [0, 20000, 500], R: [0, 20000, 500], u: [0, 80, 1], h: [0, 200, 5], up: [0, 50, 1], mf: [1, 20, 1]},
+  imperial: {m: [30, 300, 5], F: [0, 4000, 50], R: [0, 4000, 50], u: [0, 260, 2], h: [0, 640, 16], up: [0, 160, 2], mf: [1, 20, 1]}
+};
+
+/* ============================ page ============================ */
+class MotionPage {
+  constructor() {
+    this.mode = 'runway'; this.units = 'SI'; this.time = 0; this.playing = false; this.last = null;
+    this.P = {runway: {...PRESETS.SI.take, preset: 'take'}, fall: {...PRESETS.SI.drop, preset: 'drop'}};
+    this.scene = $('scene');
+    page.bindLang($('lang-el'), $('lang-en'));
+    page.onLang(() => this.renderAll());
+    $('play').onclick = () => this.toggle();
+    $('t').oninput = e => { this.stop(); this.time = +e.target.value / 1000 * this.model().tEnd; this.draw(); };
+    this.quiz = new Quiz(page, $('quiz'), QUIZ, {topics: ['kinetics', 'dynamics', 'energy'], tpls: [
+      'kinetics.final_velocity', 'kinetics.acceleration', 'kinetics.time_to_speed', 'kinetics.distance_accel', 'kinetics.distance_mean_speed',
+      'kinetics.v_from_distance', 'kinetics.landing_roll', 'kinetics.free_fall_', 'kinetics.throw_up_height', 'kinetics.vt_graph_area', 'kinetics.accelerated_theory',
+      'dynamics.force_ma', 'dynamics.accel_from_force', 'dynamics.mass_from_force', 'dynamics.net_force_accel', 'dynamics.newton1', 'dynamics.newton2',
+      'energy.work_fs', 'energy.kinetic', 'energy.speed_from_ke', 'energy.potential', 'energy.speed_from_height', 'energy.energy_theory', 'energy2.total_mech_SI']});
+    const h = location.hash.slice(1); if (h === 'fall') this.mode = 'fall';
+    this.renderAll(); this.quiz.next();
+    requestAnimationFrame(ts => this.tick(ts));
+  }
+  get u() { return UN[this.units]; }
+  model() {
+    return this.mode === 'runway' ? new RunwayModel(this.P.runway) : new FallModel({...this.P.fall, g: this.u.g});
+  }
+
+  /* ---------- play ---------- */
+  toggle() {
+    if (this.playing) return this.stop();
+    if (this.time >= this.model().tEnd - 1e-9) this.time = 0;
+    this.playing = true; this.last = null; this.label();
+  }
+  stop() { this.playing = false; this.label(); }
+  label() { $('play').textContent = this.playing ? t().pause : t().play; }
+  tick(ts) {
+    if (this.playing) {
+      if (this.last !== null) {
+        const M = this.model(), speed = Math.max(1, M.tEnd / 8);            // a whole run takes about 8 s on screen
+        this.time = Math.min(M.tEnd, this.time + (ts - this.last) / 1000 * speed);
+        if (this.time >= M.tEnd) this.stop();
+        this.draw();
+      }
+      this.last = ts;
+    }
+    requestAnimationFrame(x => this.tick(x));
+  }
+
+  /* ---------- structure ---------- */
+  setMode(m) { this.mode = m; this.time = 0; this.stop(); try { history.replaceState(null, '', '#' + m); } catch (e) { /* file:// */ } this.renderAll(); }
+  setUnits(un) {
+    if (un === this.units) return;
+    this.units = un; this.time = 0; this.stop();
+    this.P.runway = {...PRESETS[un][this.P.runway.preset || 'take'], preset: this.P.runway.preset || 'take'};
+    this.P.fall = {...PRESETS[un][this.P.fall.preset || 'drop'], preset: this.P.fall.preset || 'drop'};
+    this.renderAll();
+  }
+  renderAll() {
+    const L = t();
+    document.title = L.h1; $('h1').textContent = L.h1; $('sub').textContent = L.sub; $('title').textContent = L.titles[this.mode];
+    $('g-mode').textContent = L.gMode; $('g-units').textContent = L.gUnits; $('hint').textContent = L.hints[this.mode];
+    $('chain-h').textContent = L.chain; $('graph-h').textContent = L.graph; $('energy-h').textContent = L.energy; $('ctl-h').textContent = L.ctl;
+    $('energy-note').textContent = this.mode === 'runway' ? L.eNoteRun : L.eNoteFall; $('foot').textContent = L.foot;
+    $('modes').innerHTML = Object.keys(L.modes).map(k => `<button type="button" data-m="${k}" aria-pressed="${k === this.mode}">${L.modes[k]}</button>`).join('');
+    $('modes').onclick = e => { const b = e.target.closest('[data-m]'); if (b) this.setMode(b.dataset.m); };
+    $('units').innerHTML = ['SI', 'imperial'].map(k => `<button type="button" data-u="${k}" aria-pressed="${k === this.units}">${k === 'SI' ? 'SI' : 'Imperial'}</button>`).join('');
+    $('units').onclick = e => { const b = e.target.closest('[data-u]'); if (b) this.setUnits(b.dataset.u); };
+    this.label(); this.controls(); this.draw();
+  }
+  controls() {
+    const L = t(), u = this.u, R = RANGES[this.units], run = this.mode === 'runway', P = this.P[this.mode];
+    const keys = run ? ['take', 'cruise', 'land'] : ['drop', 'throw'];
+    $('presets').innerHTML = `<div class="seg" role="group">${keys.map(k => `<button type="button" data-p="${k}" aria-pressed="${P.preset === k}">${L.presets[k]}</button>`).join('')}</div>`;
+    $('presets').onclick = e => {
+      const b = e.target.closest('[data-p]'); if (!b) return;
+      this.P[this.mode] = {...PRESETS[this.units][b.dataset.p], preset: b.dataset.p}; this.time = 0; this.stop(); this.controls(); this.draw();
+    };
+    const sl = (k, label, r, unit) => `<div class="row"><label for="s-${k}">${label}</label><input type="range" id="s-${k}" data-k="${k}" min="${r[0]}" max="${r[1]}" step="${r[2]}" value="${P[k]}"><output id="o-${k}">${f(P[k])} ${unit}</output></div>`;
+    $('controls').innerHTML = run
+      ? sl('m', L.mass, R.m, u.m) + sl('F', L.thrust, R.F, u.F) + sl('R', L.resist, R.R, u.F) + sl('u', L.u0, R.u, u.v)
+      : sl('m', L.mass, R.mf, u.m) + sl('h', L.h0, R.h, u.s) + sl('u', L.up, R.up, u.v);
+    $('controls').oninput = e => {
+      const k = e.target.dataset.k; if (!k) return;
+      P[k] = +e.target.value; P.preset = null; this.time = 0;
+      $('o-' + k).textContent = f(P[k]) + ' ' + ({m: u.m, F: u.F, R: u.F, u: u.v, h: u.s})[k];
+      $('presets').querySelectorAll('[data-p]').forEach(b => b.setAttribute('aria-pressed', 'false'));
+      this.draw();
+    };
+  }
+
+  draw() {
+    const M = this.model(), S = M.at(this.time), end = M.tEnd;
+    $('t').value = end > 0 ? Math.round(this.time / end * 1000) : 0;
+    $('t-o').textContent = 't = ' + f(S.t, 1) + ' s';
+    if (this.mode === 'runway') this.drawRunway(M, S); else this.drawFall(M, S);
+  }
+
+  /* ---------- helpers ---------- */
+  arrow(x1, y1, x2, y2, col, w = 4) {
+    const dx = x2 - x1, dy = y2 - y1, n = Math.hypot(dx, dy); if (n < 2) return '';
+    const ux = dx / n, uy = dy / n, hx = x2 - ux * 12, hy = y2 - uy * 12;
+    return `<line x1="${x1}" y1="${y1}" x2="${hx}" y2="${hy}" stroke="${col}" stroke-width="${w}"/><path d="M${x2} ${y2}L${hx + uy * 7} ${hy - ux * 7}L${hx - uy * 7} ${hy + ux * 7}Z" fill="${col}"/>`;
+  }
+  // Two stacked plots sharing the time axis: top = v(t), bottom = position(t).
+  graphs(M, S, sample, yLabel2) {
+    const L = t(), u = this.u, end = M.tEnd, X0 = 60, W = 440, H = 120, tops = [20, 185];
+    const pts = []; for (let i = 0; i <= 120; i++) { const tt = end * i / 120; pts.push(sample(tt)); }
+    const vmin = Math.min(0, ...pts.map(p => p.v)), vmax = Math.max(1e-9, ...pts.map(p => p.v));
+    const pmax = Math.max(1e-9, ...pts.map(p => p.p));
+    const X = tt => X0 + (end ? tt / end : 0) * W;
+    const Yv = v => tops[0] + H - (v - vmin) / (vmax - vmin || 1) * H, Yp = p => tops[1] + H - p / pmax * H;
+    let g = '';
+    [[tops[0], `v (${u.v})`, vmin, vmax], [tops[1], yLabel2, 0, pmax]].forEach(([y0, lab, lo, hi]) => {
+      g += `<line x1="${X0}" y1="${y0}" x2="${X0}" y2="${y0 + H}" stroke="var(--muted)"/><line x1="${X0}" y1="${y0 + H}" x2="${X0 + W}" y2="${y0 + H}" stroke="var(--muted)"/>` +
+        `<text x="${X0 - 6}" y="${y0 + 10}" text-anchor="end" font-size="11" fill="var(--muted)">${f(hi, 0)}</text><text x="${X0 - 6}" y="${y0 + H}" text-anchor="end" font-size="11" fill="var(--muted)">${f(lo, 0)}</text>` +
+        `<text x="${X0 + 6}" y="${y0 - 4}" font-size="12" fill="var(--fg)">${lab}</text>` +
+        `<text x="${X0 + W}" y="${y0 + H + 14}" text-anchor="end" font-size="11" fill="var(--muted)">${f(end, 1)} s</text>`;
+    });
+    if (vmin < 0) g += `<line x1="${X0}" y1="${Yv(0)}" x2="${X0 + W}" y2="${Yv(0)}" stroke="var(--muted)" stroke-dasharray="3 3"/>`;
+    // shaded area under v–t up to now (= distance travelled, runway only)
+    if (this.mode === 'runway') {
+      let a = `M${X(0)} ${Yv(0)}`; for (let i = 0; i <= 60; i++) { const tt = S.t * i / 60; a += `L${X(tt)} ${Yv(sample(tt).v)}`; }
+      g += `<path d="${a}L${X(S.t)} ${Yv(0)}Z" fill="var(--cold)" fill-opacity=".25"/><text x="${X(S.t / 2)}" y="${Yv(0) - 6}" text-anchor="middle" font-size="11" fill="var(--cold)">${L.area}</text>`;
+    }
+    g += `<polyline points="${pts.map((p, i) => X(end * i / 120) + ',' + Yv(p.v)).join(' ')}" fill="none" stroke="var(--hot)" stroke-width="2.5"/>` +
+      `<polyline points="${pts.map((p, i) => X(end * i / 120) + ',' + Yp(p.p)).join(' ')}" fill="none" stroke="var(--accent)" stroke-width="2.5"/>`;
+    const now = sample(S.t);
+    g += `<line x1="${X(S.t)}" y1="${tops[0]}" x2="${X(S.t)}" y2="${tops[1] + H}" stroke="var(--fg)" stroke-dasharray="2 4"/>` +
+      `<circle cx="${X(S.t)}" cy="${Yv(now.v)}" r="5" fill="var(--hot)"/><circle cx="${X(S.t)}" cy="${Yp(now.p)}" r="5" fill="var(--accent)"/>` +
+      `<text x="${X0 + W}" y="${tops[0] + 12}" text-anchor="end" font-size="12" fill="var(--hot)">v = ${f(now.v, 1)} ${u.v}</text>` +
+      `<text x="${X0 + W}" y="${tops[1] + 12}" text-anchor="end" font-size="12" fill="var(--accent)">${f(now.p, 1)} ${u.s}</text>`;
+    $('graph').innerHTML = g;
+  }
+  // Horizontal bars; positive and negative contributions.
+  bars(items, unit) {
+    const max = Math.max(1e-9, ...items.map(i => Math.abs(i.v))), X0 = 190, W = 300;
+    $('energy').innerHTML = items.map((it, k) => {
+      const y = 22 + k * 62, w = Math.abs(it.v) / max * W;
+      return `<text x="${X0 - 10}" y="${y + 22}" text-anchor="end" font-size="13" fill="var(--fg)">${it.l}</text>` +
+        `<rect x="${X0}" y="${y}" width="${Math.max(1, w)}" height="34" fill="${it.c}" fill-opacity="${it.dim ? .35 : .85}"/>` +
+        `<text x="${X0 + Math.min(w, W - 90) + 8}" y="${y + 22}" font-size="13" fill="var(--fg)" style="paint-order:stroke" stroke="var(--panel)" stroke-width="4">${f(it.v, 0)} ${unit}</text>`;
+    }).join('');
+  }
+  chain(cells) { $('chain').innerHTML = cells.map(c => `<div class="step"><h3>${c[0]}</h3>${c[1]}</div>`).join(''); }
+
+  /* ---------- runway ---------- */
+  drawRunway(M, S) {
+    const L = t(), u = this.u, end = M.tEnd, sEnd = Math.max(1, M.at(end).s), X0 = 110, W = 780, Y = 210;
+    const x = X0 + S.s / sEnd * W;
+    let g = `<rect x="0" y="${Y}" width="1000" height="34" fill="#22201b"/>`;
+    for (let i = 0; i <= 10; i++) g += `<line x1="${X0 + i * W / 10}" y1="${Y + 34}" x2="${X0 + i * W / 10}" y2="${Y + 44}" stroke="var(--muted)"/><text x="${X0 + i * W / 10}" y="${Y + 58}" text-anchor="middle" font-size="12" fill="var(--muted)">${f(sEnd * i / 10, 0)}</text>`;
+    g += `<text x="${X0 + W + 30}" y="${Y + 58}" font-size="12" fill="var(--muted)">${u.s}</text>`;
+    for (let i = 0; i < 20; i++) g += `<rect x="${i * 52}" y="${Y + 15}" width="28" height="4" fill="#d8d0b8" opacity=".5"/>`;
+    // aircraft (side view) with the horizontal forces
+    const ac = `<g transform="translate(${x} ${Y - 4})"><path d="M-70 -22 C-60 -34 -20 -36 10 -34 L40 -30 L58 -26 C66 -24 68 -18 58 -16 L-70 -16Z" fill="#3a3020" stroke="var(--accent)"/>` +
+      `<path d="M-62 -24 L-74 -52 L-58 -52 L-46 -26Z" fill="#3a3020" stroke="var(--accent)"/><rect x="-20" y="-31" width="40" height="5" fill="var(--accent)"/>` +
+      `<circle cx="-30" cy="-6" r="6" fill="#111" stroke="var(--muted)"/><circle cx="40" cy="-6" r="5" fill="#111" stroke="var(--muted)"/></g>`;
+    const fmax = Math.max(M.F, M.R, 1), sc = 120 / fmax, y = Y - 70;
+    g += ac;
+    if (M.F > 0) g += this.arrow(x + 70, y, x + 70 + M.F * sc, y, 'var(--ok)') + `<text x="${x + 76}" y="${y - 10}" font-size="13" fill="var(--ok)">F = ${f(M.F, 0)} ${u.F}</text>`;
+    const halted = M.still || (M.a < 0 && S.t >= end - 1e-6);   // standing still: no friction is pushing it
+    if (M.R > 0 && !halted) g += this.arrow(x - 80, y, x - 80 - M.R * sc, y, 'var(--bad)') + `<text x="${x - 86}" y="${y - 10}" text-anchor="end" font-size="13" fill="var(--bad)">R = ${f(M.R, 0)} ${u.F}</text>`;
+    if (!halted) g += this.arrow(x, Y - 110, x + Math.max(-150, Math.min(150, S.v / Math.max(1, Math.abs(M.u) + Math.abs(M.a) * end) * 150)), Y - 110, 'var(--hot)', 3) +
+      `<text x="${x}" y="${Y - 120}" text-anchor="middle" font-size="13" fill="var(--hot)">v = ${f(S.v, 1)} ${u.v}</text>`;
+    if (M.still) g += `<text x="500" y="40" text-anchor="middle" font-size="16" fill="var(--bad)">${L.noMove}</text>`;
+    else if (M.a < 0 && S.t >= end - 1e-6) g += `<text x="500" y="40" text-anchor="middle" font-size="16" fill="var(--accent)">${L.stopped}: s = ${f(S.s, 1)} ${u.s}</text>`;
+    this.scene.innerHTML = g;
+
+    this.graphs(M, S, tt => { const q = M.at(tt); return {v: q.v, p: q.s}; }, `s (${u.s})`);
+    this.bars([
+      {l: L.ke0, v: S.KE0, c: 'var(--cold)'}, {l: L.wF, v: S.WF, c: 'var(--ok)'}, {l: L.wR, v: S.WR, c: 'var(--bad)'}, {l: L.ke, v: S.KE, c: 'var(--hot)'}
+    ], u.E);
+    const Fn = M.still ? 0 : M.Fnet, a = M.a;
+    this.chain([
+      [L.s1, `<p>F = ${f(M.F, 0)} ${u.F}</p><p>R = ${f(M.R, 0)} ${u.F}</p><p>ΣF = F − R = <b>${f(Fn, 0)} ${u.F}</b></p>`],
+      [L.s2, `<p class="f">a = ΣF / m</p><p>a = ${f(Fn, 0)} / ${f(M.m, 0)}</p><p>a = <b>${f(a, 3)} ${u.a}</b></p>` + (M.F === M.R && M.u > 0 ? `<p class="f">${L.n1}</p>` : '')],
+      [L.s3, `<p class="f">v = u + a·t</p><p>v = ${f(M.u)} + ${f(a, 3)}×${f(S.t, 1)} = <b>${f(S.v, 1)} ${u.v}</b></p><p class="f">s = u·t + ½·a·t²</p><p>s = <b>${f(S.s, 1)} ${u.s}</b></p>`],
+      [L.s4, `<p class="f">W = ΣF·s = ΔKE</p><p>${f(Fn, 0)}×${f(S.s, 1)} = <b>${f(Fn * S.s, 0)} ${u.E}</b></p><p>½mv² − ½mu² = <b>${f(S.KE - S.KE0, 0)} ${u.E}</b></p>`]
+    ]);
+  }
+
+  /* ---------- fall ---------- */
+  drawFall(M, S) {
+    const L = t(), u = this.u, top = M.hMax, Y0 = 270, H = 240, X = 330;
+    const Y = h => Y0 - h / Math.max(1e-9, top) * H;
+    let g = `<rect x="0" y="${Y0}" width="1000" height="30" fill="#22201b"/>`;
+    for (let i = 0; i <= 4; i++) { const h = top * i / 4; g += `<line x1="${X - 120}" y1="${Y(h)}" x2="${X - 110}" y2="${Y(h)}" stroke="var(--muted)"/><text x="${X - 126}" y="${Y(h) + 4}" text-anchor="end" font-size="12" fill="var(--muted)">${f(h, 0)} ${u.s}</text>`; }
+    g += `<line x1="${X - 115}" y1="${Y0}" x2="${X - 115}" y2="${Y(top)}" stroke="var(--muted)"/>`;
+    if (M.h > 0) g += `<rect x="${X - 80}" y="${Y(M.h)}" width="40" height="${Y0 - Y(M.h)}" fill="#2a2620" stroke="#6b5a35"/>`;
+    if (M.u > 0) g += `<line x1="${X - 30}" y1="${Y(top)}" x2="${X + 60}" y2="${Y(top)}" stroke="var(--accent)" stroke-dasharray="4 4"/><text x="${X + 66}" y="${Y(top) + 4}" font-size="12" fill="var(--accent)">${L.top}: ${f(top, 1)} ${u.s}</text>`;
+    const by = Y(S.y) - 14;
+    g += `<circle cx="${X}" cy="${by}" r="14" fill="var(--accent)"/>` +
+      this.arrow(X + 26, by, X + 26, by + 60, 'var(--bad)') + `<text x="${X + 34}" y="${by + 54}" font-size="13" fill="var(--bad)">W = m·g = ${f(M.m * M.g, 0)} ${u.F}</text>`;
+    if (Math.abs(S.v) > 1e-6) g += this.arrow(X - 26, by, X - 26, by - S.v / Math.max(1, Math.abs(M.u) + M.g * M.tEnd) * 120, 'var(--hot)', 3) +
+      `<text x="${X - 34}" y="${by + 4}" text-anchor="end" font-size="13" fill="var(--hot)">v = ${f(S.v, 1)} ${u.v}</text>`;
+    if (S.t >= M.tEnd - 1e-6) g += `<text x="700" y="40" text-anchor="middle" font-size="16" fill="var(--accent)">${L.ground}: v = ${f(Math.abs(S.v), 1)} ${u.v}, t = ${f(S.t, 2)} s</text>`;
+    this.scene.innerHTML = g;
+
+    this.graphs(M, S, tt => { const q = M.at(tt); return {v: q.v, p: q.y}; }, `h (${u.s})`);
+    this.bars([{l: L.pe, v: S.PE, c: 'var(--cold)'}, {l: L.keNow, v: S.KE, c: 'var(--hot)'}, {l: L.tot, v: S.PE + S.KE, c: 'var(--accent)'}], u.E);
+    this.chain([
+      [L.s1, `<p>${L.weight}: W = m·g</p><p>W = ${f(M.m)}×${M.g} = <b>${f(M.m * M.g, 0)} ${u.F}</b></p>`],
+      [L.s2, `<p class="f">a = W / m = m·g / m</p><p>a = <b>g = ${M.g} ${u.a}</b> (${page.lang === 'el' ? 'προς τα κάτω' : 'downwards'})</p>`],
+      [L.s3, `<p class="f">v = u − g·t</p><p>v = ${f(M.u)} − ${M.g}×${f(S.t, 2)} = <b>${f(S.v, 1)} ${u.v}</b></p><p class="f">h = h₀ + u·t − ½·g·t²</p><p>h = <b>${f(S.y, 1)} ${u.s}</b></p>`],
+      [L.s4, `<p class="f">PE = m·g·h, KE = ½·m·v²</p><p>PE = <b>${f(S.PE, 0)}</b>, KE = <b>${f(S.KE, 0)} ${u.E}</b></p><p>PE + KE = <b>${f(S.PE + S.KE, 0)} ${u.E}</b></p>`]
+    ]);
+  }
+}
+
+/* ============================ "Solve it" questions ============================ */
+const Q = (el, en) => ({el, en});
+const fl = (x, d, l) => page.fmtIn(x, d, l);
+const V = (x, u, d = 2) => Q(fl(x, d, 'el') + ' ' + u, fl(x, d, 'en') + ' ' + u);
+const X = (el, en) => Q(el, en);
+const QUIZ = [
+  // dynamics.net_force_accel
+  () => {
+    const m = pick([500, 1000, 2000]), R = pick([500, 1000, 2000]), a = pick([1, 2, 3, 4]), F = R + m * a;
+    return {
+      q: Q(`Αεροσκάφος μάζας ${m} kg δέχεται ώθηση ${F} N και αντίσταση ${R} N. Η επιτάχυνσή του είναι:`, `An aircraft of mass ${m} kg has a thrust of ${F} N and a resistance of ${R} N. Its acceleration is:`),
+      o: [V(a, 'm/s²'), V(F / m, 'm/s²'), V((F + R) / m, 'm/s²')], a: 0,
+      x: X(`ΣF = ${F} − ${R} = ${m * a} N, a = ΣF/m = ${a} m/s². Η επιτάχυνση βγαίνει από τη συνισταμένη, όχι από την ώθηση μόνη.`, `ΣF = ${F} − ${R} = ${m * a} N, a = ΣF/m = ${a} m/s². Use the net force, not the thrust alone.`),
+      apply: () => load('runway', 'SI', {m, F, R, u: 0})
+    };
+  },
+  // dynamics.force_ma
+  () => {
+    const m = pick([200, 500, 800, 1000]), a = pick([2, 3, 4, 5]);
+    return {
+      q: Q(`Σώμα μάζας ${m} kg επιταχύνεται με ${a} m/s². Η συνισταμένη δύναμη που το επιταχύνει είναι:`, `A body of mass ${m} kg accelerates at ${a} m/s². The net force accelerating it is:`),
+      o: [V(m * a, 'N'), V(m / a, 'N'), V(m + a, 'N')], a: 0,
+      x: X(`F = m·a = ${m}×${a} = ${m * a} N.`, `F = m·a = ${m}×${a} = ${m * a} N.`),
+      apply: () => load('runway', 'SI', {m, F: m * a, R: 0, u: 0})
+    };
+  },
+  // kinetics.final_velocity
+  () => {
+    const u0 = pick([0, 10, 20]), a = pick([2, 3, 4, 5]), tt = pick([4, 5, 6, 10]);
+    return {
+      q: Q(`Σώμα με αρχική ταχύτητα ${u0} m/s επιταχύνεται ομαλά με ${a} m/s² για ${tt} s. Η τελική ταχύτητα είναι:`, `A body with initial speed ${u0} m/s accelerates uniformly at ${a} m/s² for ${tt} s. The final speed is:`),
+      o: [V(u0 + a * tt, 'm/s'), V(a * tt, 'm/s'), V(u0 + 0.5 * a * tt * tt, 'm/s')], a: 0,
+      x: X(`v = u + a·t = ${u0} + ${a}×${tt} = ${u0 + a * tt} m/s.`, `v = u + a·t = ${u0} + ${a}×${tt} = ${u0 + a * tt} m/s.`),
+      apply: () => load('runway', 'SI', {m: 1000, F: 1000 * a, R: 0, u: u0}, tt)
+    };
+  },
+  // kinetics.distance_accel
+  () => {
+    const u0 = pick([0, 5, 10]), a = pick([2, 4]), tt = pick([4, 5, 10]), s = u0 * tt + 0.5 * a * tt * tt;
+    return {
+      q: Q(`Σώμα με αρχική ταχύτητα ${u0} m/s επιταχύνεται ομαλά με ${a} m/s² για ${tt} s. Η απόσταση που διανύει είναι:`, `A body with initial speed ${u0} m/s accelerates uniformly at ${a} m/s² for ${tt} s. The distance covered is:`),
+      o: [V(s, 'm'), V(u0 * tt + a * tt * tt, 'm'), V((u0 + a * tt) * tt, 'm')], a: 0,
+      x: X(`s = u·t + ½·a·t² = ${u0}×${tt} + ½×${a}×${tt}² = ${s} m (το εμβαδόν κάτω από το v–t).`, `s = u·t + ½·a·t² = ${u0}×${tt} + ½×${a}×${tt}² = ${s} m (the area under the v–t graph).`),
+      apply: () => load('runway', 'SI', {m: 1000, F: 1000 * a, R: 0, u: u0}, tt)
+    };
+  },
+  // kinetics.landing_roll
+  () => {
+    const u0 = pick([40, 50, 60, 80]), a = pick([2, 4, 5]), s = u0 * u0 / (2 * a);
+    return {
+      q: Q(`Αεροσκάφος προσγειώνεται με ${u0} m/s και επιβραδύνεται ομαλά με ${a} m/s² μέχρι να σταματήσει. Η απόσταση στάσης είναι:`, `An aircraft touches down at ${u0} m/s and decelerates uniformly at ${a} m/s² until it stops. The stopping distance is:`),
+      o: [V(s, 'm'), V(u0 / a, 'm'), V(u0 * u0 / a, 'm')], a: 0,
+      x: X(`0 = u² − 2·a·s ⇒ s = u²/(2a) = ${u0}²/(2×${a}) = ${fl(s, 1, 'el')} m.`, `0 = u² − 2·a·s so s = u²/(2a) = ${u0}²/(2×${a}) = ${fl(s, 1, 'en')} m.`),
+      apply: () => load('runway', 'SI', {m: 2000, F: 0, R: 2000 * a, u: u0}, 1e9)
+    };
+  },
+  // kinetics.time_to_speed (imperial)
+  () => {
+    const a = pick([4, 5, 8, 10]), v = a * pick([5, 6, 10, 15]);
+    return {
+      q: Q(`Όχημα ξεκινά από ηρεμία και επιταχύνεται ομαλά με ${a} ft/s². Σε πόσο χρόνο φτάνει τα ${v} ft/s;`, `The vehicle starts from rest and accelerates uniformly at ${a} ft/s². How long does it take to reach ${v} ft/s?`),
+      o: [V(v / a, 's'), V(v * a, 's'), V(v + a, 's')], a: 0,
+      x: X(`v = a·t ⇒ t = v/a = ${v}/${a} = ${v / a} s.`, `v = a·t so t = v / a = ${v}/${a} = ${v / a} s.`),
+      apply: () => load('runway', 'imperial', {m: 100, F: 100 * a, R: 0, u: 0}, v / a)
+    };
+  },
+  // kinetics.free_fall_time / free_fall_speed
+  () => {
+    const tt = pick([2, 3, 4, 5, 6]), h = 0.5 * 10 * tt * tt;
+    if (Math.random() < .5) return {
+      q: Q(`Σώμα αφήνεται από ύψος ${h} m (g = 10 m/s², χωρίς αντίσταση αέρα). Σε πόσο χρόνο φτάνει στο έδαφος;`, `A body is dropped from a height of ${h} m (g = 10 m/s², no air resistance). How long does it take to reach the ground?`),
+      o: [V(tt, 's'), V(h / 10, 's'), V(2 * h / 10, 's')], a: 0,
+      x: X(`h = ½·g·t² ⇒ t = √(2h/g) = √(2×${h}/10) = ${tt} s.`, `h = ½·g·t² so t = √(2h/g) = √(2×${h}/10) = ${tt} s.`),
+      apply: () => load('fall', 'SI', {m: 2, h, u: 0}, 1e9)
+    };
+    return {
+      q: Q(`Σώμα αφήνεται και πέφτει ελεύθερα (g = 32 ft/s², χωρίς αντίσταση αέρα). Η ταχύτητά του μετά από ${tt} s είναι:`, `A body is dropped and falls freely (g = 32 ft/s², no air resistance). Its speed after ${tt} s is:`),
+      o: [V(32 * tt, 'ft/s'), V(16 * tt * tt, 'ft/s'), V(32, 'ft/s')], a: 0,
+      x: X(`v = g·t = 32×${tt} = ${32 * tt} ft/s.`, `v = g·t = 32×${tt} = ${32 * tt} ft/s.`),
+      apply: () => load('fall', 'imperial', {m: 2, h: 16 * tt * tt + 64, u: 0}, tt)
+    };
+  },
+  // kinetics.throw_up_height
+  () => {
+    const u0 = pick([10, 20, 30, 40]), h = u0 * u0 / 20;
+    return {
+      q: Q(`Σώμα ρίχνεται κατακόρυφα προς τα πάνω με ${u0} m/s (g = 10 m/s²). Το μέγιστο ύψος που φτάνει είναι:`, `A body is thrown vertically upwards at ${u0} m/s (g = 10 m/s²). The maximum height it reaches is:`),
+      o: [V(h, 'm'), V(u0 * u0 / 10, 'm'), V(u0 / 10, 'm')], a: 0,
+      x: X(`Στο μέγιστο ύψος v = 0: h = u²/(2g) = ${u0}²/20 = ${h} m.`, `At the top v = 0: h = u²/(2·g) = ${u0}²/20 = ${h} m.`),
+      apply: () => load('fall', 'SI', {m: 2, h: 0, u: u0}, u0 / 10)
+    };
+  },
+  // energy.kinetic / energy.potential / energy.speed_from_height
+  () => {
+    const k = rnd(0, 2);
+    if (k === 0) {
+      const m = pick([2, 4, 10, 20]), v = pick([3, 4, 5, 10]);
+      return {
+        q: Q(`Σώμα μάζας ${m} kg κινείται με ${v} m/s. Η κινητική του ενέργεια είναι:`, `A body of mass ${m} kg moves at ${v} m/s. Its kinetic energy is:`),
+        o: [V(0.5 * m * v * v, 'J'), V(m * v * v, 'J'), V(0.5 * m * v, 'J')], a: 0,
+        x: X(`KE = ½·m·v² = ½×${m}×${v}² = ${0.5 * m * v * v} J. Η ταχύτητα μπαίνει στο τετράγωνο.`, `KE = ½·m·v² = ½×${m}×${v}² = ${0.5 * m * v * v} J. The speed is squared.`)
+      };
+    }
+    if (k === 1) {
+      const m = pick([2, 5, 10]), h = pick([10, 20, 50]);
+      return {
+        q: Q(`Σώμα μάζας ${m} kg ανεβαίνει σε ύψος ${h} m (g = 10 m/s²). Η δυναμική του ενέργεια είναι:`, `A body of mass ${m} kg is raised to a height of ${h} m (g = 10 m/s²). Its potential energy is:`),
+        o: [V(m * 10 * h, 'J'), V(m * h, 'J'), V(0.5 * m * 10 * h, 'J')], a: 0,
+        x: X(`PE = m·g·h = ${m}×10×${h} = ${m * 10 * h} J.`, `PE = m·g·h = ${m}×10×${h} = ${m * 10 * h} J.`),
+        apply: () => load('fall', 'SI', {m, h, u: 0}, 0)
+      };
+    }
+    const v = pick([10, 20, 30, 40]), h = v * v / 20;
+    return {
+      q: Q(`Σώμα αφήνεται από ύψος ${h} m (g = 10 m/s², χωρίς αντίσταση αέρα). Με διατήρηση της ενέργειας, η ταχύτητά του στο έδαφος είναι:`, `A body is dropped from a height of ${h} m (g = 10 m/s², no air resistance). Using conservation of energy, its speed at the ground is:`),
+      o: [V(v, 'm/s'), V(2 * 10 * h, 'm/s'), V(10 * h, 'm/s')], a: 0,
+      x: X(`m·g·h = ½·m·v² ⇒ v = √(2gh) = √(2×10×${h}) = ${v} m/s. Η μάζα απλοποιείται.`, `m·g·h = ½·m·v² so v = √(2·g·h) = √(2×10×${h}) = ${v} m/s. The mass cancels.`),
+      apply: () => load('fall', 'SI', {m: 2, h, u: 0}, 1e9)
+    };
+  },
+  // energy.work_fs linked to the runway
+  () => {
+    const F = pick([1000, 2000, 5000]), s = pick([2, 5, 10, 20]);
+    return {
+      q: Q(`Δύναμη ${F} N μετακινεί σώμα κατά ${s} m στη διεύθυνσή της. Το έργο είναι:`, `A force of ${F} N moves a body ${s} m along its own direction. The work done is:`),
+      o: [V(F * s, 'J'), V(F / s, 'J'), V(F + s, 'J')], a: 0,
+      x: X(`W = F·s = ${F}×${s} = ${F * s} J.`, `W = F·s = ${F}×${s} = ${F * s} J.`)
+    };
+  },
+  // dynamics.newton1 / newton2 (theory)
+  () => pick([
+    {q: Q('Όταν ένα λεωφορείο φρενάρει απότομα, οι επιβάτες πέφτουν μπροστά γιατί:', 'When a bus brakes suddenly the passengers lurch forward because:'),
+     o: [Q('τα σώματά τους τείνουν να συνεχίσουν με την ίδια ταχύτητα', 'their bodies tend to continue at the same velocity'), Q('η βαρύτητα αυξάνεται', 'gravity increases'), Q('μια δύναμη τους σπρώχνει μπροστά', 'a force pushes them forward')], a: 0,
+     x: Q('Αδράνεια (1ος νόμος): δεν υπάρχει πραγματική δύναμη προς τα μπροστά.', 'Inertia (1st law): there is no real forward force.')},
+    {q: Q('Αεροσκάφος πετά με σταθερή ταχύτητα σε ευθεία. Η συνισταμένη δύναμη πάνω του είναι:', 'An aircraft flies at a constant speed in a straight line. The net force on it is:'),
+     o: [Q('μηδέν', 'zero'), Q('ίση με την ώθηση', 'equal to the thrust'), Q('ίση με το βάρος', 'equal to the weight')], a: 0,
+     x: Q('Σταθερή ταχύτητα σημαίνει a = 0, άρα ΣF = 0: ώθηση = οπισθέλκουσα, άντωση = βάρος.', 'Constant velocity means a = 0, so ΣF = 0: thrust = drag, lift = weight.'),
+     apply: () => load('runway', 'SI', {...PRESETS.SI.cruise}, 5)},
+    {q: Q('Η επιτάχυνση ενός σώματος έχει την ίδια κατεύθυνση με:', 'The acceleration of a body has the same direction as:'),
+     o: [Q('τη συνισταμένη δύναμη', 'the net force'), Q('την ταχύτητα', 'the velocity'), Q('τη μετατόπιση', 'the displacement')], a: 0,
+     x: Q('a = ΣF/m. Στο φρενάρισμα η ταχύτητα είναι μπροστά αλλά η επιτάχυνση πίσω.', 'a = ΣF/m. When braking, the velocity points forward but the acceleration points back.'),
+     apply: () => load('runway', 'SI', {...PRESETS.SI.land}, 4)}
+  ])
+];
+
+function load(mode, units, vals, time = 0) {
+  const P = app; P.mode = mode; P.units = units; P.stop();
+  P.P[mode] = {...vals, preset: null};
+  P.renderAll();
+  P.time = Math.min(time, P.model().tEnd); P.draw();
+}
+
+const app = new MotionPage();
+</script>
+</body>
+</html>
