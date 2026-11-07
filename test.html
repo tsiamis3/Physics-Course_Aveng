@@ -123,7 +123,7 @@ class TestApp {
     this.cfg = cfg; this.board = board; this.Q = bank.questions; this.MISC = bank.misc; this.meta = bank.meta;
     this.topics = Object.keys(bank.meta.topics);
     this.st = new Store();
-    this.F = {topics: new Set(this.topics), units: 'both', d: new Set([1, 2, 3]), n: 20, mode: 'practice', mins: 25, lang: 'both', only: 'all'};
+    this.F = {topics: new Set(this.topics), units: 'both', d: new Set([1, 2, 3]), n: 20, mode: 'practice', mins: 25, lang: 'both', only: 'all', tpl: null};
     this.R = null; this.tick = null;
   }
 
@@ -136,6 +136,7 @@ class TestApp {
     const F = this.F;
     return this.Q.filter(q => {
       if (!skipTopic && !F.topics.has(q.topic)) return false;
+      if (F.tpl && !F.tpl.some(t => t.endsWith('.') ? q.tpl.startsWith(t) : q.tpl === t)) return false;
       if (F.units !== 'both' && q.units !== F.units) return false;
       if (!F.d.has(q.d)) return false;
       const r = this.st.d.q[q.id];
@@ -154,6 +155,7 @@ class TestApp {
   }
 
   // Links from the home page: test.html#topic=statics,fluids&n=20&mode=test&mins=40&go=1
+  // The simulation pages add tpl=cg.,torque.beam_reaction: only those question types (a trailing dot = every type with that prefix).
   applyHash() {
     const p = new URLSearchParams(location.hash.slice(1)), F = this.F;
     if (p.get('topic')) F.topics = new Set(p.get('topic').split(',').filter(t => this.topics.includes(t)));
@@ -164,6 +166,7 @@ class TestApp {
     if (p.get('mins') !== null && p.get('mins') !== '') F.mins = Math.max(0, +p.get('mins') || 0);
     if (['el', 'en', 'both'].includes(p.get('lang'))) F.lang = p.get('lang');
     if (['all', 'new', 'wrong'].includes(p.get('only'))) F.only = p.get('only');
+    if (p.get('tpl')) { const t = p.get('tpl').split(',').map(x => x.trim()).filter(Boolean); if (t.length) F.tpl = t; }
     return p.get('go') === '1';
   }
 
@@ -180,6 +183,7 @@ class TestApp {
       '<h2>Chapters</h2><div class="chips">' + this.topics.map(t =>
         `<button class="chip" type="button" data-t="${t}" aria-pressed="${F.topics.has(t)}">${esc(this.tname(t))}<small>${cnt[t] || 0}</small></button>`).join('') + '</div>' +
       '<div class="chips" style="margin-top:8px"><button class="chip" type="button" id="all">All</button><button class="chip" type="button" id="none">None</button></div>' +
+      (F.tpl ? `<div class="avail">Only the question types of the simulation you came from (${F.tpl.length}).</div><div class="chips"><button class="chip" type="button" id="alltpl">Show every question type</button></div>` : '') +
       '<h2>Units</h2>' + this.seg('units', [['both', 'SI + imperial'], ['SI', 'SI'], ['imperial', 'Imperial']]) +
       '<h2>Difficulty</h2><div class="chips">' + [1, 2, 3].map(d => `<button class="chip" type="button" data-d="${d}" aria-pressed="${F.d.has(d)}">${['Easy', 'Medium', 'Hard'][d - 1]}</button>`).join('') + '</div>' +
       '<h2>My history</h2>' + this.seg('only', [['all', 'All'], ['new', 'Not seen yet'], ['wrong', 'My mistakes']]) +
@@ -216,6 +220,7 @@ class TestApp {
       else if (b.dataset.k) { F[b.dataset.k] = b.dataset.v; }
       else if (b.id === 'all') F.topics = new Set(this.topics);
       else if (b.id === 'none') F.topics = new Set();
+      else if (b.id === 'alltpl') F.tpl = null;
       else if (b.id === 'go') return this.start();
       else if (b.id === 'link') return this.copyLink();
       else return;
@@ -238,6 +243,7 @@ class TestApp {
 
   copyLink() {
     const F = this.F, p = new URLSearchParams({topic: [...F.topics].join(','), units: F.units, d: [...F.d].join(','), n: F.n, mode: F.mode, mins: F.mins, lang: F.lang, only: F.only});
+    if (F.tpl) p.set('tpl', F.tpl.join(','));
     const url = location.href.split('#')[0] + '#' + p, msg = $('msg');
     const show = t => { if (msg) msg.textContent = t; };
     (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(() => show('Link copied. Anyone who opens it gets these filters.'), () => show(url));
@@ -246,7 +252,8 @@ class TestApp {
   // Draw the questions round-robin over the selected chapters, so every chapter is represented.
   start() {
     const F = this.F, by = {};
-    shuffle(this.pool(false)).forEach(q => (by[q.topic] = by[q.topic] || []).push(q));
+    const key = q => F.tpl ? q.tpl : q.topic;           // from a simulation: spread over its question types
+    shuffle(this.pool(false)).forEach(q => (by[key(q)] = by[key(q)] || []).push(q));
     let keys = shuffle(Object.keys(by)), qs = [], i = 0;
     while (qs.length < F.n && keys.length) {
       const k = keys[i % keys.length], q = by[k].shift();

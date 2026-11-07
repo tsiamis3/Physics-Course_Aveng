@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ηλεκτρομαγνητικό κύμα</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600&display=swap">
+<style>
+/* 3D view of the wave on top, spectrum strip, then readouts and controls. */
+:root{
+  --bg:#0b0a09; --panel:#14120f; --fg:#e8e2d0; --muted:#a09882; --line:#4a3f26;
+  --accent:#d9a521; --accent-soft:rgba(217,165,33,.14); --bcol:#8fb8d8;
+  --f-display:"Rajdhani","Barlow Condensed",sans-serif;
+  --f-body:"Source Sans 3",system-ui,sans-serif;
+  --f-mono:"Share Tech Mono",ui-monospace,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 var(--f-body)}
+header{padding:22px max(20px,env(safe-area-inset-left,0px)) 30px}
+header h1{margin:0;font-size:clamp(28px,5vw,44px);line-height:1.05}
+header p{margin:6px 0 0}
+header nav{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:10px}
+main{padding:20px max(16px,env(safe-area-inset-left,0px)) 40px}
+.wrap{max-width:1160px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.topbar{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px}
+.title{font:700 22px var(--f-display);text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin:0}
+.tools{display:flex;gap:12px;flex-wrap:wrap;align-items:end}
+.grp{display:flex;flex-direction:column;gap:3px}
+.grp small{font:12px var(--f-mono);color:var(--muted);letter-spacing:.04em}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:0;overflow:hidden;background:var(--panel);clip-path:none!important}
+.seg button{border:0;background:none;color:var(--fg);font:700 15px var(--f-display);letter-spacing:.08em;text-transform:uppercase;padding:8px 14px;cursor:pointer;clip-path:none;box-shadow:none}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#0b0a09}
+.seg button:focus-visible,.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.card{background:var(--panel);border:1px solid var(--line);padding:16px 20px;min-width:0;margin:0}
+.card h2{font:700 14px var(--f-display);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:2px 4px 6px}
+svg{display:block;width:100%;height:auto}
+#view{touch-action:none;cursor:grab}
+#view:active{cursor:grabbing}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font:13px var(--f-mono);color:var(--muted);margin:8px 4px 0}
+.legend i{display:inline-block;width:22px;height:0;border-top:3px solid;vertical-align:middle;margin-right:6px}
+#spec{cursor:pointer;margin:6px 0 0}
+.lower{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media (max-width:860px){.lower{grid-template-columns:1fr}}
+.big{display:flex;align-items:center;gap:14px;margin:4px 4px 12px}
+.swatch{width:58px;height:58px;flex:none;border:1px solid var(--line);box-shadow:0 0 28px var(--sw,transparent)}
+#cname{font:700 26px/1.1 var(--f-display);text-transform:uppercase;letter-spacing:.05em;margin:0}
+#csub{font:13px var(--f-mono);color:var(--muted);margin:2px 0 0}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+td{padding:6px 4px;border-bottom:1px solid #2d2618;font:15px var(--f-mono)}
+td:first-child{color:var(--muted);font-family:var(--f-body);font-size:14px}
+td b{color:var(--fg);font-weight:500}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 4px 12px}
+.row label{font-size:13px;color:var(--muted);min-width:120px}
+.row input[type=range]{flex:1;min-width:180px;accent-color:var(--accent);box-shadow:none;border:0;background:none}
+.row output{font:15px var(--f-mono);min-width:90px;text-align:right}
+.checks{display:flex;flex-wrap:wrap;gap:8px 18px;margin:0 4px 12px}
+.checks label{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.btn{cursor:pointer;min-width:44px}
+.note{color:var(--muted);font-size:13px;margin:0}
+text{font-family:var(--f-body)}
+</style>
+<link rel="stylesheet" href="assets/theme.css">
+</head>
+<body>
+<header>
+  <h1 id="h1"></h1>
+  <p id="sub"></p>
+  <nav><a href="index.html">← Home</a><a href="formula.html">Formula sheet</a><a href="optics.html">Mirrors &amp; Lenses</a><a href="test.html#topic=optics,waves&tpl=optics.speed_in_medium,optics.index_from_speed,optics.radio_wavelength,optics.light_frequency,optics.angstrom,optics.light_theory,waves.speed_f_lambda,waves.wave_theory&n=10&mode=practice&go=1">Practice questions</a></nav>
+</header>
+<main>
+<div class="wrap">
+  <div class="topbar">
+    <p class="title" id="title"></p>
+    <div class="tools">
+      <div class="grp"><small id="g-med"></small>
+        <div class="seg" role="group" aria-label="Medium" id="media"></div></div>
+      <div class="grp"><small>&nbsp;</small>
+        <div class="seg" role="group" aria-label="Language">
+          <button id="lang-el">ΕΛ</button><button id="lang-en">EN</button>
+        </div></div>
+    </div>
+  </div>
+
+  <section class="card">
+    <div id="stage"><svg id="view" viewBox="0 0 1000 430" role="img" aria-label="Electromagnetic wave"><g id="scene"></g></svg></div>
+    <div class="legend" id="legend"></div>
+    <svg id="spec" viewBox="0 0 1000 70" role="img" aria-label="Visible spectrum"></svg>
+  </section>
+
+  <div class="lower">
+    <section class="card">
+      <h2 id="read-h"></h2>
+      <div class="big"><div class="swatch" id="swatch"></div><div><p id="cname"></p><p id="csub"></p></div></div>
+      <table id="tab"></table>
+    </section>
+    <section class="card">
+      <h2 id="ctl-h"></h2>
+      <div class="row"><label for="lam" id="lam-l"></label><input type="range" id="lam" min="380" max="750" step="1"><output id="lam-o"></output></div>
+      <div class="row"><label for="frq" id="frq-l"></label><input type="range" id="frq" min="400" max="789" step="1"><output id="frq-o"></output></div>
+      <div class="checks">
+        <label><input type="checkbox" id="showE" checked> <span id="showE-l"></span></label>
+        <label><input type="checkbox" id="showB" checked> <span id="showB-l"></span></label>
+        <label><input type="checkbox" id="vecs" checked> <span id="vecs-l"></span></label>
+      </div>
+      <div class="row">
+        <button class="btn primary" id="play"></button>
+        <button class="btn alt" id="reset"></button>
+      </div>
+      <p class="note" id="hint"></p>
+    </section>
+  </div>
+  <p class="note" id="foot"></p>
+</div>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const C = 299792458;
+
+/* ======================= text ======================= */
+const T = {
+ el:{ h1:'Ηλεκτρομαγνητικό κύμα', sub:'Ηλεκτρικό και μαγνητικό πεδίο ταλαντώνονται κάθετα μεταξύ τους και στη διεύθυνση διάδοσης.',
+  title:'Ορατό φως σε 3 άξονες', med:'Μέσο', media:{vac:'Κενό', water:'Νερό', glass:'Γυαλί'},
+  read:'Τιμές', ctl:'Ρυθμίσεις', lam:'Μήκος κύματος λ', frq:'Συχνότητα f',
+  showE:'Ηλεκτρικό πεδίο E', showB:'Μαγνητικό πεδίο B', vecs:'Βέλη πεδίου', play:'Αναπαραγωγή', pause:'Παύση', reset:'Επαναφορά όψης',
+  hint:'Σύρε το διάγραμμα για να το περιστρέψεις. Αλλάζοντας το λ αλλάζει και η f, γιατί c = f·λ. Κάνε κλικ στο φάσμα για να διαλέξεις χρώμα.',
+  rows:{lam0:'λ στο κενό', ang:'σε ångström', f:'Συχνότητα f', T:'Περίοδος T = 1/f', n:'Δείκτης διάθλασης n', v:'Ταχύτητα v = c/n', lamm:'λ μέσα στο μέσο = λ/n', check:'Έλεγχος c = f·λ'},
+  axX:'διάδοση', axE:'E', axB:'B', eLab:'ηλεκτρικό πεδίο E', bLab:'μαγνητικό πεδίο B', kLab:'διεύθυνση διάδοσης',
+  csub:'ορατό φάσμα: 380–750 nm',
+  colours:['Ιώδες','Μπλε','Κυανό','Πράσινο','Κίτρινο','Πορτοκαλί','Κόκκινο'],
+  uv:'UV', ir:'IR',
+  foot:'Το E και το B ταλαντώνονται μαζί (ίδια φάση), κάθετα μεταξύ τους και στη διάδοση. Στο μέσο η συχνότητα μένει ίδια· μικραίνουν η ταχύτητα και το μήκος κύματος, και το χρώμα δεν αλλάζει, γιατί το ορίζει η συχνότητα. Η κίνηση στην οθόνη είναι επιβραδυμένη περίπου 10¹⁴ φορές.' },
+ en:{ h1:'Electromagnetic wave', sub:'The electric and magnetic fields oscillate at right angles to each other and to the direction of travel.',
+  title:'Visible light in 3 axes', med:'Medium', media:{vac:'Vacuum', water:'Water', glass:'Glass'},
+  read:'Values', ctl:'Controls', lam:'Wavelength λ', frq:'Frequency f',
+  showE:'Electric field E', showB:'Magnetic field B', vecs:'Field arrows', play:'Play', pause:'Pause', reset:'Reset view',
+  hint:'Drag the diagram to rotate it. Changing λ also changes f, because c = f·λ. Click the spectrum to pick a colour.',
+  rows:{lam0:'λ in vacuum', ang:'in ångström', f:'Frequency f', T:'Period T = 1/f', n:'Refractive index n', v:'Speed v = c/n', lamm:'λ in the medium = λ/n', check:'Check c = f·λ'},
+  axX:'propagation', axE:'E', axB:'B', eLab:'electric field E', bLab:'magnetic field B', kLab:'direction of travel',
+  csub:'visible spectrum: 380–750 nm',
+  colours:['Violet','Blue','Cyan','Green','Yellow','Orange','Red'],
+  uv:'UV', ir:'IR',
+  foot:'E and B oscillate together (in phase), at right angles to each other and to the direction of travel. In a medium the frequency stays the same; the speed and the wavelength get smaller, and the colour does not change, because the frequency sets it. The motion on screen is slowed down about 10¹⁴ times.' }
+};
+const MEDIA = {vac:1, water:1.33, glass:1.5};
+const S = {lam:520, med:'vac', lang:'el', yaw:-38, pitch:18, t:0, playing:true, showE:true, showB:true, vecs:true};
+try{ const g=localStorage.getItem('em-lang'); if(g==='en'||g==='el') S.lang=g; }catch(e){}
+const L = () => T[S.lang];
+const fmt = (x,d) => { const s=x.toFixed(d); return S.lang==='el' ? s.replace('.',',') : s; };
+
+/* wavelength (nm) → sRGB, the usual piecewise approximation */
+function lamRGB(l){
+  let r=0,g=0,b=0;
+  if (l<440){ r=-(l-440)/60; b=1; } else if (l<490){ g=(l-440)/50; b=1; }
+  else if (l<510){ g=1; b=-(l-510)/20; } else if (l<580){ r=(l-510)/70; g=1; }
+  else if (l<645){ r=1; g=-(l-645)/65; } else { r=1; }
+  let a = l<420 ? .3+.7*(l-380)/40 : (l>700 ? .3+.7*(750-l)/50 : 1);
+  const c = v => Math.round(255*Math.pow(Math.max(0,v)*a,.8));
+  return `rgb(${c(r)},${c(g)},${c(b)})`;
+}
+function colourIdx(l){ return l<450?0 : l<485?1 : l<500?2 : l<565?3 : l<590?4 : l<625?5 : 6; }
+
+/* ======================= 3D view ======================= */
+const W=1000, H=430, SCALE=78, CX=500, CY=215;
+function proj(x,y,z){                                       // rotate about the vertical axis, then tilt
+  const a=S.yaw*Math.PI/180, b=S.pitch*Math.PI/180;
+  const x1=x*Math.cos(a)+z*Math.sin(a), z1=-x*Math.sin(a)+z*Math.cos(a);
+  const y1=y*Math.cos(b)-z1*Math.sin(b), z2=y*Math.sin(b)+z1*Math.cos(b);
+  return [CX+x1*SCALE, CY-y1*SCALE, z2];
+}
+const P = (x,y,z) => { const p=proj(x,y,z); return p[0].toFixed(1)+','+p[1].toFixed(1); };
+function axis(x1,y1,z1,x2,y2,z2,col,lab){
+  const a=proj(x1,y1,z1), b=proj(x2,y2,z2), dx=b[0]-a[0], dy=b[1]-a[1], n=Math.hypot(dx,dy)||1, ux=dx/n, uy=dy/n;
+  const head=`M${b[0]} ${b[1]}L${b[0]-12*ux+5*uy} ${b[1]-12*uy-5*ux}L${b[0]-12*ux-5*uy} ${b[1]-12*uy+5*ux}Z`;
+  return `<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="${col}" stroke-width="1.6" opacity=".85"/><path d="${head}" fill="${col}"/>`+
+    `<text x="${b[0]+ux*16}" y="${b[1]+uy*16+5}" text-anchor="middle" font-size="17" font-weight="600" fill="${col}">${lab}</text>`;
+}
+
+function draw(){
+  const lab=L(), n=MEDIA[S.med], lamM=S.lam/n, col=lamRGB(S.lam);
+  const X0=-5.2, X1=5.2, A=1.6;
+  const k = 2*Math.PI*(lamM>0 ? 2450/lamM : 1)/(X1-X0);    // more cycles on screen for a shorter λ
+  const ph = S.t;
+  let ePts=[], bPts=[], eV='', bV='';
+  const N=260;
+  for (let i=0;i<=N;i++){
+    const x=X0+(X1-X0)*i/N, s=Math.sin(k*(x-X0)-ph);
+    ePts.push(P(x,A*s,0)); bPts.push(P(x,0,A*s));
+  }
+  if (S.vecs){
+    const step=(X1-X0)/34;
+    for (let x=X0;x<=X1+1e-6;x+=step){
+      const s=Math.sin(k*(x-X0)-ph);
+      if (S.showE) eV+=`<line x1="${proj(x,0,0)[0]}" y1="${proj(x,0,0)[1]}" x2="${proj(x,A*s,0)[0]}" y2="${proj(x,A*s,0)[1]}" stroke="${col}" stroke-width="1.6" opacity=".55"/>`;
+      if (S.showB) bV+=`<line x1="${proj(x,0,0)[0]}" y1="${proj(x,0,0)[1]}" x2="${proj(x,0,A*s)[0]}" y2="${proj(x,0,A*s)[1]}" stroke="var(--bcol)" stroke-width="1.6" opacity=".5"/>`;
+    }
+  }
+  /* faint E-plane and B-plane */
+  const plane=(pts,c)=>`<polygon points="${pts.join(' ')}" fill="${c}" fill-opacity=".05" stroke="${c}" stroke-opacity=".18"/>`;
+  const pE=[P(X0,-A,0),P(X1,-A,0),P(X1,A,0),P(X0,A,0)], pB=[P(X0,0,-A),P(X1,0,-A),P(X1,0,A),P(X0,0,A)];
+  /* draw the farther field first so the nearer one sits on top */
+  const eFar = proj(0,1,0)[2] < proj(0,0,1)[2];
+  const eSvg = S.showE ? eV+`<polyline points="${ePts.join(' ')}" fill="none" stroke="${col}" stroke-width="3.4" stroke-linejoin="round" style="filter:drop-shadow(0 0 6px ${col})"/>` : '';
+  const bSvg = S.showB ? bV+`<polyline points="${bPts.join(' ')}" fill="none" stroke="var(--bcol)" stroke-width="3" stroke-linejoin="round"/>` : '';
+  const fields = eFar ? eSvg+bSvg : bSvg+eSvg;
+  $('scene').innerHTML = `
+    ${S.showE?plane(pE,col):''}${S.showB?plane(pB,'#8fb8d8'):''}
+    ${axis(0,-2.2,0,0,2.3,0,'var(--fg)',lab.axE)}${axis(0,0,-2.2,0,0,2.3,'var(--fg)',lab.axB)}
+    ${fields}
+    ${axis(X0-.3,0,0,X1+.5,0,0,'var(--accent)','c')}
+    <text x="${proj(X1+.5,0,0)[0]}" y="${proj(X1+.5,0,0)[1]+34}" text-anchor="middle" font-size="13" fill="var(--accent)">${lab.axX}</text>`;
+}
+
+function spectrum(){
+  let stops=''; for(let l=380;l<=750;l+=10) stops+=`<stop offset="${((l-380)/370*100).toFixed(1)}%" stop-color="${lamRGB(l)}"/>`;
+  const x=100+(S.lam-380)/370*800, lab=L();
+  let ticks=''; for(let l=400;l<=750;l+=50){ const tx=100+(l-380)/370*800; ticks+=`<line x1="${tx}" y1="40" x2="${tx}" y2="46" stroke="var(--muted)"/><text x="${tx}" y="62" text-anchor="middle" font-size="13" fill="var(--muted)">${l}</text>`; }
+  $('spec').innerHTML = `<defs><linearGradient id="g">${stops}</linearGradient></defs>
+    <rect x="100" y="8" width="800" height="32" fill="url(#g)"/>${ticks}
+    <text x="92" y="30" text-anchor="end" font-size="13" fill="var(--muted)">${lab.uv}</text>
+    <text x="908" y="30" font-size="13" fill="var(--muted)">${lab.ir}</text>
+    <path d="M${x} 6 L${x-7} -4 L${x+7} -4Z" fill="var(--fg)" transform="translate(0,4)"/>
+    <rect x="${x-2}" y="6" width="4" height="36" fill="var(--fg)" stroke="#000" stroke-width="1"/>
+    <text x="${x}" y="62" text-anchor="middle" font-size="13" font-weight="600" fill="var(--fg)" style="paint-order:stroke" stroke="var(--panel)" stroke-width="5">${S.lam} nm</text>`;
+}
+
+function readout(){
+  const lab=L(), n=MEDIA[S.med], f=C/(S.lam*1e-9), col=lamRGB(S.lam), r=lab.rows;
+  $('swatch').style.background=col; $('swatch').style.setProperty('--sw',col);
+  $('cname').textContent=lab.colours[colourIdx(S.lam)]; $('cname').style.color=col; $('csub').textContent=lab.csub;
+  const rows=[
+    [r.lam0, `<b>${S.lam} nm</b> = ${fmt(S.lam*1e-9*1e7,1)} × 10⁻⁷ m`],
+    [r.ang, `<b>${(S.lam*10).toLocaleString('en').replace(/,/g,S.lang==='el'?'.':',')} Å</b>`],
+    [r.f, `<b>${fmt(f/1e12,0)} THz</b> = ${fmt(f/1e14,2)} × 10¹⁴ Hz`],
+    [r.T, `<b>${fmt(1e15/f,2)} fs</b> (10⁻¹⁵ s)`],
+    [r.n, `<b>${fmt(n,2)}</b> (${lab.media[S.med]})`],
+    [r.v, `<b>${(C/n/1000).toLocaleString('en',{maximumFractionDigits:0}).replace(/,/g,S.lang==='el'?'.':',')} km/s</b>`],
+    [r.lamm, `<b>${fmt(S.lam/n,0)} nm</b>`],
+    [r.check, `${fmt(f/1e14,2)}×10¹⁴ × ${S.lam}×10⁻⁹ ≈ <b>${fmt(f*S.lam*1e-9/1e8,2)} × 10⁸ m/s</b>`]
+  ];
+  $('tab').innerHTML=rows.map(x=>`<tr><td>${x[0]}</td><td>${x[1]}</td></tr>`).join('');
+  $('lam').value=S.lam; $('frq').value=Math.round(f/1e12);
+  $('lam-o').textContent=S.lam+' nm'; $('frq-o').textContent=fmt(f/1e12,0)+' THz';
+}
+
+function renderStatic(){
+  const lab=L(); document.documentElement.lang=S.lang; document.title=lab.h1;
+  $('h1').textContent=lab.h1; $('sub').textContent=lab.sub; $('title').textContent=lab.title;
+  $('g-med').textContent=lab.med; $('read-h').textContent=lab.read; $('ctl-h').textContent=lab.ctl;
+  $('lam-l').textContent=lab.lam; $('frq-l').textContent=lab.frq;
+  $('showE-l').textContent=lab.showE; $('showB-l').textContent=lab.showB; $('vecs-l').textContent=lab.vecs;
+  $('play').textContent=S.playing?lab.pause:lab.play; $('reset').textContent=lab.reset;
+  $('hint').textContent=lab.hint; $('foot').textContent=lab.foot;
+  $('media').innerHTML=Object.keys(MEDIA).map(k=>`<button data-m="${k}" aria-pressed="${k===S.med}">${lab.media[k]}</button>`).join('');
+  document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{ S.med=b.dataset.m; renderStatic(); all(); });
+  $('lang-el').setAttribute('aria-pressed',S.lang==='el'); $('lang-en').setAttribute('aria-pressed',S.lang==='en');
+  $('legend').innerHTML=`<span><i id="lgE"></i>${lab.eLab}</span><span><i style="border-color:var(--bcol)"></i>${lab.bLab}</span><span><i style="border-color:var(--accent)"></i>${lab.kLab}</span>`;
+}
+function all(){ draw(); spectrum(); readout(); const e=$('lgE'); if(e) e.style.borderColor=lamRGB(S.lam); }
+
+/* ======================= interaction ======================= */
+function bindDrag(){
+  const v=$('view'); let p=null;
+  v.onpointerdown=e=>{ p=[e.clientX,e.clientY,S.yaw,S.pitch]; v.setPointerCapture(e.pointerId); };
+  v.onpointermove=e=>{ if(!p) return; S.yaw=p[2]+(e.clientX-p[0])*0.4; S.pitch=Math.max(-80,Math.min(80,p[3]+(e.clientY-p[1])*0.3)); if(!S.playing) draw(); };
+  v.onpointerup=v.onpointercancel=()=>{ p=null; };
+}
+$('lam').oninput=e=>{ S.lam=+e.target.value; all(); };
+$('frq').oninput=e=>{ S.lam=Math.round(C/(e.target.value*1e12)*1e9); S.lam=Math.max(380,Math.min(750,S.lam)); all(); };
+$('spec').onclick=e=>{ const r=$('spec').getBoundingClientRect(); const x=(e.clientX-r.left)/r.width*1000; S.lam=Math.round(Math.max(380,Math.min(750,380+(x-100)/800*370))); all(); };
+$('showE').onchange=e=>{ S.showE=e.target.checked; draw(); };
+$('showB').onchange=e=>{ S.showB=e.target.checked; draw(); };
+$('vecs').onchange=e=>{ S.vecs=e.target.checked; draw(); };
+$('play').onclick=()=>{ S.playing=!S.playing; $('play').textContent=S.playing?L().pause:L().play; if(S.playing) loop(); };
+$('reset').onclick=()=>{ S.yaw=-38; S.pitch=18; draw(); };
+$('lang-el').onclick=()=>{ S.lang='el'; try{localStorage.setItem('em-lang','el');}catch(e){} renderStatic(); all(); };
+$('lang-en').onclick=()=>{ S.lang='en'; try{localStorage.setItem('em-lang','en');}catch(e){} renderStatic(); all(); };
+
+let last=null;
+const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (reduce) S.playing=false;
+function loop(ts){
+  if(!S.playing){ last=null; return; }
+  if(ts!==undefined){ if(last!==null){ const f=C/(S.lam*1e-9); S.t += (ts-last)/1000 * 2*Math.PI * f/2.6e14; } last=ts; draw(); }
+  requestAnimationFrame(loop);
+}
+bindDrag(); renderStatic(); all(); loop();
+</script>
+</body>
+</html>

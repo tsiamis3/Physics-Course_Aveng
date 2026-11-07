@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Simple Machines</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600&display=swap">
+<link rel="stylesheet" href="assets/sim.css">
+<link rel="stylesheet" href="assets/theme.css">
+</head>
+<body>
+<header>
+  <h1 id="h1"></h1>
+  <p id="sub"></p>
+  <nav><a href="index.html">← Home</a><a href="test.html">Test builder</a><a href="weight.html">Weight &amp; Balance</a></nav>
+</header>
+<main>
+<div class="wrap">
+  <div class="topbar">
+    <p class="title" id="title"></p>
+    <div class="tools">
+      <div class="grp"><small id="g-mode"></small><div class="seg" role="group" id="modes"></div></div>
+      <div class="grp"><small id="g-units"></small><div class="seg" role="group" id="units"></div></div>
+      <div class="grp"><small>&nbsp;</small><div class="seg" role="group" aria-label="Language">
+        <button id="lang-el" type="button">ΕΛ</button><button id="lang-en" type="button">EN</button></div></div>
+    </div>
+  </div>
+
+  <section class="card">
+    <div class="fig"><svg id="view" viewBox="0 0 1000 340" role="img" aria-label="Simple machine diagram"><g id="scene"></g></svg></div>
+    <p class="note" id="hint"></p>
+  </section>
+
+  <div class="lower">
+    <section class="card">
+      <h2 id="calc-h"></h2>
+      <div class="scroll"><table class="calc" id="calc"></table></div>
+      <div class="steps" id="steps"></div>
+      <p class="status" id="status"></p>
+    </section>
+    <section class="card">
+      <h2 id="ctl-h"></h2>
+      <div id="controls"></div>
+    </section>
+  </div>
+
+  <section class="card quiz" id="quiz"></section>
+  <p class="note" id="foot"></p>
+</div>
+</main>
+
+<script src="assets/sim.js"></script>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const {SimPage, Quiz, rnd, pick} = Sim;
+
+/* ============================ texts ============================ */
+const T = {
+ el: {
+  h1: 'Απλές μηχανές', sub: 'Μοχλοί, τροχαλίες, κεκλιμένο επίπεδο και γρανάζια: λιγότερη δύναμη, περισσότερη απόσταση.',
+  gMode: 'Μηχανή', gUnits: 'Μονάδες', modes: {lever: 'Μοχλός', pulley: 'Τροχαλίες', incline: 'Κεκλ. επίπεδο', gears: 'Γρανάζια'},
+  titles: {lever: 'Μοχλός', pulley: 'Πολύσπαστο', incline: 'Κεκλιμένο επίπεδο', gears: 'Γρανάζια και ιμάντες'},
+  calc: 'Υπολογισμός', ctl: 'Ρυθμίσεις',
+  load: 'Φορτίο', effort: 'Δύναμη (effort)', le: 'Βραχίονας δύναμης', ll: 'Βραχίονας φορτίου', cls: 'Κατηγορία',
+  classes: ['1ης', '2ης', '3ης'],
+  classTxt: ['Υπομόχλιο ανάμεσα σε δύναμη και φορτίο. Π.χ. τραμπάλα, πένσα, λοστός.',
+             'Φορτίο ανάμεσα σε υπομόχλιο και δύναμη: πάντα κερδίζουμε δύναμη. Π.χ. καρότσι, καρυοθραύστης.',
+             'Δύναμη ανάμεσα σε υπομόχλιο και φορτίο: χάνουμε δύναμη, κερδίζουμε απόσταση. Π.χ. τσιμπίδα, πήχης.'],
+  segs: 'Τμήματα σχοινιού που κρατούν το φορτίο', eff: 'Απόδοση η', lift: 'Ανύψωση φορτίου', pull: 'Τράβηγμα σχοινιού',
+  len: 'Μήκος ράμπας', hgt: 'Ύψος ράμπας',
+  gType: 'Μετάδοση', gear: 'Γρανάζια', belt: 'Ιμάντας', t1: 'Δόντια κινητήριου', t2: 'Δόντια κινούμενου', d1: 'Διάμετρος κινητήριας', d2: 'Διάμετρος κινούμενης',
+  n1: 'Στροφές κινητήριου', tq1: 'Ροπή κινητήριου', driver: 'κινητήριο', driven: 'κινούμενο',
+  ma: 'Μηχανικό πλεονέκτημα MA', vr: 'Λόγος ταχυτήτων VR', eta: 'Απόδοση η', n2: 'Στροφές κινούμενου', tq2: 'Ροπή κινούμενου', ratio: 'Σχέση μετάδοσης',
+  gain: 'Κέρδος δύναμης', loss: 'Απώλεια δύναμης, κέρδος απόστασης', none: 'Ούτε κέρδος ούτε απώλεια',
+  faster: 'Το κινούμενο γυρίζει πιο γρήγορα, με μικρότερη ροπή', slower: 'Το κινούμενο γυρίζει πιο αργά, με μεγαλύτερη ροπή', same: 'Ίδια ταχύτητα και ροπή',
+  opposite: 'αντίθετη φορά', sameDir: 'ίδια φορά',
+  hints: {lever: 'Άλλαξε κατηγορία και βραχίονες. Ισορροπία: δύναμη × βραχίονας δύναμης = φορτίο × βραχίονας φορτίου.',
+          pulley: 'Κάθε τμήμα σχοινιού κρατά ένα μέρος του φορτίου. Ανέβασε το φορτίο και δες πόσο σχοινί τραβάς.',
+          incline: 'Ιδανική ράμπα (χωρίς τριβή): έργο δύναμης F·L = έργο ανύψωσης W·h.',
+          gears: 'Η ταχύτητα αλλάζει ανάποδα από τα δόντια, η ροπή ανάλογα. Δύο γρανάζια γυρίζουν αντίθετα, ο ιμάντας στην ίδια φορά.'},
+  foot: 'MA = φορτίο / δύναμη. VR = απόσταση δύναμης / απόσταση φορτίου. η = MA / VR × 100%. Σε ιδανική μηχανή MA = VR· καμία μηχανή δεν δίνει περισσότερο έργο από αυτό που της δίνουμε.'
+ },
+ en: {
+  h1: 'Simple machines', sub: 'Levers, pulleys, the inclined plane and gears: less force, more distance.',
+  gMode: 'Machine', gUnits: 'Units', modes: {lever: 'Lever', pulley: 'Pulleys', incline: 'Incline', gears: 'Gears'},
+  titles: {lever: 'Lever', pulley: 'Block and tackle', incline: 'Inclined plane', gears: 'Gears and belts'},
+  calc: 'Calculation', ctl: 'Controls',
+  load: 'Load', effort: 'Effort', le: 'Effort arm', ll: 'Load arm', cls: 'Class',
+  classes: ['1st', '2nd', '3rd'],
+  classTxt: ['Fulcrum between effort and load. E.g. see-saw, pliers, crowbar.',
+             'Load between fulcrum and effort: always a force gain. E.g. wheelbarrow, nutcracker.',
+             'Effort between fulcrum and load: force loss, distance gain. E.g. tweezers, forearm.'],
+  segs: 'Rope segments supporting the load', eff: 'Efficiency η', lift: 'Load raised', pull: 'Rope pulled',
+  len: 'Ramp length', hgt: 'Ramp height',
+  gType: 'Drive', gear: 'Gears', belt: 'Belt', t1: 'Driver teeth', t2: 'Driven teeth', d1: 'Driver diameter', d2: 'Driven diameter',
+  n1: 'Driver speed', tq1: 'Driver torque', driver: 'driver', driven: 'driven',
+  ma: 'Mechanical advantage MA', vr: 'Velocity ratio VR', eta: 'Efficiency η', n2: 'Driven speed', tq2: 'Driven torque', ratio: 'Gear ratio',
+  gain: 'Force gain', loss: 'Force loss, distance gain', none: 'No gain, no loss',
+  faster: 'The driven gear turns faster, with less torque', slower: 'The driven gear turns slower, with more torque', same: 'Same speed and torque',
+  opposite: 'opposite direction', sameDir: 'same direction',
+  hints: {lever: 'Change the class and the arms. Balance: effort × effort arm = load × load arm.',
+          pulley: 'Each rope segment carries part of the load. Raise the load and see how much rope you pull.',
+          incline: 'Ideal ramp (no friction): work by the effort F·L = work to lift W·h.',
+          gears: 'Speed changes inversely with the teeth, torque in proportion. Two meshing gears turn opposite ways; a belt keeps the same direction.'},
+  foot: 'MA = load / effort. VR = effort distance / load distance. η = MA / VR × 100%. In an ideal machine MA = VR; no machine gives out more work than is put in.'
+ }
+};
+const page = new SimPage(T);
+const t = () => page.t, f = (x, d) => page.fmt(x, d);
+const UN = {SI: {F: 'N', D: 'm', d: 'cm', M: 'N·m'}, imperial: {F: 'lb', D: 'ft', d: 'in', M: 'lb·ft'}};
+
+/* ============================ state ============================ */
+const DEF = {
+  lever: {cls: 0, le: 30, ll: 10, W: 300},
+  pulley: {n: 4, W: 400, eta: 100, h: 0.5},
+  incline: {L: 8, h: 2, W: 200},
+  gears: {type: 'gear', T1: 20, T2: 40, n1: 1200, tq1: 30}
+};
+const clone = o => JSON.parse(JSON.stringify(o));
+
+class MachinesPage {
+  constructor() {
+    this.mode = 'lever'; this.units = 'SI'; this.S = clone(DEF); this.ang = 0; this.last = null;
+    this.scene = $('scene');
+    page.bindLang($('lang-el'), $('lang-en'));
+    page.onLang(() => this.renderAll());
+    this.quiz = new Quiz(page, $('quiz'), QUIZ, {topics: ['machines'], tpls: ['machines.lever_ma', 'machines.lever_load', 'machines.lever_effort', 'machines.lever_class',
+      'machines.pulley_effort', 'machines.pulley_distance', 'machines.pulley_actual_effort', 'machines.incline_ma', 'machines.incline_effort',
+      'machines.belt_drive', 'machines.gear_speed', 'machines.gear_torque', 'machines.work_in_out', 'machines.efficiency_ma_vr', 'machines.efficiency_work',
+      'mach2.vr_distances', 'mach2.ma_forces', 'mach2.gear_ma', 'mach2.speed_ratio', 'mach2.ratio_one']});
+    const h = location.hash.slice(1); if (DEF[h]) this.mode = h;
+    this.renderAll(); this.quiz.next();
+    requestAnimationFrame(ts => this.tick(ts));
+  }
+  get u() { return UN[this.units]; }
+  setMode(m) { this.mode = m; try { history.replaceState(null, '', '#' + m); } catch (e) { /* file:// */ } this.renderAll(); }
+
+  renderAll() {
+    const L = t();
+    document.title = L.h1; $('h1').textContent = L.h1; $('sub').textContent = L.sub; $('title').textContent = L.titles[this.mode];
+    $('g-mode').textContent = L.gMode; $('g-units').textContent = L.gUnits; $('calc-h').textContent = L.calc; $('ctl-h').textContent = L.ctl;
+    $('foot').textContent = L.foot; $('hint').textContent = L.hints[this.mode];
+    $('modes').innerHTML = Object.keys(L.modes).map(k => `<button type="button" data-m="${k}" aria-pressed="${k === this.mode}">${L.modes[k]}</button>`).join('');
+    $('modes').onclick = e => { const b = e.target.closest('[data-m]'); if (b) this.setMode(b.dataset.m); };
+    $('units').innerHTML = ['SI', 'imperial'].map(k => `<button type="button" data-u="${k}" aria-pressed="${k === this.units}">${k === 'SI' ? 'SI' : 'Imperial'}</button>`).join('');
+    $('units').onclick = e => { const b = e.target.closest('[data-u]'); if (b) { this.units = b.dataset.u; this.renderAll(); } };
+    this.controls(); this.draw();
+  }
+
+  /* ---------- sliders ---------- */
+  slider(key, label, min, max, step, val) {
+    return `<div class="row"><label for="s-${key}">${label}</label><input type="range" id="s-${key}" data-s="${key}" min="${min}" max="${max}" step="${step}" value="${val}"><output id="o-${key}"></output></div>`;
+  }
+  seg(key, opts, cur) {
+    return `<div class="row"><div class="seg" role="group">${opts.map(([v, l]) => `<button type="button" data-g="${key}" data-v="${v}" aria-pressed="${String(v) === String(cur)}">${l}</button>`).join('')}</div></div>`;
+  }
+  controls() {
+    const L = t(), u = this.u, s = this.S[this.mode];
+    let h = '';
+    if (this.mode === 'lever') {
+      h = this.seg('cls', L.classes.map((c, i) => [i, L.cls + ' ' + c]), s.cls) + `<p class="note" style="margin:0 4px 12px">${L.classTxt[s.cls]}</p>` +
+        this.slider('le', L.le, 5, 60, 5, s.le) + this.slider('ll', L.ll, 5, 60, 5, s.ll) + this.slider('W', L.load, 50, 1000, 10, s.W);
+    } else if (this.mode === 'pulley') {
+      h = this.slider('n', L.segs, 1, 6, 1, s.n) + this.slider('W', L.load, 50, 1200, 10, s.W) + this.slider('eta', L.eff, 40, 100, 5, s.eta) + this.slider('h', L.lift, 0, 1, 0.05, s.h);
+    } else if (this.mode === 'incline') {
+      h = this.slider('L', L.len, 2, 12, 0.5, s.L) + this.slider('h', L.hgt, 0.5, 6, 0.5, s.h) + this.slider('W', L.load, 50, 1000, 10, s.W);
+    } else {
+      const g = s.type === 'gear';
+      h = this.seg('type', [['gear', L.gear], ['belt', L.belt]], s.type) +
+        this.slider('T1', g ? L.t1 : L.d1, 10, 60, g ? 1 : 2, s.T1) + this.slider('T2', g ? L.t2 : L.d2, 10, 60, g ? 1 : 2, s.T2) +
+        this.slider('n1', L.n1, 100, 3000, 100, s.n1) + this.slider('tq1', L.tq1, 10, 200, 5, s.tq1);
+    }
+    $('controls').innerHTML = h;
+    $('controls').oninput = e => {
+      const k = e.target.dataset.s; if (!k) return;
+      s[k] = +e.target.value; this.constrain(); this.draw();
+    };
+    $('controls').onclick = e => {
+      const b = e.target.closest('[data-g]'); if (!b) return;
+      s[b.dataset.g] = isNaN(+b.dataset.v) ? b.dataset.v : +b.dataset.v; this.constrain(); this.controls(); this.draw();
+    };
+  }
+  // Class 2 needs the load nearer the fulcrum than the effort, class 3 the opposite.
+  constrain() {
+    const s = this.S.lever;
+    if (s.cls === 1 && s.le <= 5) s.le = 10;
+    if (s.cls === 2 && s.ll <= 5) s.ll = 10;
+    if (s.cls === 1 && s.ll >= s.le) s.ll = s.le - 5;
+    if (s.cls === 2 && s.le >= s.ll) s.le = s.ll - 5;
+    const p = this.S.incline; if (p.h >= p.L) p.h = p.L - 0.5;
+    ['le', 'll', 'h'].forEach(k => { const el = $('s-' + k); if (el && this.mode === 'lever') el.value = s[k]; });
+    const eh = $('s-h'); if (eh && this.mode === 'incline') eh.value = p.h;
+  }
+
+  /* ---------- drawing and numbers ---------- */
+  draw() { this['draw_' + this.mode](); }
+  out(k, v) { const o = $('o-' + k); if (o) o.textContent = v; }
+  table(rows) { $('calc').innerHTML = rows.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join(''); }
+  verdict(ma) {
+    const L = t(), el = $('status');
+    el.className = 'status ' + (ma > 1.0001 ? 'ok' : ma < 0.9999 ? 'bad' : '');
+    el.textContent = ma > 1.0001 ? L.gain : ma < 0.9999 ? L.loss : L.none;
+  }
+  arrowDown(x, y1, y2, col, w = 4) { return `<line x1="${x}" y1="${y1}" x2="${x}" y2="${y2 - 10}" stroke="${col}" stroke-width="${w}"/><path d="M${x - 8} ${y2 - 12}L${x} ${y2}L${x + 8} ${y2 - 12}Z" fill="${col}"/>`; }
+  arrowUp(x, y1, y2, col, w = 4) { return `<line x1="${x}" y1="${y1}" x2="${x}" y2="${y2 + 10}" stroke="${col}" stroke-width="${w}"/><path d="M${x - 8} ${y2 + 12}L${x} ${y2}L${x + 8} ${y2 + 12}Z" fill="${col}"/>`; }
+
+  draw_lever() {
+    const L = t(), u = this.u, s = this.S.lever, E = s.W * s.ll / s.le, MA = s.le / s.ll, K = 7, Y = 190;
+    // positions along the bar (in arm units) of fulcrum, load and effort
+    let xf, xl, xe;
+    if (s.cls === 0) { xf = 500 + (s.ll - s.le) * K / 2; xl = xf - s.ll * K; xe = xf + s.le * K; }
+    else { xf = 200; xl = xf + s.ll * K; xe = xf + s.le * K; }
+    const x0 = Math.min(xf, xl, xe) - 30, x1 = Math.max(xf, xl, xe) + 30;
+    let g = `<rect x="${x0}" y="${Y - 7}" width="${x1 - x0}" height="14" fill="#3a3020" stroke="#8a7440"/>` +
+      `<path d="M${xf} ${Y + 7}L${xf - 22} ${Y + 48}H${xf + 22}Z" fill="var(--accent)"/><rect x="${xf - 40}" y="${Y + 48}" width="80" height="6" fill="#6b5a35"/>`;
+    const box = 34 + Math.min(40, s.W / 25);
+    g += `<rect x="${xl - box / 2}" y="${Y - 7 - box}" width="${box}" height="${box}" fill="#2a2620" stroke="var(--cold)"/>` +
+      `<text x="${xl}" y="${Y - 7 - box / 2 + 5}" text-anchor="middle" font-size="13" fill="var(--fg)">${f(s.W, 0)} ${u.F}</text>`;
+    const eLen = 30 + Math.min(110, E / 6);
+    // 1st class: push down on the far side; 2nd and 3rd class: lift the bar
+    g += s.cls === 0 ? this.arrowDown(xe, Y - 7 - eLen, Y - 7, 'var(--hot)') : this.arrowUp(xe, Y - 7, Y - 7 - eLen, 'var(--hot)');
+    g += `<text x="${xe + 12}" y="${Y - 7 - eLen + 14}" font-size="14" font-weight="700" fill="var(--hot)">E = ${f(E, 1)} ${u.F}</text>`;
+    // arms
+    const arm = (xa, xb, yy, txt, col) => `<line x1="${xa}" y1="${yy}" x2="${xb}" y2="${yy}" stroke="${col}"/><line x1="${xa}" y1="${yy - 5}" x2="${xa}" y2="${yy + 5}" stroke="${col}"/><line x1="${xb}" y1="${yy - 5}" x2="${xb}" y2="${yy + 5}" stroke="${col}"/>` +
+      `<text x="${(xa + xb) / 2}" y="${yy + 18}" text-anchor="middle" font-size="13" fill="${col}">${txt}</text>`;
+    g += arm(xf, xe, Y + 78, `${L.le} ${f(s.le)} ${u.d}`, 'var(--hot)') + arm(xf, xl, Y + 110, `${L.ll} ${f(s.ll)} ${u.d}`, 'var(--cold)');
+    this.scene.innerHTML = g;
+    this.out('le', f(s.le) + ' ' + u.d); this.out('ll', f(s.ll) + ' ' + u.d); this.out('W', f(s.W, 0) + ' ' + u.F);
+    this.table([[L.load, `${f(s.W, 0)} ${u.F}`], [L.effort, `${f(E, 2)} ${u.F}`], [L.ma, f(MA, 2)], [L.vr, f(MA, 2)], [L.eta, '100 %']]);
+    $('steps').innerHTML = `E·${f(s.le)} = ${f(s.W, 0)}·${f(s.ll)} ⇒ E = ${f(s.W, 0)}×${f(s.ll)}/${f(s.le)} = <b>${f(E, 2)} ${u.F}</b><br>MA = ${L.load.toLowerCase()}/E = ${f(s.le)}/${f(s.ll)} = <b>${f(MA, 2)}</b>`;
+    this.verdict(MA);
+  }
+
+  draw_pulley() {
+    const L = t(), u = this.u, s = this.S.pulley, eta = s.eta / 100, Ei = s.W / s.n, E = Ei / eta, pull = s.n * s.h;
+    const top = 30, k = 40, ly = 170 - s.h * k, cx = 380, gap = 26;     // k: pixels per unit length, the same for load and rope
+    let g = `<rect x="${cx - 120}" y="${top - 12}" width="${240 + s.n * 6}" height="12" fill="#6b5a35"/>`;
+    for (let i = 0; i < s.n; i++) {
+      const x = cx - (s.n - 1) * gap / 2 + i * gap;
+      g += `<line x1="${x}" y1="${top}" x2="${x}" y2="${ly}" stroke="var(--fg)" stroke-width="2.5"/>`;
+    }
+    const xl = cx - (s.n - 1) * gap / 2, xr = cx + (s.n - 1) * gap / 2;
+    g += `<rect x="${xl - 16}" y="${ly}" width="${xr - xl + 32}" height="16" rx="8" fill="#2a2620" stroke="var(--accent)"/>` +
+      `<line x1="${cx}" y1="${ly + 16}" x2="${cx}" y2="${ly + 34}" stroke="var(--fg)" stroke-width="2"/>`;
+    const bw = 70 + Math.min(40, s.W / 30);
+    g += `<rect x="${cx - bw / 2}" y="${ly + 34}" width="${bw}" height="60" fill="#2a2620" stroke="var(--cold)"/><text x="${cx}" y="${ly + 70}" text-anchor="middle" font-size="15" fill="var(--fg)">${f(s.W, 0)} ${u.F}</text>`;
+    // the free end of the rope runs over the top block down to the hand, which has moved n·h
+    const ex = 640, hy = 70 + pull * k;
+    g += `<path d="M${xr} ${top} Q${xr + 40} ${top - 30} ${ex} ${top} L${ex} ${hy}" fill="none" stroke="var(--fg)" stroke-width="2.5"/>` +
+      this.arrowDown(ex, hy, hy + 40, 'var(--hot)') +
+      `<text x="${ex + 14}" y="${hy + 30}" font-size="14" font-weight="700" fill="var(--hot)">E = ${f(E, 1)} ${u.F}</text>`;
+    // measuring bars
+    if (s.h > 0) g += `<line x1="${cx + 150}" y1="170" x2="${cx + 150}" y2="${ly}" stroke="var(--cold)" stroke-width="3"/><text x="${cx + 158}" y="${(170 + ly) / 2 + 4}" font-size="13" fill="var(--cold)">h = ${f(s.h)} ${u.D}</text>` +
+      `<line x1="${ex + 130}" y1="70" x2="${ex + 130}" y2="${hy}" stroke="var(--hot)" stroke-width="3"/><text x="${ex + 138}" y="${(70 + hy) / 2 + 4}" font-size="13" fill="var(--hot)">${f(pull)} ${u.D}</text>`;
+    g += `<text x="${xl - 30}" y="${(top + ly) / 2 + 5}" text-anchor="end" font-size="15" font-weight="700" fill="var(--accent)">n = ${s.n}</text>`;
+    this.scene.innerHTML = g;
+    this.out('n', s.n); this.out('W', f(s.W, 0) + ' ' + u.F); this.out('eta', s.eta + ' %'); this.out('h', f(s.h) + ' ' + u.D);
+    const MA = s.W / E;
+    this.table([[L.load, `${f(s.W, 0)} ${u.F}`], [L.effort, `${f(E, 2)} ${u.F}`], [L.vr, `${s.n}`], [L.ma, f(MA, 2)], [L.eta, `${s.eta} %`], [L.pull, `${f(pull)} ${u.D}`]]);
+    $('steps').innerHTML = `${eta < 1 ? 'E<sub>ideal</sub>' : 'E'} = W / n = ${f(s.W, 0)} / ${s.n} = ${f(Ei, 2)} ${u.F}` +
+      (eta < 1 ? `<br>E = E<sub>ideal</sub> / η = ${f(Ei, 2)} / ${f(eta, 2)} = <b>${f(E, 2)} ${u.F}</b>` : '') +
+      `<br>${L.pull}: n × h = ${s.n} × ${f(s.h)} = <b>${f(pull)} ${u.D}</b>`;
+    this.verdict(MA);
+  }
+
+  draw_incline() {
+    const L = t(), u = this.u, s = this.S.incline, F = s.W * s.h / s.L, MA = s.L / s.h;
+    const base = Math.sqrt(s.L * s.L - s.h * s.h), sc = Math.min(700 / base, 240 / s.h), x0 = 140, y0 = 300;
+    const x1 = x0 + base * sc, y1 = y0 - s.h * sc, ang = Math.atan2(s.h, base);
+    let g = `<path d="M${x0} ${y0}L${x1} ${y0}L${x1} ${y1}Z" fill="#1d1a14" stroke="#8a7440" stroke-width="2"/>`;
+    // box half-way up the slope
+    const bx = x0 + (x1 - x0) * 0.55, by = y0 - (y0 - y1) * 0.55, deg = -ang * 180 / Math.PI;
+    g += `<g transform="translate(${bx} ${by}) rotate(${deg})"><rect x="-28" y="-46" width="56" height="46" fill="#2a2620" stroke="var(--cold)"/>` +
+      `<text x="0" y="-18" text-anchor="middle" font-size="13" fill="var(--fg)">${f(s.W, 0)} ${u.F}</text>` +
+      `<line x1="30" y1="-23" x2="${30 + 40 + F / 4}" y2="-23" stroke="var(--hot)" stroke-width="4"/><path d="M${30 + 40 + F / 4} -31L${40 + 40 + F / 4} -23L${30 + 40 + F / 4} -15Z" fill="var(--hot)"/></g>`;
+    g += `<text x="${bx + 60}" y="${by - 70}" font-size="14" font-weight="700" fill="var(--hot)">F = ${f(F, 1)} ${u.F}</text>`;
+    const mx = x0 + (x1 - x0) * 0.3, my = y0 - (y0 - y1) * 0.3;
+    g += `<text x="${mx}" y="${my + 24}" text-anchor="middle" font-size="14" fill="var(--accent)" transform="rotate(${deg} ${mx} ${my})">L = ${f(s.L)} ${u.D}</text>` +
+      `<text x="${x1 + 10}" y="${(y0 + y1) / 2}" font-size="14" fill="var(--cold)">h = ${f(s.h)} ${u.D}</text>`;
+    this.scene.innerHTML = g;
+    this.out('L', f(s.L) + ' ' + u.D); this.out('h', f(s.h) + ' ' + u.D); this.out('W', f(s.W, 0) + ' ' + u.F);
+    this.table([[L.load, `${f(s.W, 0)} ${u.F}`], [L.effort, `${f(F, 2)} ${u.F}`], [L.ma, f(MA, 2)]]);
+    $('steps').innerHTML = `W·h = F·L ⇒ F = ${f(s.W, 0)}×${f(s.h)}/${f(s.L)} = <b>${f(F, 2)} ${u.F}</b><br>MA = L/h = ${f(s.L)}/${f(s.h)} = <b>${f(MA, 2)}</b>`;
+    this.verdict(MA);
+  }
+
+  gearPath(cx, cy, Tn, r, a) {
+    const ro = r + 7, ri = r - 7, step = 2 * Math.PI / Tn; let d = '';
+    for (let i = 0; i < Tn; i++) {
+      const b = a + i * step, pts = [[ri, b], [ro, b + step * 0.18], [ro, b + step * 0.5], [ri, b + step * 0.68]];
+      pts.forEach(([rr, aa], j) => { d += (i === 0 && j === 0 ? 'M' : 'L') + (cx + rr * Math.cos(aa)).toFixed(1) + ' ' + (cy + rr * Math.sin(aa)).toFixed(1); });
+    }
+    return d + 'Z';
+  }
+  draw_gears() {
+    const L = t(), u = this.u, s = this.S.gears, g = s.type === 'gear';
+    const ratio = s.T2 / s.T1, n2 = s.n1 / ratio, tq2 = s.tq1 * ratio;
+    const k = g ? 2.6 : 2.4, r1 = s.T1 * k, r2 = s.T2 * k, cy = 170;
+    const cx1 = 500 - (r1 + r2 + (g ? 0 : 60)) / 2, cx2 = cx1 + r1 + r2 + (g ? 0 : 60);
+    const a1 = this.ang, a2 = g ? -a1 / ratio + Math.PI / s.T2 * (1 + s.T1 % 2) : a1 / ratio;
+    let h = '';
+    if (g) {
+      h += `<path d="${this.gearPath(cx1, cy, s.T1, r1, a1)}" fill="#3a3020" stroke="var(--accent)" stroke-width="1.5"/>` +
+        `<path d="${this.gearPath(cx2, cy, s.T2, r2, a2)}" fill="#22303a" stroke="var(--cold)" stroke-width="1.5"/>`;
+    } else {
+      h += `<line x1="${cx1}" y1="${cy - r1}" x2="${cx2}" y2="${cy - r2}" stroke="var(--fg)" stroke-width="4"/><line x1="${cx1}" y1="${cy + r1}" x2="${cx2}" y2="${cy + r2}" stroke="var(--fg)" stroke-width="4"/>` +
+        `<circle cx="${cx1}" cy="${cy}" r="${r1}" fill="#3a3020" stroke="var(--accent)" stroke-width="2"/><circle cx="${cx2}" cy="${cy}" r="${r2}" fill="#22303a" stroke="var(--cold)" stroke-width="2"/>`;
+    }
+    [[cx1, r1, a1, 'var(--accent)'], [cx2, r2, a2, 'var(--cold)']].forEach(([cx, r, a, c]) => {
+      h += `<line x1="${cx}" y1="${cy}" x2="${cx + (r - 14) * Math.cos(a)}" y2="${cy + (r - 14) * Math.sin(a)}" stroke="${c}" stroke-width="4"/><circle cx="${cx}" cy="${cy}" r="7" fill="${c}"/>`;
+    });
+    const ly = cy + Math.max(r1, r2) + 30, mid = (cx1 + r1 + cx2 - r2) / 2;
+    h += `<text x="${mid - 12}" y="${ly}" text-anchor="end" font-size="14" fill="var(--accent)">${L.driver}: ${g ? s.T1 + ' ' + (page.lang === 'el' ? 'δόντια' : 'teeth') : 'Ø ' + s.T1 + ' ' + u.d} · ${f(s.n1, 0)} rpm</text>` +
+      `<text x="${mid + 12}" y="${ly}" font-size="14" fill="var(--cold)">${L.driven}: ${g ? s.T2 + ' ' + (page.lang === 'el' ? 'δόντια' : 'teeth') : 'Ø ' + s.T2 + ' ' + u.d} · ${f(n2, 0)} rpm</text>`;
+    this.scene.innerHTML = h;
+    if (this._lastG !== JSON.stringify([s, this.units, page.lang])) {           // numbers only change with the inputs
+      this._lastG = JSON.stringify([s, this.units, page.lang]);
+      this.out('T1', g ? s.T1 : s.T1 + ' ' + u.d); this.out('T2', g ? s.T2 : s.T2 + ' ' + u.d); this.out('n1', s.n1 + ' rpm'); this.out('tq1', s.tq1 + ' ' + u.M);
+      this.table([[L.ratio, `${f(ratio, 2)} : 1`], [L.n2, `${f(n2, 1)} rpm`], [L.tq2, `${f(tq2, 1)} ${u.M}`], ['', g ? L.opposite : L.sameDir]]);
+      const sym = g ? 'T' : 'D';
+      $('steps').innerHTML = `n₂ = n₁·${sym}₁/${sym}₂ = ${s.n1}×${s.T1}/${s.T2} = <b>${f(n2, 1)} rpm</b><br>τ₂ = τ₁·${sym}₂/${sym}₁ = ${s.tq1}×${s.T2}/${s.T1} = <b>${f(tq2, 1)} ${u.M}</b>`;
+      const el = $('status'); el.className = 'status';
+      el.textContent = ratio < 0.9999 ? L.faster : ratio > 1.0001 ? L.slower : L.same;
+    }
+  }
+
+  // Gears turn continuously; the speed on screen follows the driver rpm (scaled down).
+  tick(ts) {
+    if (this.last !== null && this.mode === 'gears' && !document.hidden) {
+      this.ang += (ts - this.last) / 1000 * this.S.gears.n1 / 600;
+      this.draw_gears();
+    }
+    this.last = ts; requestAnimationFrame(x => this.tick(x));
+  }
+}
+
+/* ============================ "Solve it" questions ============================ */
+const Q = (el, en) => ({el, en});
+const fl = (x, d, l) => page.fmtIn(x, d, l);
+const V = (x, u, d = 2) => Q(fl(x, d, 'el') + ' ' + u, fl(x, d, 'en') + ' ' + u);
+const QUIZ = [
+  // machines.lever_effort
+  () => {
+    const le = pick([10, 20, 30, 40, 50, 60]), ll = pick([5, 10, 15, 20].filter(v => v < le)), W = pick([100, 200, 300, 400, 600]);
+    const E = W * ll / le;
+    return {
+      q: Q(`Για να σηκώσουμε φορτίο ${W} N με μοχλό (βραχίονας δύναμης ${le} cm, βραχίονας φορτίου ${ll} cm) χρειάζεται δύναμη:`,
+           `To lift a load of ${W} N with a lever (effort arm ${le} cm, load arm ${ll} cm) the effort required is:`),
+      o: [V(E, 'N'), V(W * le / ll, 'N'), V(W, 'N')], a: 0,
+      x: Q(`E = L·ll/le = ${W}×${ll}/${le} = ${fl(E, 2, 'el')} N.`, `E = L·ll/le = ${W}×${ll}/${le} = ${fl(E, 2, 'en')} N.`),
+      apply: () => load('lever', {cls: 0, le, ll, W}, 'SI')
+    };
+  },
+  // machines.lever_load
+  () => {
+    const le = pick([20, 30, 40, 60]), ll = pick([5, 10, 20].filter(v => v < le)), E = pick([20, 40, 50, 100]);
+    const W = E * le / ll;
+    return {
+      q: Q(`Μοχλός: βραχίονας δύναμης ${le} cm, βραχίονας φορτίου ${ll} cm. Με δύναμη ${E} N, το μέγιστο φορτίο που ισορροπεί είναι:`,
+           `Lever: effort arm ${le} cm, load arm ${ll} cm. With an effort of ${E} N, the maximum load that can be balanced is:`),
+      o: [V(W, 'N'), V(E * ll / le, 'N'), V(E, 'N')], a: 0,
+      x: Q(`E·le = L·ll ⇒ L = ${E}×${le}/${ll} = ${fl(W, 2, 'el')} N.`, `E·le = L·ll so L = ${E}×${le}/${ll} = ${fl(W, 2, 'en')} N.`),
+      apply: () => load('lever', {cls: 0, le, ll, W: Math.min(1000, W)}, 'SI')
+    };
+  },
+  // machines.lever_class
+  () => {
+    const c = rnd(0, 2);
+    const ans = [Q('ανάμεσα στη δύναμη και στο φορτίο', 'between the effort and the load'), Q('στο ένα άκρο, με το φορτίο στη μέση', 'at one end, with the load in the middle'), Q('στο ένα άκρο, με τη δύναμη στη μέση', 'at one end, with the effort in the middle')];
+    return {
+      q: Q(`Σε μοχλό ${['1ης', '2ης', '3ης'][c]} κατηγορίας, το υπομόχλιο βρίσκεται:`, `In a ${['first', 'second', 'third'][c]}-class lever, the fulcrum is:`),
+      o: [ans[c], ans[(c + 1) % 3], ans[(c + 2) % 3]], a: 0,
+      x: Q(T.el.classTxt[c], T.en.classTxt[c]),
+      apply: () => load('lever', c === 0 ? {cls: 0, le: 30, ll: 10, W: 300} : c === 1 ? {cls: 1, le: 50, ll: 20, W: 300} : {cls: 2, le: 15, ll: 40, W: 100}, 'SI')
+    };
+  },
+  // machines.pulley_effort / pulley_actual_effort
+  () => {
+    const n = rnd(2, 6), W = n * pick([20, 40, 50, 100, 200]), eta = pick([100, 100, 80, 50]);
+    const E = W / n / (eta / 100);
+    const q = eta === 100
+      ? Q(`Ιδανικό σύστημα τροχαλιών με ${n} τμήματα σχοινιού να κρατούν το φορτίο σηκώνει φορτίο ${W} lb. Η δύναμη που χρειάζεται είναι:`,
+          `An ideal pulley system with ${n} rope segments supporting the load lifts a load of ${W} lb. The effort required is:`)
+      : Q(`Σύστημα τροχαλιών με ${n} τμήματα σχοινιού έχει απόδοση ${eta}%. Για να σηκώσει φορτίο ${W} lb, η πραγματική δύναμη είναι:`,
+          `A pulley system with ${n} rope segments has an efficiency of ${eta}%. To lift a ${W} lb load the actual effort is:`);
+    return {
+      q, o: [V(E, 'lb'), V(eta === 100 ? W * n : W / n * eta / 100, 'lb'), V(W, 'lb')], a: 0,
+      x: Q(eta === 100 ? `MA = ${n}, E = W/n = ${W}/${n} = ${fl(E, 2, 'el')} lb.` : `Ιδανική δύναμη = ${W}/${n}. Πραγματική = ιδανική/η = ${fl(E, 2, 'el')} lb.`,
+           eta === 100 ? `MA = ${n}, E = W/n = ${W}/${n} = ${fl(E, 2, 'en')} lb.` : `Ideal effort = ${W}/${n}. Actual = ideal/η = ${fl(E, 2, 'en')} lb.`),
+      apply: () => load('pulley', {n, W: Math.min(1200, W), eta, h: 0.5}, 'imperial')
+    };
+  },
+  // machines.pulley_distance
+  () => {
+    const n = rnd(2, 6), h = pick([1, 2, 3]);
+    return {
+      q: Q(`Σύστημα τροχαλιών έχει ${n} τμήματα σχοινιού που κρατούν το φορτίο. Για να ανέβει το φορτίο ${h} ft, πρέπει να τραβήξουμε σχοινί:`,
+           `A pulley system has ${n} rope segments supporting the load. To raise the load by ${h} ft, the rope must be pulled by:`),
+      o: [V(n * h, 'ft'), V(h, 'ft'), V(h / n, 'ft')], a: 0,
+      x: Q(`VR = ${n}, άρα απόσταση δύναμης = ${n}×${h} = ${n * h} ft.`, `VR = ${n}, so effort distance = ${n}×${h} = ${n * h} ft.`),
+      apply: () => load('pulley', {n, W: 400, eta: 100, h: 1}, 'imperial')
+    };
+  },
+  // machines.incline_effort / incline_ma
+  () => {
+    const Lr = pick([4, 6, 8, 10, 12]), h = pick([1, 2, 3].filter(v => v < Lr)), W = pick([60, 100, 120, 240, 300]);
+    const F = W * h / Lr;
+    if (Math.random() < .35) return {
+      q: Q(`Ράμπα μήκους ${Lr} m ανεβάζει φορτία σε ύψος ${h} m. Το ιδανικό μηχανικό πλεονέκτημα είναι:`, `A ramp ${Lr} m long raises loads through ${h} m. The ideal mechanical advantage is:`),
+      o: [V(Lr / h, ''), V(h / Lr, ''), V(Lr - h, '')], a: 0,
+      x: Q(`MA = μήκος/ύψος = ${Lr}/${h} = ${fl(Lr / h, 2, 'el')}.`, `MA = length / height = ${Lr}/${h} = ${fl(Lr / h, 2, 'en')}.`),
+      apply: () => load('incline', {L: Lr, h, W: 200}, 'SI')
+    };
+    return {
+      q: Q(`Φορτίο βάρους ${W} lb σπρώχνεται σε ράμπα χωρίς τριβή, μήκους ${Lr} ft και ύψους ${h} ft. Η ελάχιστη δύναμη (παράλληλη στη ράμπα) είναι:`,
+           `A load weighing ${W} lb is pushed up a frictionless ramp ${Lr} ft long and ${h} ft high. The minimum force (parallel to the ramp) is:`),
+      o: [V(F, 'lb'), V(W, 'lb'), V(W * Lr / h, 'lb')], a: 0,
+      x: Q(`W·h = F·L ⇒ F = ${W}×${h}/${Lr} = ${fl(F, 2, 'el')} lb.`, `W·h = F·L so F = ${W}×${h}/${Lr} = ${fl(F, 2, 'en')} lb.`),
+      apply: () => load('incline', {L: Lr, h, W}, 'imperial')
+    };
+  },
+  // machines.gear_speed / gear_torque
+  () => {
+    const T1 = pick([10, 12, 15, 20, 30, 40, 60]), T2 = pick([10, 15, 20, 30, 40, 45, 60].filter(v => v !== T1)), n1 = pick([600, 1200, 1500, 2400, 3000]), tq = pick([20, 30, 50, 60]);
+    if (Math.random() < .6) {
+      const n2 = n1 * T1 / T2;
+      return {
+        q: Q(`Κινητήριο γρανάζι με ${T1} δόντια γυρίζει με ${n1} rpm και κινεί γρανάζι με ${T2} δόντια. Το κινούμενο γρανάζι γυρίζει με:`,
+             `A driver gear with ${T1} teeth turns at ${n1} rpm and drives a gear with ${T2} teeth. The driven gear turns at:`),
+        o: [V(n2, 'rpm', 1), V(n1 * T2 / T1, 'rpm', 1), V(n1, 'rpm')], a: 0,
+        x: Q(`n₂ = n₁·T₁/T₂ = ${n1}×${T1}/${T2} = ${fl(n2, 1, 'el')} rpm.`, `n₂ = n₁·T₁/T₂ = ${n1}×${T1}/${T2} = ${fl(n2, 1, 'en')} rpm.`),
+        apply: () => load('gears', {type: 'gear', T1, T2, n1, tq1: tq}, 'imperial')
+      };
+    }
+    const tq2 = tq * T2 / T1;
+    return {
+      q: Q(`Κινητήριο γρανάζι με ${T1} δόντια δίνει ροπή ${tq} lb·ft σε γρανάζι με ${T2} δόντια (χωρίς απώλειες). Η ροπή στον κινούμενο άξονα είναι:`,
+           `A driver gear with ${T1} teeth gives a torque of ${tq} lb·ft to a gear with ${T2} teeth (no losses). The torque on the driven shaft is:`),
+      o: [V(tq2, 'lb·ft', 1), V(tq * T1 / T2, 'lb·ft', 1), V(tq, 'lb·ft')], a: 0,
+      x: Q(`Η ροπή είναι ανάλογη των δοντιών: τ₂ = τ₁·T₂/T₁ = ${tq}×${T2}/${T1} = ${fl(tq2, 1, 'el')} lb·ft.`, `Torque ∝ teeth: τ₂ = τ₁·T₂/T₁ = ${tq}×${T2}/${T1} = ${fl(tq2, 1, 'en')} lb·ft.`),
+      apply: () => load('gears', {type: 'gear', T1, T2, n1, tq1: tq}, 'imperial')
+    };
+  },
+  // machines.belt_drive
+  () => {
+    const D1 = pick([12, 16, 24, 30, 40]), D2 = pick([10, 12, 20, 40, 60].filter(v => v !== D1)), n1 = pick([300, 600, 900, 1200]);
+    const n2 = n1 * D1 / D2;
+    return {
+      q: Q(`Ιμάντας συνδέει κινητήρια τροχαλία ${D1} cm που γυρίζει με ${n1} rpm με κινούμενη τροχαλία ${D2} cm. Η κινούμενη γυρίζει με:`,
+           `A belt connects a ${D1} cm driver pulley turning at ${n1} rpm to a ${D2} cm driven pulley. The driven pulley turns at:`),
+      o: [V(n2, 'rpm', 1), V(n1 * D2 / D1, 'rpm', 1), V(n1, 'rpm')], a: 0,
+      x: Q(`n₂ = n₁·D₁/D₂ = ${n1}×${D1}/${D2} = ${fl(n2, 1, 'el')} rpm.`, `n₂ = n₁·D₁/D₂ = ${n1}×${D1}/${D2} = ${fl(n2, 1, 'en')} rpm.`),
+      apply: () => load('gears', {type: 'belt', T1: D1, T2: D2, n1, tq1: 30}, 'SI')
+    };
+  },
+  // machines.efficiency_ma_vr / mach2.vr_distances
+  () => {
+    if (Math.random() < .5) {
+      const VR = pick([2, 4, 5, 8, 10]), MA = pick([1, 2, 3, 4, 6, 8].filter(v => v < VR));
+      return {
+        q: Q(`Μια μηχανή έχει μηχανικό πλεονέκτημα MA = ${MA} και λόγο ταχυτήτων VR = ${VR}. Η απόδοσή της είναι:`, `A machine has a mechanical advantage MA = ${MA} and a velocity ratio VR = ${VR}. Its efficiency is:`),
+        o: [V(MA / VR * 100, '%', 1), V(VR / MA * 100, '%', 1), V(MA * VR, '%')], a: 0,
+        x: Q(`η = MA/VR × 100 = ${MA}/${VR}×100 = ${fl(MA / VR * 100, 1, 'el')} %.`, `η = MA / VR × 100 = ${MA}/${VR}×100 = ${fl(MA / VR * 100, 1, 'en')} %.`)
+      };
+    }
+    const dl = pick([10, 20, 25, 50]), k = rnd(2, 6), de = dl * k;
+    return {
+      q: Q(`Η δύναμη μετακινείται ${de} in και το φορτίο ανεβαίνει ${dl} in. Ο λόγος ταχυτήτων (VR) είναι:`, `The effort moves ${de} in and the load rises ${dl} in. The velocity ratio (VR) is:`),
+      o: [V(k, ''), V(de * dl, ''), V(dl / de, '')], a: 0,
+      x: Q(`VR = ${de}/${dl} = ${k}.`, `VR = ${de}/${dl} = ${k}.`),
+      apply: () => load('pulley', {n: Math.min(6, k), W: 400, eta: 100, h: 0.5}, 'imperial')
+    };
+  }
+];
+
+function load(mode, vals, units) {
+  const P = app; P.mode = mode; P.units = units;
+  Object.assign(P.S[mode], vals);
+  P.renderAll();
+}
+
+const app = new MachinesPage();
+</script>
+</body>
+</html>
