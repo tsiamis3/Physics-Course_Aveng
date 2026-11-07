@@ -322,7 +322,7 @@ class MotionPage {
 
   /* ---------- runway ---------- */
   drawRunway(M, S) {
-    const L = t(), u = this.u, end = M.tEnd, sEnd = Math.max(1, M.at(end).s), X0 = 110, W = 780, Y = 210;
+    const L = t(), u = this.u, end = M.tEnd, sEnd = Math.max(1, M.at(end).s), X0 = 200, W = 700, Y = 210;
     const x = X0 + S.s / sEnd * W;
     let g = `<rect x="0" y="${Y}" width="1000" height="34" fill="#22201b"/>`;
     for (let i = 0; i <= 10; i++) g += `<line x1="${X0 + i * W / 10}" y1="${Y + 34}" x2="${X0 + i * W / 10}" y2="${Y + 44}" stroke="var(--muted)"/><text x="${X0 + i * W / 10}" y="${Y + 58}" text-anchor="middle" font-size="12" fill="var(--muted)">${f(sEnd * i / 10, 0)}</text>`;
@@ -538,5 +538,6 @@ function load(mode, units, vals, time = 0) {
 
 const app = new MotionPage();
 </script>
+<script src="assets/landscape.js"></script>
 </body>
 </html>

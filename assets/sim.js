@@ -122,8 +122,5 @@
     svg.addEventListener('pointerup', up); svg.addEventListener('pointercancel', up);
   }
 
-  // Phones: diagrams scroll sideways (see .fig in sim.css); start them centred.
-  window.addEventListener('load', () => document.querySelectorAll('.fig').forEach(f => { f.scrollLeft = (f.scrollWidth - f.clientWidth) / 2; }));
-
   window.Sim = {SimPage, Quiz, esc, rnd, pick, shuffle, svgPoint, dragOn};
 })();
