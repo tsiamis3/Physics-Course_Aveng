@@ -157,7 +157,7 @@ class TestApp {
     return this.Q.filter(q => {
       if (!skipTopic && !F.topics.has(q.topic)) return false;
       if (F.tpl && !F.tpl.some(t => t.endsWith('.') ? q.tpl.startsWith(t) : q.tpl === t)) return false;
-      if (F.units !== 'both' && q.units !== F.units) return false;
+      if (F.units !== 'both' && q.units !== F.units && !this.isTheory(q)) return false;   // conceptual questions have no units
       if (!F.d.has(q.d)) return false;
       const r = this.st.d.q[q.id];
       if (F.only === 'wrong' && !(r && r.l === 0 && r.w > 0)) return false;
@@ -197,6 +197,8 @@ class TestApp {
     F.exam = on ? 'b1' : null;
     if (on) { F.mode = 'test'; F.mins = E.minutes; F.n = E.sections.reduce((s, x) => s + x.n, 0); }
   }
+
+  isTheory(q) { return /theory/.test(q.tpl); }
 
   // Questions of one syllabus section of the mock exam.
   inSection(q, sec) {
@@ -337,12 +339,22 @@ class TestApp {
     if (F.exam) {
       const ex = this.examQuestions(); qs = ex.map(x => x.q); secs = ex.map(x => x.sec);
     } else {
-      const key = q => F.tpl ? q.tpl : q.topic;           // from a simulation: spread over its question types
-      shuffle(this.pool(false)).forEach(q => (by[key(q)] = by[key(q)] || []).push(q));
-      let keys = shuffle(Object.keys(by)), i = 0;
-      while (qs.length < F.n && keys.length) {
-        const k = keys[i % keys.length], q = by[k].shift();
-        if (q) { qs.push(q); i++; } else keys.splice(i % keys.length, 1);
+      if (F.tpl) {                                         // from a simulation: spread over its question types
+        qs = this.spread(this.pool(false), F.n, new Set());
+      } else {
+        // Chapters take turns; inside each chapter about 40 % conceptual questions (as in the exam),
+        // and every question type is equally likely, so the large calculation templates do not crowd out the theory.
+        const pool = this.pool(false), taken = new Set(), share = this.cfg.EXAM_B1.theory, want = {}, have = {};
+        pool.forEach(q => { (by[q.topic] = by[q.topic] || []).push(q); have[q.topic] = (have[q.topic] || 0) + 1; });
+        let keys = shuffle(Object.keys(by)), i = 0, left = Math.min(F.n, pool.length);
+        while (left > 0) { const t = keys[i++ % keys.length]; if ((want[t] || 0) < have[t]) { want[t] = (want[t] || 0) + 1; left--; } }
+        Object.keys(want).forEach(t => {
+          const all = by[t], th = all.filter(q => this.isTheory(q)), n = want[t];
+          let got = this.spread(th, Math.round(n * share), taken);
+          got = got.concat(this.spread(all.filter(q => !this.isTheory(q)), n - got.length, taken));
+          if (got.length < n) got = got.concat(this.spread(all, n - got.length, taken));
+          qs = qs.concat(got);
+        });
       }
       qs = shuffle(qs);
     }
