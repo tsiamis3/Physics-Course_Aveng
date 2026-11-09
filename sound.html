@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Doppler &amp; Mach</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600&display=swap">
+<link rel="stylesheet" href="assets/sim.css">
+<link rel="stylesheet" href="assets/theme.css">
+<style>
+  #view .front{fill:none;stroke:#5B9BEF;stroke-width:1.6}
+  #view .cone{stroke:#F2704A;stroke-width:3;fill:rgba(242,112,74,.08)}
+  .boom{font:700 34px var(--f-display);fill:#F2704A;letter-spacing:.1em}
+  .legend{display:flex;flex-wrap:wrap;gap:6px 18px;margin:6px 4px 0;font-size:13px;color:var(--muted)}
+  .legend i{display:inline-block;width:14px;height:3px;vertical-align:middle;margin-right:6px}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="h1"></h1>
+  <p id="sub"></p>
+  <nav><a href="index.html">← Home</a><a href="test.html">Test builder</a><a href="em.html">EM Wave</a><a href="motion.html">Motion &amp; Energy</a></nav>
+</header>
+<main>
+<div class="wrap">
+  <div class="topbar">
+    <p class="title" id="title"></p>
+    <div class="tools">
+      <div class="grp"><small>&nbsp;</small><div class="seg" role="group"><button id="play" type="button" aria-pressed="true"></button><button id="reset" type="button"></button></div></div>
+      <div class="grp"><small>&nbsp;</small><div class="seg" role="group" aria-label="Language">
+        <button id="lang-el" type="button">ΕΛ</button><button id="lang-en" type="button">EN</button></div></div>
+    </div>
+  </div>
+
+  <section class="card">
+    <div class="fig"><svg id="view" viewBox="0 0 1000 400" role="img" aria-label="Sound waves from a moving aircraft"><g id="scene"></g></svg></div>
+    <div class="legend" id="legend"></div>
+    <p class="note" id="hint"></p>
+  </section>
+
+  <div class="lower">
+    <section class="card">
+      <h2 id="calc-h"></h2>
+      <div class="scroll"><table class="calc" id="calc"></table></div>
+      <div class="steps" id="steps"></div>
+      <p class="status" id="status"></p>
+    </section>
+    <section class="card">
+      <h2 id="ctl-h"></h2>
+      <div class="row"><label for="m" id="l-m"></label><input type="range" id="m" min="0" max="3" step="0.05" value="0.6"><output id="o-m"></output></div>
+      <div class="row"><label for="alt" id="l-alt"></label><input type="range" id="alt" min="0" max="45000" step="1000" value="0"><output id="o-alt"></output></div>
+      <div class="row"><label for="f" id="l-f"></label><input type="range" id="f" min="100" max="2000" step="50" value="500"><output id="o-f"></output></div>
+      <div class="row"><span class="note" id="presets-l"></span></div>
+      <div class="row" id="presets"></div>
+    </section>
+  </div>
+
+  <section class="card quiz" id="quiz"></section>
+  <p class="note" id="foot"></p>
+</div>
+</main>
+
+<script src="assets/sim.js"></script>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const {SimPage, Quiz, rnd, pick, dragOn} = Sim;
+
+/* ============================ texts ============================ */
+const T = {
+ el: {
+  h1: 'Doppler και Mach', sub: 'Ένα αεροσκάφος εκπέμπει ήχο ενώ κινείται. Δες τα κύματα να πυκνώνουν μπροστά του, να αραιώνουν πίσω του και, πάνω από Mach 1, να γίνονται κώνος.',
+  title: 'Ηχητικά κύματα από κινούμενη πηγή', play: '❚❚ Παύση', pause: '▶ Συνέχεια', reset: '↺ Από την αρχή',
+  calc: 'Τι συμβαίνει', ctl: 'Ρυθμίσεις',
+  m: 'Αριθμός Mach', alt: 'Ύψος πτήσης', f: 'Συχνότητα που εκπέμπει',
+  presets: 'Έτοιμα παραδείγματα:', pre: {heli: 'Ελικόπτερο M 0,3', jet: 'Αεροσκάφος M 0,85', one: 'Ακριβώς M 1', conc: 'Concorde M 2'},
+  rows: {T: 'Θερμοκρασία (ISA)', a: 'Ταχύτητα ήχου a', tas: 'Ταχύτητα αεροσκάφους', reg: 'Περιοχή', mu: 'Μισή γωνία κώνου μ',
+         la0: 'λ αν ήταν ακίνητο', laA: 'λ μπροστά', laB: 'λ πίσω', fA: 'Ακούει μπροστά', fB: 'Ακούει πίσω'},
+  regs: ['Υποηχητική', 'Διηχητική', 'Υπερηχητική', 'Υπερυπερηχητική (hypersonic)'],
+  noCone: 'δεν υπάρχει κώνος', none: '—',
+  legend: ['Μέτωπα κύματος (κάθε κύκλος ξεκίνησε από εκεί που ήταν το αεροσκάφος)', 'Κώνος Mach (ωστικό κύμα)', 'Παρατηρητής στο έδαφος: σύρε τον'],
+  hint: 'Τα κύματα ταξιδεύουν πάντα με την ταχύτητα του ήχου, όσο γρήγορα κι αν πάει το αεροσκάφος. Σύρε τον παρατηρητή κατά μήκος του εδάφους.',
+  sub1: 'Τα κύματα μπροστά στριμώχνονται (μικρό λ, υψηλή συχνότητα), πίσω αραιώνουν (μεγάλο λ, χαμηλή συχνότητα): φαινόμενο Doppler.',
+  at1: 'Στο M 1 όλα τα μέτωπα συσσωρεύονται μπροστά στη μύτη: το «φράγμα του ήχου».',
+  sup: 'Πάνω από M 1 το αεροσκάφος προσπερνά τον ήχο του. Τα μέτωπα σχηματίζουν κώνο (ωστικό κύμα) και μπροστά του δεν ακούγεται τίποτα.',
+  colder: 'Ψηλά κάνει κρύο, άρα ο ήχος είναι πιο αργός: για το ίδιο Mach το αεροσκάφος πετά με μικρότερη ταχύτητα.',
+  obsA: 'Ο παρατηρητής ακούει υψηλότερο ήχο (το αεροσκάφος πλησιάζει).', obsR: 'Ο παρατηρητής ακούει χαμηλότερο ήχο (το αεροσκάφος απομακρύνεται).',
+  obsQ: 'Ο παρατηρητής δεν ακούει ακόμα τίποτα: είναι μπροστά από τον κώνο.', obsIn: 'Ο κώνος πέρασε από τον παρατηρητή: άκουσε την ηχητική έκρηξη.',
+  boom: 'ΜΠΑΜ!', still: 'ακίνητο', inf: 'όλα στο ίδιο σημείο',
+  foot: 'Η ταχύτητα του ήχου υπολογίζεται με a ≈ 331 + 0,6·T m/s και τη θερμοκρασία ISA (15 °C στη θάλασσα, −2 °C ανά 1000 ft, −56,5 °C πάνω από 36 000 ft). Τα κύματα στο σχήμα είναι πολύ αργότερα από την πραγματικότητα.'
+ },
+ en: {
+  h1: 'Doppler and Mach', sub: 'An aircraft makes sound while it moves. Watch the waves bunch up in front of it, spread out behind it and, above Mach 1, form a cone.',
+  title: 'Sound waves from a moving source', play: '❚❚ Pause', pause: '▶ Play', reset: '↺ Restart',
+  calc: 'What is happening', ctl: 'Settings',
+  m: 'Mach number', alt: 'Altitude', f: 'Frequency emitted',
+  presets: 'Ready examples:', pre: {heli: 'Helicopter M 0.3', jet: 'Airliner M 0.85', one: 'Exactly M 1', conc: 'Concorde M 2'},
+  rows: {T: 'Temperature (ISA)', a: 'Speed of sound a', tas: 'Aircraft speed', reg: 'Regime', mu: 'Cone half-angle μ',
+         la0: 'λ if it were still', laA: 'λ in front', laB: 'λ behind', fA: 'Heard in front', fB: 'Heard behind'},
+  regs: ['Subsonic', 'Transonic', 'Supersonic', 'Hypersonic'],
+  noCone: 'no cone', none: '—',
+  legend: ['Wavefronts (each circle started where the aircraft was)', 'Mach cone (shock wave)', 'Observer on the ground: drag it'],
+  hint: 'The waves always travel at the speed of sound, however fast the aircraft goes. Drag the observer along the ground.',
+  sub1: 'The waves bunch up in front (short λ, high frequency) and spread out behind (long λ, low frequency): the Doppler effect.',
+  at1: 'At M 1 all the wavefronts pile up at the nose: the "sound barrier".',
+  sup: 'Above M 1 the aircraft overtakes its own sound. The wavefronts form a cone (a shock wave) and nothing is heard ahead of it.',
+  colder: 'It is cold up high, so sound is slower: for the same Mach number the aircraft flies more slowly.',
+  obsA: 'The observer hears a higher pitch (the aircraft is approaching).', obsR: 'The observer hears a lower pitch (the aircraft is moving away).',
+  obsQ: 'The observer hears nothing yet: they are ahead of the cone.', obsIn: 'The cone has swept over the observer: they heard the sonic boom.',
+  boom: 'BOOM!', still: 'still', inf: 'all at one point',
+  foot: 'The speed of sound uses a ≈ 331 + 0.6·T m/s and the ISA temperature (15 °C at sea level, −2 °C per 1000 ft, −56.5 °C above 36 000 ft). The waves in the picture are much slower than in reality.'
+ }
+};
+
+const page = new SimPage(T);
+const Q = (el, en) => ({el, en});
+const fl = (x, d, l) => page.fmtIn(x, d, l);
+const V = (x, u, d = 2) => Q(fl(x, d, 'el') + (u ? ' ' + u : ''), fl(x, d, 'en') + (u ? ' ' + u : ''));
+const KT = 1.94384;
+
+/* ============================ physics ============================ */
+const isaT = ft => Math.max(-56.5, 15 - 1.98 * ft / 1000);
+const sound = T => 331 + 0.6 * T;                       // m/s, as in the lesson
+const regime = M => M < 0.8 ? 0 : M <= 1.2 ? 1 : M <= 5 ? 2 : 3;
+
+/* ============================ the page ============================ */
+const W = 1000, GY = 360, AY = 150, A_PX = 70, PERIOD = 0.32;   // screen: ground, flight level, sound speed in px/s, emission period (s)
+
+class SoundPage {
+  constructor() {
+    this.S = {M: 0.6, alt: 0, f: 500};
+    this.reset();
+    this.ox = 760; this.running = true; this.heard = false; this.flash = 0;
+    page.bindLang($('lang-el'), $('lang-en'));
+    page.onLang(() => this.texts());
+    for (const k of ['m', 'alt', 'f']) $(k).addEventListener('input', () => { this.read(); this.table(); });
+    $('play').onclick = () => { this.running = !this.running; this.texts(); };
+    $('reset').onclick = () => this.reset();
+    dragOn($('view'), (key, p) => { if (key === 'obs') { this.ox = Math.max(20, Math.min(W - 20, p.x)); this.heard = false; } });
+    this.quiz = new Quiz(page, $('quiz'), QUIZ, {topics: ['waves'], tpls: ['waves.mach_speed', 'waves.mach_number', 'waves.sound_speed_temp', 'waves.sound_theory2']});
+    this.texts();
+    this.quiz.next();
+    this.last = performance.now();
+    requestAnimationFrame(t => this.tick(t));
+  }
+  read() {
+    const M0 = this.S.M;
+    this.S.M = +$('m').value; this.S.alt = +$('alt').value; this.S.f = +$('f').value;
+    if (Math.abs(M0 - this.S.M) > 1e-9) this.reset();
+  }
+  set(vals) {
+    Object.assign(this.S, vals);
+    $('m').value = this.S.M; $('alt').value = this.S.alt; $('f').value = this.S.f;
+    this.reset(); this.table();
+  }
+  reset() {
+    this.t = 0; this.fronts = []; this.nextEmit = 0; this.heard = false;
+    this.x0 = this.S.M > 1 ? -40 : this.S.M > 0.7 ? 60 : 160;
+  }
+  srcX() { return this.x0 + this.S.M * A_PX * this.t; }
+
+  tick(now) {
+    const dt = Math.min(0.05, (now - this.last) / 1000); this.last = now;
+    if (this.running) {
+      this.t += dt;
+      while (this.nextEmit <= this.t) { this.fronts.push({x: this.x0 + this.S.M * A_PX * this.nextEmit, t: this.nextEmit}); this.nextEmit += PERIOD; }
+      this.fronts = this.fronts.filter(f => (this.t - f.t) * A_PX < 1300);
+      const xs = this.srcX();
+      if (xs > W + 60 + (this.S.M > 1 ? 500 : 0) || (this.S.M < 0.02 && this.t > 12)) this.reset();
+    }
+    if (this.flash > 0) this.flash -= dt;
+    this.draw();
+    requestAnimationFrame(t => this.tick(t));
+  }
+
+  // Is the observer inside the Mach cone (i.e. has the shock already passed)?
+  insideCone(xs) {
+    const M = this.S.M; if (M < 1) return false;
+    const dx = xs - this.ox, dy = GY - AY; if (dx <= 0) return false;
+    return Math.atan2(dy, dx) <= Math.asin(1 / M) + 1e-9 && this.fronts.length && this.fronts[0].x <= this.ox + 1;
+  }
+
+  draw() {
+    const xs = this.srcX(), M = this.S.M, t = page.t;
+    let s = `<rect x="0" y="0" width="${W}" height="${GY}" fill="#0f1218"/><rect x="0" y="${GY}" width="${W}" height="${400 - GY}" fill="#1b1710"/>` +
+            `<line x1="0" y1="${GY}" x2="${W}" y2="${GY}" stroke="#4a3f26" stroke-width="2"/>`;
+    for (const f of this.fronts) {
+      const r = (this.t - f.t) * A_PX; if (r <= 0) continue;
+      s += `<circle class="front" cx="${f.x.toFixed(1)}" cy="${AY}" r="${r.toFixed(1)}" opacity="${Math.max(0.15, 1 - r / 1300).toFixed(2)}"/>`;
+    }
+    if (M > 1) {
+      const mu = Math.asin(1 / M), L = 1400, x1 = xs - L * Math.cos(mu), yU = AY - L * Math.sin(mu), yD = AY + L * Math.sin(mu);
+      s += `<path class="cone" d="M${x1.toFixed(1)},${yU.toFixed(1)} L${xs.toFixed(1)},${AY} L${x1.toFixed(1)},${yD.toFixed(1)}"/>`;
+      const ra = 70, ax = xs - ra, ay = AY, bx = xs - ra * Math.cos(mu), by = AY - ra * Math.sin(mu);
+      s += `<path d="M${ax.toFixed(1)},${ay} A${ra},${ra} 0 0 1 ${bx.toFixed(1)},${by.toFixed(1)}" fill="none" stroke="#e8e2d0" stroke-width="1.2"/>` +
+           `<line x1="${xs - 200}" y1="${AY}" x2="${xs}" y2="${AY}" stroke="#e8e2d0" stroke-dasharray="4 4" stroke-width="1"/>` +
+           `<text x="${(xs - ra - 26).toFixed(1)}" y="${AY - 10}" fill="#e8e2d0" font-size="18">μ</text>`;
+    }
+    // aircraft
+    s += `<g transform="translate(${xs.toFixed(1)},${AY})"><path d="M14,0 L-6,-5 L-22,-5 L-30,-14 L-34,-14 L-30,-4 L-38,-3 L-38,3 L-30,4 L-34,14 L-30,14 L-22,5 L-6,5 Z" fill="#d9a521"/></g>`;
+    // observer
+    const inside = this.insideCone(xs);
+    if (M >= 1 && inside && !this.heard) { this.heard = true; this.flash = 1.2; }
+    if (M >= 1 && !inside && xs < this.ox) this.heard = false;
+    s += `<g class="drag" data-drag="obs" transform="translate(${this.ox.toFixed(1)},${GY})"><rect x="-22" y="-56" width="44" height="66" fill="transparent"/>` +
+         `<circle cx="0" cy="-40" r="7" fill="#62b886"/><line x1="0" y1="-33" x2="0" y2="-14" stroke="#62b886" stroke-width="4"/>` +
+         `<line x1="0" y1="-14" x2="-8" y2="0" stroke="#62b886" stroke-width="4"/><line x1="0" y1="-14" x2="8" y2="0" stroke="#62b886" stroke-width="4"/>` +
+         `<line x1="-10" y1="-26" x2="10" y2="-26" stroke="#62b886" stroke-width="4"/></g>`;
+    if (this.flash > 0) s += `<text class="boom" x="${Math.min(W - 120, Math.max(10, this.ox - 50)).toFixed(1)}" y="${GY - 70}" opacity="${Math.min(1, this.flash).toFixed(2)}">${t.boom}</text>`;
+    // what the observer hears
+    let msg;
+    if (M <= 0.02) msg = '';
+    else if (M >= 1) msg = inside || this.heard ? t.obsIn : t.obsQ;
+    else msg = xs < this.ox ? t.obsA : t.obsR;
+    $('status').textContent = msg;
+    $('status').className = 'status ' + (M >= 1 && (inside || this.heard) ? 'bad' : 'ok');
+    $('scene').innerHTML = s;
+  }
+
+  table() {
+    const {M, alt, f} = this.S, t = page.t, L = page.lang, Tc = isaT(alt), a = sound(Tc), v = M * a;
+    $('o-m').textContent = 'M ' + fl(M, 2, L);
+    $('o-alt').textContent = fl(alt, 0, L) + ' ft';
+    $('o-f').textContent = fl(f, 0, L) + ' Hz';
+    const la0 = a / f, laA = (a - v) / f, laB = (a + v) / f;
+    const rows = [
+      [t.rows.T, fl(Tc, 1, L) + ' °C'],
+      [t.rows.a, fl(a, 0, L) + ' m/s · ' + fl(a * KT, 0, L) + ' kt'],
+      [t.rows.tas, fl(v, 0, L) + ' m/s · ' + fl(v * KT, 0, L) + ' kt'],
+      [t.rows.reg, M < 0.02 ? t.still : t.regs[regime(M)]],
+      [t.rows.mu, M > 1 ? fl(Math.asin(1 / M) * 180 / Math.PI, 1, L) + '°' : t.noCone],
+      [t.rows.la0, fl(la0, 2, L) + ' m'],
+      [t.rows.laA, M < 1 ? fl(laA, 2, L) + ' m' : M === 1 ? t.inf : t.none],
+      [t.rows.laB, fl(laB, 2, L) + ' m'],
+      [t.rows.fA, M < 1 ? fl(a / laA, 0, L) + ' Hz' : t.none],
+      [t.rows.fB, fl(a / laB, 0, L) + ' Hz']
+    ];
+    $('calc').innerHTML = rows.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('');
+    const st = [M < 1 ? t.sub1 : Math.abs(M - 1) < 0.001 ? t.at1 : t.sup];
+    if (alt >= 10000) st.push(t.colder);
+    st.push(page.lang === 'el' ? `M = v/a ⇒ v = ${fl(M, 2, L)} × ${fl(a * KT, 0, L)} = ${fl(v * KT, 0, L)} kt.` : `M = v/a, so v = ${fl(M, 2, L)} × ${fl(a * KT, 0, L)} = ${fl(v * KT, 0, L)} kt.`);
+    $('steps').innerHTML = st.map(x => `<div>${Sim.esc(x)}</div>`).join('');
+  }
+
+  texts() {
+    const t = page.t;
+    for (const k of ['h1', 'sub', 'title', 'hint', 'foot']) $(k).textContent = t[k];
+    $('calc-h').textContent = t.calc; $('ctl-h').textContent = t.ctl;
+    $('l-m').textContent = t.m; $('l-alt').textContent = t.alt; $('l-f').textContent = t.f;
+    $('play').textContent = this.running ? t.play : t.pause; $('play').setAttribute('aria-pressed', this.running);
+    $('reset').textContent = t.reset; $('presets-l').textContent = t.presets;
+    const P = {heli: {M: 0.3, alt: 1000}, jet: {M: 0.85, alt: 36000}, one: {M: 1, alt: 0}, conc: {M: 2, alt: 45000}};
+    $('presets').innerHTML = Object.keys(P).map(k => `<button class="btn alt" type="button" data-p="${k}">${Sim.esc(t.pre[k])}</button>`).join('');
+    $('presets').querySelectorAll('button').forEach(b => b.onclick = () => { this.set(P[b.dataset.p]); $('view').scrollIntoView({behavior: 'smooth', block: 'center'}); });
+    const col = ['#5B9BEF', '#F2704A', '#62b886'];
+    $('legend').innerHTML = t.legend.map((x, i) => `<span><i style="background:${col[i]}"></i>${Sim.esc(x)}</span>`).join('');
+    document.title = t.h1;
+    this.table();
+  }
+}
+
+/* ============================ "Solve it" questions ============================ */
+const QUIZ = [
+  // waves.mach_speed
+  () => {
+    const M = pick([0.5, 0.6, 0.75, 0.8, 0.85, 1.2, 1.5, 2]), sea = Math.random() < .5;
+    const a = sea ? 661 : 573, alt = sea ? 0 : 36000, v = M * a;
+    return {
+      q: Q(`Η ταχύτητα του ήχου ${sea ? 'στη στάθμη της θάλασσας' : 'στα 36 000 ft'} είναι ${a} kt. Αεροσκάφος πετά εκεί με M ${fl(M, 2, 'el')}. Η ταχύτητά του είναι:`,
+           `The speed of sound ${sea ? 'at sea level' : 'at 36 000 ft'} is ${a} kt. An aircraft flies there at M ${fl(M, 2, 'en')}. Its speed is:`),
+      o: [V(v, 'kt', 1), V(a / M, 'kt', 1), V(a, 'kt')], a: 0,
+      x: Q(`v = M × a = ${fl(M, 2, 'el')} × ${a} = ${fl(v, 1, 'el')} kt.`, `v = M × a = ${fl(M, 2, 'en')} × ${a} = ${fl(v, 1, 'en')} kt.`),
+      apply: () => app.set({M, alt})
+    };
+  },
+  // waves.mach_number
+  () => {
+    const a = pick([340, 300]), M = pick([0.5, 0.6, 0.8, 0.9, 1.2, 1.5, 2]), v = M * a;
+    return {
+      q: Q(`Αεροσκάφος πετά με ${fl(v, 0, 'el')} m/s σε ύψος όπου η ταχύτητα του ήχου είναι ${a} m/s. Ο αριθμός Mach είναι:`,
+           `An aircraft flies at ${fl(v, 0, 'en')} m/s where the speed of sound is ${a} m/s. Its Mach number is:`),
+      o: [V(M, ''), V(a / v, ''), V(M * 10, '')], a: 0,
+      x: Q(`M = v/a = ${fl(v, 0, 'el')}/${a} = ${fl(M, 2, 'el')}.`, `M = v/a = ${fl(v, 0, 'en')}/${a} = ${fl(M, 2, 'en')}.`),
+      apply: () => app.set({M, alt: a === 340 ? 0 : 33000})
+    };
+  },
+  // waves.sound_speed_temp
+  () => {
+    const Tc = pick([-55, -40, -30, -20, -10, 5, 10, 20, 25, 30, 35]), v = 331 + 0.6 * Tc;
+    return {
+      q: Q(`Η ταχύτητα του ήχου στον αέρα είναι 331 m/s στους 0 °C και αυξάνεται 0,6 m/s ανά °C. Στους ${fl(Tc, 0, 'el')} °C είναι:`,
+           `The speed of sound in air is 331 m/s at 0 °C and rises by 0.6 m/s per °C. At ${fl(Tc, 0, 'en')} °C it is:`),
+      o: [V(v, 'm/s', 1), V(331 - 0.6 * Tc, 'm/s', 1), V(331, 'm/s')], a: 0,
+      x: Q(`v = 331 + 0,6 × (${fl(Tc, 0, 'el')}) = ${fl(v, 1, 'el')} m/s.`, `v = 331 + 0.6 × (${fl(Tc, 0, 'en')}) = ${fl(v, 1, 'en')} m/s.`)
+    };
+  },
+  // altitude and Mach
+  () => ({
+    q: Q('Αεροσκάφος ανεβαίνει σε ψυχρότερο αέρα με σταθερή αληθή ταχύτητα. Ο αριθμός Mach του:', 'An aircraft climbs into colder air at a constant true airspeed. Its Mach number:'),
+    o: [Q('αυξάνεται', 'increases'), Q('μειώνεται', 'decreases'), Q('μένει ίδιος', 'stays the same')], a: 0,
+    x: Q('Στον κρύο αέρα ο ήχος είναι πιο αργός, άρα M = v/a μεγαλώνει.', 'Sound is slower in cold air, so M = v/a increases.'),
+    apply: () => app.set({M: 0.8, alt: 36000})
+  }),
+  // Doppler, qualitative
+  () => {
+    const ap = Math.random() < .5;
+    return {
+      q: ap ? Q('Αεροσκάφος πλησιάζει έναν ακίνητο παρατηρητή. Σε σχέση με τη συχνότητα που εκπέμπει, ο παρατηρητής ακούει:', 'An aircraft approaches a stationary observer. Compared with the frequency it emits, the observer hears:')
+            : Q('Αεροσκάφος απομακρύνεται από έναν ακίνητο παρατηρητή. Σε σχέση με τη συχνότητα που εκπέμπει, ο παρατηρητής ακούει:', 'An aircraft moves away from a stationary observer. Compared with the frequency it emits, the observer hears:'),
+      o: ap ? [Q('υψηλότερη συχνότητα', 'a higher frequency'), Q('χαμηλότερη συχνότητα', 'a lower frequency'), Q('την ίδια συχνότητα', 'the same frequency')]
+            : [Q('χαμηλότερη συχνότητα', 'a lower frequency'), Q('υψηλότερη συχνότητα', 'a higher frequency'), Q('την ίδια συχνότητα', 'the same frequency')], a: 0,
+      x: Q('Φαινόμενο Doppler: τα κύματα στριμώχνονται μπροστά από την πηγή και αραιώνουν πίσω της.', 'The Doppler effect: the waves bunch up in front of the source and spread out behind it.'),
+      apply: () => app.set({M: 0.5, alt: 0})
+    };
+  },
+  // speed of the waves does not depend on the source
+  () => ({
+    q: Q('Ένα αεροσκάφος επιταχύνει από M 0,3 σε M 0,8. Η ταχύτητα με την οποία ταξιδεύουν τα ηχητικά κύματα που εκπέμπει:', 'An aircraft accelerates from M 0.3 to M 0.8. The speed at which its sound waves travel:'),
+    o: [Q('μένει ίδια, γιατί την ορίζει ο αέρας', 'stays the same, because the air sets it'), Q('αυξάνεται μαζί με το αεροσκάφος', 'increases with the aircraft'), Q('μειώνεται', 'decreases')], a: 0,
+    x: Q('Η ταχύτητα του κύματος είναι ιδιότητα του μέσου. Αλλάζει μόνο η απόσταση των μετώπων.', 'The wave speed is a property of the medium. Only the spacing of the wavefronts changes.'),
+    apply: () => app.set({M: 0.8, alt: 0})
+  }),
+  // sonic boom
+  () => ({
+    q: Q('Υπερηχητικό αεροσκάφος πετά πάνω από μια πόλη. Οι κάτοικοι ακούν την ηχητική έκρηξη:', 'A supersonic aircraft flies over a town. The people hear the sonic boom:'),
+    o: [Q('όταν ο κώνος περάσει από πάνω τους, αφού περάσει το αεροσκάφος', 'when the cone sweeps over them, after the aircraft has passed'), Q('πριν φτάσει το αεροσκάφος', 'before the aircraft arrives'), Q('μόνο τη στιγμή που ξεπέρασε το M 1', 'only at the moment it passed M 1')], a: 0,
+    x: Q('Ο κώνος ακολουθεί το αεροσκάφος σε όλη την υπερηχητική πτήση.', 'The cone trails the aircraft along its whole supersonic flight.'),
+    apply: () => app.set({M: 2, alt: 0})
+  }),
+  // regime
+  () => {
+    const M = pick([0.5, 0.9, 1.1, 2.2, 6]), r = regime(M), names = T.el.regs, en = T.en.regs;
+    const wrong = [0, 1, 2, 3].filter(i => i !== r).sort(() => Math.random() - .5).slice(0, 2);
+    return {
+      q: Q(`Αεροσκάφος πετά με M ${fl(M, 1, 'el')}. Η περιοχή πτήσης είναι:`, `An aircraft flies at M ${fl(M, 1, 'en')}. The flight regime is:`),
+      o: [Q(names[r], en[r]), Q(names[wrong[0]], en[wrong[0]]), Q(names[wrong[1]], en[wrong[1]])], a: 0,
+      x: Q('Υποηχητική < 0,8 · διηχητική 0,8–1,2 · υπερηχητική 1,2–5 · hypersonic > 5.', 'Subsonic < 0.8 · transonic 0.8–1.2 · supersonic 1.2–5 · hypersonic > 5.'),
+      apply: () => app.set({M: Math.min(3, M), alt: 0})
+    };
+  }
+];
+
+const app = new SoundPage();
+</script>
+<script src="assets/landscape.js"></script>
+</body>
+</html>
