@@ -96,6 +96,26 @@ const CONFIG = {
     {label: 'Formula sheet', href: 'formula.html'}
   ],
   PASS: 0.75,              // pass mark of the exam
+  // Mock exam: EASA Part-66 Module 2, category B1 (level 2 throughout). Questions per syllabus section,
+  // as in the official table. Each section is matched by bank topics, optionally narrowed by a template pattern.
+  EXAM_B1: {
+    minutes: 65,
+    theory: 0.4,   // share of conceptual questions per section (as far as the bank has them)
+    hard: 0.15,    // at most this share of the calculations may be multi-step (difficulty 3)
+    sections: [
+      {ref: '2.1',    name: 'Matter',                                n: 5, topics: ['matter']},
+      {ref: '2.2.1',  name: 'Statics',                               n: 7, topics: ['torque', 'stress', 'pressure']},
+      {ref: '2.2.2',  name: 'Kinetics',                              n: 7, topics: ['kinetics', 'circular', 'vibrations', 'machines']},
+      {ref: '2.2.3a', name: 'Mass, force and energy',                n: 5, topics: ['dynamics', 'energy']},
+      {ref: '2.2.3b', name: 'Momentum, friction',                    n: 4, topics: ['momentum', 'friction']},
+      {ref: '2.2.4a', name: 'Gravity and density',                   n: 2, topics: ['density']},
+      {ref: '2.2.4b', name: 'Viscosity, compressibility, pressure',  n: 3, topics: ['fluids']},
+      {ref: '2.3a',   name: 'Temperature',                           n: 2, topics: ['therm'], tpl: /^therm1\.(c_to|f_to|k_to|r_to|dt_)|^therm2\./},
+      {ref: '2.3b',   name: 'Heat',                                  n: 8, topics: ['therm'], not: /^therm1\.(c_to|f_to|k_to|r_to|dt_)|^therm2\./},
+      {ref: '2.4',    name: 'Optics',                                n: 5, topics: ['optics']},
+      {ref: '2.5',    name: 'Wave motion and sound',                 n: 4, topics: ['waves']}
+    ]
+  },
   BOARD_LESSON: 'm2-test'  // id used on the shared scoreboard (timed tests of 10 to 50 questions only)
 };
 
@@ -123,7 +143,7 @@ class TestApp {
     this.cfg = cfg; this.board = board; this.Q = bank.questions; this.MISC = bank.misc; this.meta = bank.meta;
     this.topics = Object.keys(bank.meta.topics);
     this.st = new Store();
-    this.F = {topics: new Set(this.topics), units: 'both', d: new Set([1, 2, 3]), n: 20, mode: 'practice', mins: 25, lang: 'both', only: 'all', tpl: null};
+    this.F = {topics: new Set(this.topics), units: 'both', d: new Set([1, 2, 3]), n: 20, mode: 'practice', mins: 25, lang: 'both', only: 'all', tpl: null, exam: null};
     this.R = null; this.tick = null;
   }
 
@@ -167,7 +187,48 @@ class TestApp {
     if (['el', 'en', 'both'].includes(p.get('lang'))) F.lang = p.get('lang');
     if (['all', 'new', 'wrong'].includes(p.get('only'))) F.only = p.get('only');
     if (p.get('tpl')) { const t = p.get('tpl').split(',').map(x => x.trim()).filter(Boolean); if (t.length) F.tpl = t; }
+    if (p.get('exam') === 'b1') this.setExam(true);
     return p.get('go') === '1';
+  }
+
+  // The mock exam fixes the number of questions, the timer and the mix of chapters.
+  setExam(on) {
+    const F = this.F, E = this.cfg.EXAM_B1;
+    F.exam = on ? 'b1' : null;
+    if (on) { F.mode = 'test'; F.mins = E.minutes; F.n = E.sections.reduce((s, x) => s + x.n, 0); }
+  }
+
+  // Questions of one syllabus section of the mock exam.
+  inSection(q, sec) {
+    return sec.topics.includes(q.topic) && (!sec.tpl || sec.tpl.test(q.tpl)) && (!sec.not || !sec.not.test(q.tpl));
+  }
+
+  // Draw k questions spread over as many question types as possible.
+  spread(pool, k, taken) {
+    const by = {}, out = [];
+    shuffle(pool.filter(q => !taken.has(q.id))).forEach(q => (by[q.tpl] = by[q.tpl] || []).push(q));
+    let keys = shuffle(Object.keys(by)), i = 0;
+    while (out.length < k && keys.length) {
+      const t = keys[i % keys.length], q = by[t].shift();
+      if (q) { out.push(q); taken.add(q.id); i++; } else keys.splice(i % keys.length, 1);
+    }
+    return out;
+  }
+
+  // Mock exam: the official number of questions per section, about 40 % conceptual,
+  // calculations mostly one or two steps (level 2), every question type equally likely.
+  examQuestions() {
+    const E = this.cfg.EXAM_B1, qs = [], taken = new Set();
+    E.sections.forEach(sec => {
+      const pool = this.Q.filter(q => this.inSection(q, sec)), theory = pool.filter(q => /theory/.test(q.tpl)), calc = pool.filter(q => !/theory/.test(q.tpl));
+      const nT = Math.min(theory.length, Math.round(sec.n * E.theory)), nH = Math.round((sec.n - nT) * E.hard);
+      let got = this.spread(theory, nT, taken)
+        .concat(this.spread(calc.filter(q => q.d === 3), nH, taken));
+      got = got.concat(this.spread(calc.filter(q => q.d < 3), sec.n - got.length, taken));
+      if (got.length < sec.n) got = got.concat(this.spread(pool, sec.n - got.length, taken));   // the bank is short: take anything left
+      got.forEach(q => qs.push({q, sec: sec.ref + ' ' + sec.name}));
+    });
+    return shuffle(qs);
   }
 
   seg(key, vals) {
@@ -177,6 +238,14 @@ class TestApp {
   // Left column: all filters.
   side() {
     const F = this.F, cnt = {};
+    if (F.exam) {                                        // mock exam: fixed content, only the language is free
+      $('side').innerHTML = '<h2>Mock exam B1</h2><p class="note">EASA Part-66 Module 2, as in the official table: ' +
+        `${F.n} questions, ${F.mins} minutes, pass mark ${Math.round(this.cfg.PASS * 100)} %.</p>` +
+        '<h2>Language</h2>' + this.seg('lang', [['both', 'EN + EL'], ['en', 'EN'], ['el', 'EL']]) +
+        '<div class="row" style="margin-top:12px"><button class="btn go grow" id="go" type="button">Start</button><button class="btn alt" id="link" type="button">Copy link</button></div>' +
+        '<div class="row"><button class="chip" id="noexam" type="button">Leave the mock exam: build my own test</button></div><p class="note" id="msg"></p>';
+      return;
+    }
     this.pool(true).forEach(q => { cnt[q.topic] = (cnt[q.topic] || 0) + 1; });
     const avail = this.pool(false).length;
     $('side').innerHTML =
@@ -200,6 +269,16 @@ class TestApp {
     clearInterval(this.tick); this.R = null; $('main').className = '';
     const F = this.F, avail = this.pool(false).length, seen = Object.keys(this.st.d.q).length;
     const worst = Object.keys(this.st.d.t).sort((a, b) => this.st.d.t[b] - this.st.d.t[a]).slice(0, 3);
+    if (F.exam) {
+      const E = this.cfg.EXAM_B1;
+      $('stage').innerHTML = '<h2>Mock exam: Module 2, category B1</h2>' +
+        `<p>${F.n} questions in ${F.mins} minutes, three options each, explanations at the end. Pass mark ${Math.round(this.cfg.PASS * 100)} %.</p>` +
+        '<div class="blk"><h2>Questions per syllabus section</h2>' +
+        E.sections.map(x => `<div class="tb"><span>${esc(x.ref + ' ' + x.name)}</span><span></span><span>${x.n}</span></div>`).join('') + '</div>' +
+        `<p class="note">About ${Math.round(E.theory * 100)} % of the questions are conceptual; the calculations are mostly one or two steps (level 2).</p>` +
+        '<div class="row"><button class="btn go" id="go2" type="button">Start</button></div>';
+      return;
+    }
     $('stage').innerHTML =
       '<h2>Build a test</h2>' +
       '<ol class="note"><li>Pick the chapters on the left (and units or difficulty if you want).</li><li>Choose Practice (answer shown after each question) or Test (timer, explanations at the end).</li><li>Press Start.</li></ol>' +
@@ -221,6 +300,7 @@ class TestApp {
       else if (b.id === 'all') F.topics = new Set(this.topics);
       else if (b.id === 'none') F.topics = new Set();
       else if (b.id === 'alltpl') F.tpl = null;
+      else if (b.id === 'noexam') { this.setExam(false); F.n = 20; F.mode = 'practice'; }
       else if (b.id === 'go') return this.start();
       else if (b.id === 'link') return this.copyLink();
       else return;
@@ -244,6 +324,7 @@ class TestApp {
   copyLink() {
     const F = this.F, p = new URLSearchParams({topic: [...F.topics].join(','), units: F.units, d: [...F.d].join(','), n: F.n, mode: F.mode, mins: F.mins, lang: F.lang, only: F.only});
     if (F.tpl) p.set('tpl', F.tpl.join(','));
+    if (F.exam) p.set('exam', F.exam);
     const url = location.href.split('#')[0] + '#' + p, msg = $('msg');
     const show = t => { if (msg) msg.textContent = t; };
     (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(() => show('Link copied. Anyone who opens it gets these filters.'), () => show(url));
@@ -252,15 +333,21 @@ class TestApp {
   // Draw the questions round-robin over the selected chapters, so every chapter is represented.
   start() {
     const F = this.F, by = {};
-    const key = q => F.tpl ? q.tpl : q.topic;           // from a simulation: spread over its question types
-    shuffle(this.pool(false)).forEach(q => (by[key(q)] = by[key(q)] || []).push(q));
-    let keys = shuffle(Object.keys(by)), qs = [], i = 0;
-    while (qs.length < F.n && keys.length) {
-      const k = keys[i % keys.length], q = by[k].shift();
-      if (q) { qs.push(q); i++; } else keys.splice(i % keys.length, 1);
+    let qs = [], secs = null;
+    if (F.exam) {
+      const ex = this.examQuestions(); qs = ex.map(x => x.q); secs = ex.map(x => x.sec);
+    } else {
+      const key = q => F.tpl ? q.tpl : q.topic;           // from a simulation: spread over its question types
+      shuffle(this.pool(false)).forEach(q => (by[key(q)] = by[key(q)] || []).push(q));
+      let keys = shuffle(Object.keys(by)), i = 0;
+      while (qs.length < F.n && keys.length) {
+        const k = keys[i % keys.length], q = by[k].shift();
+        if (q) { qs.push(q); i++; } else keys.splice(i % keys.length, 1);
+      }
+      qs = shuffle(qs);
     }
     if (!qs.length) return;
-    this.R = {qs: shuffle(qs), cur: 0, ans: [], flag: [], done: false, confirm: false, t0: Date.now(), used: 0,
+    this.R = {qs, secs, cur: 0, ans: [], flag: [], done: false, confirm: false, t0: Date.now(), used: 0,
               end: F.mode === 'test' && F.mins > 0 ? Date.now() + F.mins * 60000 : 0, onlyWrong: false};
     if (this.R.end) this.tick = setInterval(() => {
       const c = $('clock'), r = Math.ceil((this.R.end - Date.now()) / 1000);
@@ -324,17 +411,19 @@ class TestApp {
     const n = R.qs.length, per = {}, tags = {}; let ok = 0;
     R.qs.forEach((q, i) => {
       const a = R.ans[i], g = a === q.a; if (g) ok++;
-      const p = per[q.topic] || (per[q.topic] = {c: 0, n: 0}); p.n++; if (g) p.c++;
+      const key = R.secs ? R.secs[i] : q.topic;           // the mock exam reports by syllabus section
+      const p = per[key] || (per[key] = {c: 0, n: 0}); p.n++; if (g) p.c++;
       if (F.mode === 'test') this.st.rec(q, g, a === undefined ? null : q.tags[a]);
       if (!g && a !== undefined && q.tags[a]) tags[q.tags[a]] = (tags[q.tags[a]] || 0) + 1;
     });
     const pct = Math.round(ok / n * 100), pass = pct >= this.cfg.PASS * 100;
-    const rows = Object.keys(per).map(t => `<div class="tb"><span>${esc(this.tname(t))}</span><div class="bar"><i style="width:${Math.round(per[t].c / per[t].n * 100)}%"></i></div><span>${per[t].c}/${per[t].n}</span></div>`).join('');
+    const order = R.secs ? Object.keys(per).sort((a, b) => a.localeCompare(b, 'en', {numeric: true})) : Object.keys(per);
+    const rows = order.map(t => `<div class="tb"><span>${esc(R.secs ? t : this.tname(t))}</span><div class="bar"><i style="width:${Math.round(per[t].c / per[t].n * 100)}%"></i></div><span>${per[t].c}/${per[t].n}</span></div>`).join('');
     const tl = Object.keys(tags).sort((a, b) => tags[b] - tags[a]).map(t => `<p><b>${tags[t]}×</b> ${this.txt(this.mist(t) || {el: t, en: t})}</p>`).join('');
     $('stage').innerHTML =
       `<div class="meta">Result · ${mmss(R.used)}</div><div id="result" class="${pass ? 'pass' : 'fail'}">${pct} %</div>` +
       `<p>${ok} of ${n} correct. Pass mark ${Math.round(this.cfg.PASS * 100)} %: ${pass ? 'passed.' : 'not yet.'}</p><p class="note" id="sbmsg"></p>` +
-      `<div class="blk"><h2>By chapter</h2>${rows}</div>` +
+      `<div class="blk"><h2>${R.secs ? 'By syllabus section' : 'By chapter'}</h2>${rows}</div>` +
       (tl ? `<div class="blk"><h2>Mistakes you made</h2><div class="expl">${tl}</div></div>` : '') +
       '<div class="blk nav"><button class="btn go" id="again" type="button">New test, same filters</button><button class="btn alt" id="back" type="button">Change filters</button><button class="chip" id="wo" type="button" aria-pressed="false">Wrong answers only</button></div><div id="rev"></div>';
     this.review();
