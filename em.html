@@ -61,6 +61,7 @@ td b{color:var(--fg);font-weight:500}
 text{font-family:var(--f-body)}
 </style>
 <link rel="stylesheet" href="assets/theme.css">
+<link rel="stylesheet" href="assets/dock.css">
 </head>
 <body>
 <header>
@@ -82,19 +83,15 @@ text{font-family:var(--f-body)}
     </div>
   </div>
 
-  <section class="card">
-    <div id="stage"><svg id="view" viewBox="0 0 1000 430" role="img" aria-label="Electromagnetic wave"><g id="scene"></g></svg></div>
-    <div class="legend" id="legend"></div>
-    <svg id="spec" viewBox="0 0 1000 70" role="img" aria-label="Visible spectrum"></svg>
-  </section>
-
-  <div class="lower">
-    <section class="card">
-      <h2 id="read-h"></h2>
-      <div class="big"><div class="swatch" id="swatch"></div><div><p id="cname"></p><p id="csub"></p></div></div>
-      <table id="tab"></table>
-    </section>
-    <section class="card">
+  <div class="dock">
+    <div class="dock-viz">
+      <section class="card dock-fig">
+        <div id="stage"><svg id="view" viewBox="0 0 1000 430" role="img" aria-label="Electromagnetic wave"><g id="scene"></g></svg></div>
+        <svg id="spec" viewBox="0 0 1000 70" role="img" aria-label="Visible spectrum"></svg>
+      </section>
+      <div class="dock-cap"><div class="legend" id="legend"></div></div>
+    </div>
+    <section class="card dock-ctl">
       <h2 id="ctl-h"></h2>
       <div class="row"><label for="lam" id="lam-l"></label><input type="range" id="lam" min="380" max="750" step="1"><output id="lam-o"></output></div>
       <div class="row"><label for="frq" id="frq-l"></label><input type="range" id="frq" min="400" max="789" step="1"><output id="frq-o"></output></div>
@@ -110,6 +107,12 @@ text{font-family:var(--f-body)}
       <p class="note" id="hint"></p>
     </section>
   </div>
+
+  <section class="card">
+    <h2 id="read-h"></h2>
+    <div class="big"><div class="swatch" id="swatch"></div><div><p id="cname"></p><p id="csub"></p></div></div>
+    <table id="tab"></table>
+  </section>
   <p class="note" id="foot"></p>
 </div>
 </main>
