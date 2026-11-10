@@ -15,6 +15,8 @@
   .checks label{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center}
   #view text{font-family:var(--f-mono,monospace)}
   #sound.on{background:var(--accent);color:#0b0a09}
+  #presets{gap:6px}
+  #presets .btn{min-height:32px;padding:4px 10px;font-size:13px}
 </style>
 </head>
 <body>
@@ -44,7 +46,8 @@
     <section class="card dock-ctl">
       <h2 id="ctl-h"></h2>
       <div class="row"><label for="f1" id="l-f1"></label><input type="range" id="f1" min="0" max="1000" step="1"><output id="o-f1"></output></div>
-      <div class="row"><label for="f2" id="l-f2"></label><input type="range" id="f2" step="0.5"><output id="o-f2"></output></div>
+      <div class="row"><label for="f2" id="l-f2"></label><input type="range" id="f2" min="0" max="1000" step="1"><output id="o-f2"></output></div>
+      <div class="row"><label for="df" id="l-df"></label><input type="range" id="df" min="-10" max="10" step="0.5" value="0"><output id="o-df"></output></div>
       <div class="row"><label for="a2" id="l-a2"></label><input type="range" id="a2" min="0" max="100" step="5" value="100"><output id="o-a2"></output></div>
       <div class="checks">
         <label><input type="checkbox" id="on1" checked> <span id="on1-l"></span></label>
@@ -78,11 +81,16 @@ const {SimPage, Quiz, pick} = Sim;
 const T = {
  el: {
   h1: 'Διακρότημα', sub: 'Δύο ήχοι με λίγο διαφορετική συχνότητα συμβάλλουν. Ο ήχος που ακούμε δυναμώνει και σβήνει τόσες φορές το δευτερόλεπτο όση είναι η διαφορά των συχνοτήτων.',
-  title: 'Δύο πηγές, κοντινές συχνότητες', soundOn: '🔊 Ήχος: ON', soundOff: '🔇 Ήχος: OFF', play: '❚❚ Παύση', pause: '▶ Συνέχεια', reset: '↺ Από την αρχή',
+  title: 'Δύο πηγές, δύο συχνότητες', soundOn: '🔊 Ήχος: ON', soundOff: '🔇 Ήχος: OFF', play: '❚❚ Παύση', pause: '▶ Συνέχεια', reset: '↺ Από την αρχή',
   calc: 'Τι συμβαίνει', ctl: 'Ρυθμίσεις',
-  f1: 'Συχνότητα πηγής 1', f2: 'Συχνότητα πηγής 2', a2: 'Πλάτος πηγής 2', vol: 'Ένταση ηχείων',
+  f1: 'Συχνότητα πηγής 1', f2: 'Συχνότητα πηγής 2', df: 'Λεπτή ρύθμιση f₂', a2: 'Πλάτος πηγής 2', vol: 'Ένταση ηχείων',
   on1: 'Ακούω την πηγή 1', on2: 'Ακούω την πηγή 2',
-  presets: 'Έτοιμα παραδείγματα:', pre: {tune: 'Κούρδισμα 440 / 442', fast: 'Γρήγορο 440 / 450', same: 'Ίδιες 440 / 440', slow: 'Αργή κίνηση 6 / 7', half: 'Άνισα πλάτη'},
+  presets: 'Έτοιμα παραδείγματα:', pre: {tune: 'Κούρδισμα 440 / 442', fast: 'Γρήγορο 440 / 450', same: 'Ίδιες 440 / 440', slow: 'Αργή κίνηση 6 / 7', half: 'Άνισα πλάτη', oct: 'Οκτάβα 1:2 (440 / 880)', fifth: 'Πέμπτη 2:3 (440 / 660)', fourth: 'Τετάρτη 3:4 (330 / 440)', third: 'Μεγ. τρίτη 4:5 (440 / 550)', off: 'Ξεκούρδιστη πέμπτη (440 / 663)'},
+  ratio: 'Λόγος f₂ : f₁', rep: 'Το άθροισμα επαναλαμβάνεται κάθε', noRep: 'δεν επαναλαμβάνεται ακριβώς', far: 'δύο τόνοι μαζί (συγχορδία)',
+  iv: {'1:1': 'ταυτοφωνία', '2:1': 'οκτάβα', '3:2': 'καθαρή πέμπτη', '4:3': 'καθαρή τετάρτη', '5:4': 'μεγάλη τρίτη', '6:5': 'μικρή τρίτη', '5:3': 'μεγάλη έκτη', '8:5': 'μικρή έκτη', '9:8': 'μεγάλη δευτέρα', '15:8': 'μεγάλη έβδομη', '3:1': 'οκτάβα + πέμπτη', '4:1': 'δύο οκτάβες'},
+  stFar: 'Οι συχνότητες απέχουν πολύ: δεν ακούμε διακρότημα αλλά δύο ξεχωριστούς τόνους μαζί.',
+  stRat: (r, n, T) => `Ο λόγος είναι ${r}${n ? ' (' + n + ')' : ''}: το άθροισμα ξαναπαίρνει το ίδιο σχήμα κάθε ${T}. Όσο πιο απλός ο λόγος (1:2, 2:3, 3:4), τόσο πιο γρήγορα επαναλαμβάνεται και τόσο πιο «σύμφωνα» ακούγεται το ζευγάρι.`,
+  stNoRat: 'Ο λόγος δεν είναι απλός: το σχήμα του αθροίσματος αλλάζει συνεχώς. Δοκίμασε τη λεπτή ρύθμιση για να «κουμπώσεις» σε λόγο 2:3 ή 1:2 και δες το σχήμα να σταθεροποιείται.',
   rows: {f1: 'Συχνότητα πηγής 1, f₁', f2: 'Συχνότητα πηγής 2, f₂', fb: 'Συχνότητα διακροτήματος f_b = |f₁ − f₂|', Tb: 'Περίοδος διακροτήματος T_b = 1/f_b', tone: 'Τόνος που ακούγεται ≈ (f₁ + f₂)/2', win: 'Χρόνος που δείχνει το πάνω διάγραμμα'},
   none: 'δεν υπάρχει', inf: '∞ (σταθερή ένταση)',
   top: 'Άθροισμα των δύο κυμάτων στο χρόνο', zoom: 'Μεγέθυνση τη στιγμή της κόκκινης γραμμής',
@@ -101,11 +109,16 @@ const T = {
  },
  en: {
   h1: 'Beats', sub: 'Two sounds of slightly different frequency interfere. The sound we hear swells and fades as many times per second as the difference of the frequencies.',
-  title: 'Two sources, close frequencies', soundOn: '🔊 Sound: ON', soundOff: '🔇 Sound: OFF', play: '❚❚ Pause', pause: '▶ Play', reset: '↺ Restart',
+  title: 'Two sources, two frequencies', soundOn: '🔊 Sound: ON', soundOff: '🔇 Sound: OFF', play: '❚❚ Pause', pause: '▶ Play', reset: '↺ Restart',
   calc: 'What is happening', ctl: 'Settings',
-  f1: 'Frequency of source 1', f2: 'Frequency of source 2', a2: 'Amplitude of source 2', vol: 'Speaker volume',
+  f1: 'Frequency of source 1', f2: 'Frequency of source 2', df: 'Fine tuning of f₂', a2: 'Amplitude of source 2', vol: 'Speaker volume',
   on1: 'Hear source 1', on2: 'Hear source 2',
-  presets: 'Ready examples:', pre: {tune: 'Tuning 440 / 442', fast: 'Fast 440 / 450', same: 'Equal 440 / 440', slow: 'Slow motion 6 / 7', half: 'Unequal amplitudes'},
+  presets: 'Ready examples:', pre: {tune: 'Tuning 440 / 442', fast: 'Fast 440 / 450', same: 'Equal 440 / 440', slow: 'Slow motion 6 / 7', half: 'Unequal amplitudes', oct: 'Octave 1:2 (440 / 880)', fifth: 'Fifth 2:3 (440 / 660)', fourth: 'Fourth 3:4 (330 / 440)', third: 'Major third 4:5 (440 / 550)', off: 'Out-of-tune fifth (440 / 663)'},
+  ratio: 'Ratio f₂ : f₁', rep: 'The sum repeats every', noRep: 'does not repeat exactly', far: 'two tones together (a chord)',
+  iv: {'1:1': 'unison', '2:1': 'octave', '3:2': 'perfect fifth', '4:3': 'perfect fourth', '5:4': 'major third', '6:5': 'minor third', '5:3': 'major sixth', '8:5': 'minor sixth', '9:8': 'major second', '15:8': 'major seventh', '3:1': 'octave + fifth', '4:1': 'two octaves'},
+  stFar: 'The frequencies are far apart: we hear no beats but two separate tones together.',
+  stRat: (r, n, T) => `The ratio is ${r}${n ? ' (' + n + ')' : ''}: the sum takes the same shape again every ${T}. The simpler the ratio (1:2, 2:3, 3:4), the sooner it repeats and the more "consonant" the pair sounds.`,
+  stNoRat: 'The ratio is not simple: the shape of the sum keeps changing. Use the fine tuning to lock onto 2:3 or 1:2 and watch the shape settle.',
   rows: {f1: 'Frequency of source 1, f₁', f2: 'Frequency of source 2, f₂', fb: 'Beat frequency f_b = |f₁ − f₂|', Tb: 'Beat period T_b = 1/f_b', tone: 'Pitch heard ≈ (f₁ + f₂)/2', win: 'Time shown in the top graph'},
   none: 'none', inf: '∞ (steady loudness)',
   top: 'Sum of the two waves against time', zoom: 'Close-up at the red line',
@@ -133,6 +146,16 @@ const V = (x, u, d = 2) => Q(fl(x, d, 'el') + (u ? ' ' + u : ''), fl(x, d, 'en')
 const F_MIN = 2, F_MAX = 1000;
 const sl2f = v => { const f = F_MIN * Math.pow(F_MAX / F_MIN, v / 1000); return f < 20 ? Math.round(f * 2) / 2 : Math.round(f); };
 const f2sl = f => Math.round(1000 * Math.log(f / F_MIN) / Math.log(F_MAX / F_MIN));
+const F2_MAX = 2000;                                     // source 2 goes up to two octaves above 500 Hz
+const sl2g = v => { const f = F_MIN * Math.pow(F2_MAX / F_MIN, v / 1000); return f < 20 ? Math.round(f * 2) / 2 : Math.round(f); };
+const g2sl = f => Math.round(1000 * Math.log(f / F_MIN) / Math.log(F2_MAX / F_MIN));
+// Simplest ratio p:q (both up to 9) that matches f2/f1 within 0.3 %, or null.
+function ratio(f1, f2) {
+  for (let s = 2; s <= 18; s++) for (let q = 1; q < s; q++) { const p = s - q; if (p > 9 || q > 9) continue;
+    let g = (a, b) => b ? g(b, a % b) : a; if (g(p, q) !== 1) continue;
+    if (Math.abs(f2 / f1 - p / q) < 0.003 * p / q) return {p, q}; }
+  return Math.abs(f2 - f1) < 1e-9 ? {p: 1, q: 1} : null;
+}
 
 /* ============================ geometry ============================ */
 const X0 = 70, X1 = 900, TOP_Y = 162, TOP_H = 92, Z_Y = 440, Z_H = 52, BAR_X = 945;
@@ -140,13 +163,14 @@ const C1 = '#5B9BEF', C2 = '#F2A64A', CS = '#e8e2d0', CE = '#62b886', CH = '#F27
 
 class BeatsPage {
   constructor() {
-    this.S = {f1: 440, f2: 442, a2: 1, on1: true, on2: true, vol: 0.5};
+    this.S = {f1: 440, f2: 442, f2c: 442, df: 0, a2: 1, on1: true, on2: true, vol: 0.5};
     this.running = true; this.t = 0; this.win = -1;
     this.ctx = null; this.osc = null; this.soundOn = false;
     page.bindLang($('lang-el'), $('lang-en'));
     page.onLang(() => this.texts());
-    $('f1').addEventListener('input', () => { this.S.f1 = sl2f(+$('f1').value); this.clampF2(); this.changed(true); });
-    $('f2').addEventListener('input', () => { this.S.f2 = +$('f2').value; this.changed(true); });
+    $('f1').addEventListener('input', () => { this.S.f1 = sl2f(+$('f1').value); this.changed(true); });
+    $('f2').addEventListener('input', () => { this.S.f2c = sl2g(+$('f2').value); this.syncF2(); this.changed(true); });
+    $('df').addEventListener('input', () => { this.S.df = +$('df').value; this.syncF2(); this.changed(true); });
     $('a2').addEventListener('input', () => { this.S.a2 = +$('a2').value / 100; this.changed(false); });
     $('vol').addEventListener('input', () => { this.S.vol = +$('vol').value / 100; this.gains(); this.outputs(); });
     for (const k of ['on1', 'on2']) $(k).addEventListener('change', () => { this.S[k] = $(k).checked; this.gains(); });
@@ -162,23 +186,24 @@ class BeatsPage {
   }
 
   /* ---------- state ---------- */
-  clampF2() {
-    const {f1} = this.S, lo = Math.max(0.5, f1 - 20), hi = f1 + 20;
-    this.S.f2 = Math.min(hi, Math.max(lo, Math.round(this.S.f2 * 2) / 2));
-    $('f2').min = lo; $('f2').max = hi; $('f2').value = this.S.f2;
-  }
+  syncF2() { this.S.f2 = Math.max(0.5, Math.round((this.S.f2c + this.S.df) * 2) / 2); }
   sliders() {
-    $('f1').value = f2sl(this.S.f1); this.clampF2();
+    $('f1').value = f2sl(this.S.f1); $('f2').value = g2sl(this.S.f2c); $('df').value = this.S.df; this.syncF2();
     $('a2').value = Math.round(this.S.a2 * 100); $('on1').checked = this.S.on1; $('on2').checked = this.S.on2;
   }
-  set(v) { Object.assign(this.S, v); this.sliders(); this.changed(true); }
+  set(v) { if (v.f2 !== undefined) { v = Object.assign({f2c: v.f2, df: 0}, v); } Object.assign(this.S, v); this.sliders(); this.changed(true); }
   changed(freq) {
     if (freq) this.restart(); else { this.win = -1; this.gains(); }
     this.table();
   }
   get fb() { return Math.abs(this.S.f1 - this.S.f2); }
-  get Tw() {                         // length of the top graph: three beat periods, within limits
+  // Close frequencies give beats; far apart they are heard as two tones (an interval).
+  get beats() { const {f1, f2} = this.S; return this.fb < 25 && this.fb <= 0.2 * Math.min(f1, f2); }
+  get rat() { return ratio(this.S.f1, this.S.f2); }
+  get Trep() { const r = this.rat; return r ? r.q / this.S.f1 : 0; }      // the sum repeats after q cycles of f1
+  get Tw() {                         // length of the top graph
     const fb = this.fb, f1 = this.S.f1;
+    if (!this.beats) return Math.min(6, Math.max(0.004, this.Trep ? Math.max(3 * this.Trep, 6 / f1) : 12 / f1));
     let w = fb > 0 ? 3 / fb : 12 / f1 > 0.2 ? 12 / f1 : 0.2;
     if (fb > 0 && w > 6) w = 1 / fb;
     return Math.min(6, Math.max(0.06, w));
@@ -238,7 +263,7 @@ class BeatsPage {
   // so that even 1000 Hz looks right (the carrier fills the envelope).
   drawTop(k) {
     const Tw = this.Tw, t0 = k * Tw, A = 1 + this.S.a2, sc = TOP_H / A, cols = X1 - X0, t = page.t, L = page.lang;
-    const cyc = this.S.f1 * Tw / cols, n = Math.max(4, Math.ceil(cyc * 10));
+    const cyc = Math.max(this.S.f1, this.S.f2) * Tw / cols, n = Math.max(4, Math.ceil(cyc * 10));
     let up = [], dn = [], line = cyc < 0.25;
     for (let i = 0; i <= cols; i++) {
       const ta = t0 + i / cols * Tw;
@@ -253,10 +278,11 @@ class BeatsPage {
       `<line x1="${X0}" y1="${TOP_Y - TOP_H - 6}" x2="${X0}" y2="${TOP_Y + TOP_H + 6}" stroke="#555"/>`;
     s += line ? `<polyline points="${up.join(' ')}" fill="none" stroke="${CS}" stroke-width="1.6"/>`
               : `<polygon points="${up.join(' ')} ${dn.reverse().join(' ')}" fill="${CS}" fill-opacity=".85" stroke="${CS}" stroke-width=".6"/>`;
-    // envelope
+    if (this.beats) {
     const e = [], e2 = [];
     for (let i = 0; i <= cols; i += 2) { const ta = t0 + i / cols * Tw, v = this.env(ta) * sc; e.push(`${X0 + i},${(TOP_Y - v).toFixed(1)}`); e2.push(`${X0 + i},${(TOP_Y + v).toFixed(1)}`); }
     s += `<polyline points="${e.join(' ')}" fill="none" stroke="${CE}" stroke-width="2.2" stroke-dasharray="7 4"/><polyline points="${e2.join(' ')}" fill="none" stroke="${CE}" stroke-width="2.2" stroke-dasharray="7 4"/>`;
+    }
     // time axis ticks
     const step = niceStep(Tw / 5);
     for (let v = Math.ceil(t0 / step) * step; v <= t0 + Tw + 1e-9; v += step) {
@@ -265,12 +291,13 @@ class BeatsPage {
            `<text x="${x.toFixed(1)}" y="${TOP_Y + TOP_H + 26}" fill="#8a8274" font-size="13" text-anchor="middle">${fl(v, step < 0.01 ? 3 : step < 0.1 ? 2 : 1, L)} s</text>`;
     }
     // beat period bracket between the first two loud points
-    if (this.fb > 0 && 1 / this.fb <= Tw) {
-      const Tb = 1 / this.fb, first = Math.ceil(t0 / Tb - 1e-9) * Tb;
+    const TB = this.beats ? (this.fb > 0 ? 1 / this.fb : 0) : this.Trep;
+    if (TB > 0 && TB <= Tw) {
+      const Tb = TB, first = Math.ceil(t0 / Tb - 1e-9) * Tb;
       if (first + Tb <= t0 + Tw + 1e-9) {
         const xa = X0 + (first - t0) / Tw * cols, xb = X0 + (first + Tb - t0) / Tw * cols, yb = TOP_Y - TOP_H - 14;
         s += `<path d="M${xa.toFixed(1)},${yb + 6} V${yb} H${xb.toFixed(1)} V${yb + 6}" fill="none" stroke="${CE}" stroke-width="1.6"/>` +
-             `<text x="${((xa + xb) / 2).toFixed(1)}" y="${yb - 6}" fill="${CE}" font-size="15" text-anchor="middle">T_b = 1/f_b = ${fl(Tb, Tb < 0.1 ? 3 : 2, L)} s</text>`;
+             `<text x="${((xa + xb) / 2).toFixed(1)}" y="${yb - 6}" fill="${CE}" font-size="15" text-anchor="middle">${this.beats ? 'T_b = 1/f_b' : 'T'} = ${fl(Tb, Tb < 0.01 ? 4 : Tb < 0.1 ? 3 : 2, L)} s</text>`;
       }
     }
     $('top').innerHTML = s;
@@ -287,7 +314,11 @@ class BeatsPage {
   // Lower graph: about four periods of wave 1, starting at a crest-free point of wave 1,
   // so wave 1 stands still and wave 2 slides past it at the beat rate.
   drawZoom() {
-    const {f1, f2, a2} = this.S, t = page.t, P = 4, ts = Math.floor(this.t * f1) / f1, span = P / f1, cols = X1 - X0;
+    const {f1, f2, a2} = this.S, t = page.t, cols = X1 - X0, far = !this.beats, Tr = this.Trep;
+    // beats: four cycles of wave 1, aligned to wave 1 (wave 2 slides past it);
+    // intervals: whole repetition periods when the ratio is simple, so the shape stands still.
+    const span = far ? Math.min(14 / Math.max(f1, f2), Math.max(4 / Math.min(f1, f2), Tr || 0)) : 4 / f1;
+    const unit = far && Tr ? Tr : 1 / f1, ts = Math.floor(this.t / unit) * unit;
     const p1 = [], p2 = [], ps = [];
     for (let i = 0; i <= cols; i += 2) {
       const ta = ts + i / cols * span, a = Math.sin(2 * Math.PI * f1 * ta), b = a2 * Math.sin(2 * Math.PI * f2 * ta), x = X0 + i;
@@ -295,7 +326,8 @@ class BeatsPage {
       ps.push(`${x},${(Z_Y + 40 - (a + b) * Z_H * 0.55).toFixed(1)}`);
     }
     const ph = ((2 * Math.PI * (f2 - f1) * this.t) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI), c = Math.cos(ph);
-    const msg = c > 0.85 ? t.inPhase : c < -0.85 ? t.outPhase : t.mid, col = c > 0.85 ? CE : c < -0.85 ? CH : '#a9a193';
+    let msg = c > 0.85 ? t.inPhase : c < -0.85 ? t.outPhase : t.mid, col = c > 0.85 ? CE : c < -0.85 ? CH : '#a9a193';
+    if (far) { const r = this.rat, k = r ? Math.max(r.p, r.q) + ':' + Math.min(r.p, r.q) : ''; msg = r ? `${r.p}:${r.q}` + (t.iv[k] ? ' · ' + t.iv[k] : '') : t.far; col = '#a9a193'; }
     const loud = this.env(this.t) / (1 + a2), bh = 150;
     let s = `<line x1="0" y1="298" x2="1000" y2="298" stroke="#2a2a2a"/>` +
       `<text x="${X0}" y="324" fill="#a9a193" font-size="15">${Sim.esc(t.zoom)}</text>` +
@@ -305,9 +337,9 @@ class BeatsPage {
       `<polyline points="${p2.join(' ')}" fill="none" stroke="${C2}" stroke-width="2.2"/>` +
       `<polyline points="${ps.join(' ')}" fill="none" stroke="${CS}" stroke-width="2.6"/>` +
       `<text x="12" y="${Z_Y - 66}" fill="#a9a193" font-size="14">1 + 2</text><text x="12" y="${Z_Y + 44}" fill="${CS}" font-size="14">Σ</text>` +
-      `<rect x="${BAR_X}" y="${Z_Y + 88 - bh}" width="26" height="${bh}" fill="none" stroke="#555"/>` +
+      (far ? '' : `<rect x="${BAR_X}" y="${Z_Y + 88 - bh}" width="26" height="${bh}" fill="none" stroke="#555"/>` +
       `<rect x="${BAR_X}" y="${(Z_Y + 88 - bh * loud).toFixed(1)}" width="26" height="${(bh * loud).toFixed(1)}" fill="${col}"/>` +
-      `<text x="${BAR_X + 13}" y="${Z_Y + 108}" fill="#a9a193" font-size="13" text-anchor="middle">${Sim.esc(t.loud)}</text>`;
+      `<text x="${BAR_X + 13}" y="${Z_Y + 108}" fill="#a9a193" font-size="13" text-anchor="middle">${Sim.esc(t.loud)}</text>`);
     $('zoom').innerHTML = s;
   }
 
@@ -316,13 +348,31 @@ class BeatsPage {
     const L = page.lang, d = v => v < 20 ? 1 : 0;
     $('o-f1').textContent = fl(this.S.f1, d(this.S.f1), L) + ' Hz';
     $('o-f2').textContent = fl(this.S.f2, d(this.S.f2), L) + ' Hz';
+    $('o-df').textContent = (this.S.df > 0 ? '+' : this.S.df < 0 ? '−' : '') + fl(Math.abs(this.S.df), 1, L) + ' Hz';
     $('o-a2').textContent = Math.round(this.S.a2 * 100) + ' %';
     $('o-vol').textContent = Math.round(this.S.vol * 100) + ' %';
   }
   table() {
     this.outputs();
     const {f1, f2, a2} = this.S, t = page.t, L = page.lang, fb = this.fb, d = v => (v < 20 && v % 1) ? 1 : 0;
-    const rows = [
+    const r = this.rat, rs = r ? `${r.p} : ${r.q}` : '≈ ' + fl(f2 / f1, 3, L), k = r ? Math.max(r.p, r.q) + ':' + Math.min(r.p, r.q) : '';
+    const fmtT = T => fl(T, T < 0.01 ? 4 : T < 0.1 ? 3 : 2, L) + ' s';
+    const rows = this.beats ? null : [
+      [t.rows.f1, fl(f1, d(f1), L) + ' Hz'],
+      [t.rows.f2, fl(f2, d(f2), L) + ' Hz'],
+      [t.ratio, rs + (r && t.iv[k] ? ' · ' + t.iv[k] : '')],
+      [t.rep, this.Trep ? fmtT(this.Trep) : t.noRep],
+      [t.rows.win, fmtT(this.Tw)]
+    ];
+    if (rows) {
+      $('calc').innerHTML = rows.map(x => `<tr><td>${x[0]}</td><td>${x[1]}</td></tr>`).join('');
+      const st = [t.stFar, r ? t.stRat(rs, t.iv[k], fmtT(this.Trep)) : t.stNoRat];
+      if (Math.min(f1, f2) < 60) st.push(t.stLow);
+      $('steps').innerHTML = st.map(x => `<div>${Sim.esc(x)}</div>`).join('');
+      $('status').textContent = ''; $('status').className = 'status';
+      return;
+    }
+    const rowsB = [
       [t.rows.f1, fl(f1, d(f1), L) + ' Hz'],
       [t.rows.f2, fl(f2, d(f2), L) + ' Hz'],
       [t.rows.fb, fb ? fl(fb, d(fb), L) + ' Hz' : '0 Hz · ' + t.none],
@@ -330,7 +380,7 @@ class BeatsPage {
       [t.rows.tone, fl((f1 + f2) / 2, (f1 + f2) / 2 < 20 ? 2 : 1, L) + ' Hz'],
       [t.rows.win, fl(this.Tw, this.Tw < 0.1 ? 3 : 2, L) + ' s']
     ];
-    $('calc').innerHTML = rows.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('');
+    $('calc').innerHTML = rowsB.map(x => `<tr><td>${x[0]}</td><td>${x[1]}</td></tr>`).join('');
     const st = [];
     st.push(L === 'el' ? `f_b = |f₁ − f₂| = |${fl(f1, d(f1), L)} − ${fl(f2, d(f2), L)}| = ${fl(fb, d(fb), L)} Hz.`
                        : `f_b = |f₁ − f₂| = |${fl(f1, d(f1), L)} − ${fl(f2, d(f2), L)}| = ${fl(fb, d(fb), L)} Hz.`);
@@ -346,12 +396,13 @@ class BeatsPage {
     const t = page.t;
     for (const k of ['h1', 'sub', 'title', 'hint', 'foot']) $(k).textContent = t[k];
     $('calc-h').textContent = t.calc; $('ctl-h').textContent = t.ctl;
-    for (const k of ['f1', 'f2', 'a2', 'vol']) $('l-' + k).textContent = t[k];
+    for (const k of ['f1', 'f2', 'df', 'a2', 'vol']) $('l-' + k).textContent = t[k];
     $('on1-l').textContent = t.on1; $('on2-l').textContent = t.on2;
     $('sound').textContent = this.soundOn ? t.soundOn : t.soundOff; $('sound').classList.toggle('on', this.soundOn); $('sound').setAttribute('aria-pressed', this.soundOn);
     $('play').textContent = this.running ? t.play : t.pause; $('play').setAttribute('aria-pressed', this.running);
     $('reset').textContent = t.reset; $('presets-l').textContent = t.presets;
-    const P = {tune: {f1: 440, f2: 442, a2: 1}, fast: {f1: 440, f2: 450, a2: 1}, same: {f1: 440, f2: 440, a2: 1}, slow: {f1: 6, f2: 7, a2: 1}, half: {f1: 440, f2: 443, a2: 0.5}};
+    const P = {tune: {f1: 440, f2: 442, a2: 1}, fast: {f1: 440, f2: 450, a2: 1}, same: {f1: 440, f2: 440, a2: 1}, slow: {f1: 6, f2: 7, a2: 1}, half: {f1: 440, f2: 443, a2: 0.5},
+      oct: {f1: 440, f2: 880, a2: 1}, fifth: {f1: 440, f2: 660, a2: 1}, fourth: {f1: 330, f2: 440, a2: 1}, third: {f1: 440, f2: 550, a2: 1}, off: {f1: 440, f2: 663, a2: 1}};
     $('presets').innerHTML = Object.keys(P).map(k => `<button class="btn alt" type="button" data-p="${k}">${Sim.esc(t.pre[k])}</button>`).join('');
     $('presets').querySelectorAll('button').forEach(b => b.onclick = () => this.set(P[b.dataset.p]));
     const col = [C1, C2, CS, CE, CH];
