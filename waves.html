@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Waves</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600&display=swap">
+<link rel="stylesheet" href="assets/sim.css">
+<link rel="stylesheet" href="assets/theme.css">
+<style>
+  canvas.tank{display:block;width:100%;height:auto;image-rendering:auto;touch-action:none;background:#0f1218}
+  .legend{display:flex;flex-wrap:wrap;gap:6px 18px;margin:6px 4px 0;font-size:13px;color:var(--muted)}
+  .legend i{display:inline-block;width:14px;height:3px;vertical-align:middle;margin-right:6px}
+  .row select{background:#0d0c0a;color:var(--fg);border:1px solid var(--line);padding:6px 8px;font:15px var(--f-body)}
+  .hide{display:none!important}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="h1"></h1>
+  <p id="sub"></p>
+  <nav><a href="index.html">← Home</a><a href="test.html">Test builder</a><a href="sound.html">Doppler &amp; Mach</a><a href="em.html">EM Wave</a></nav>
+</header>
+<main>
+<div class="wrap">
+  <div class="topbar">
+    <p class="title" id="title"></p>
+    <div class="tools">
+      <div class="grp"><small id="g-mode"></small><div class="seg" role="group" id="modes"></div></div>
+      <div class="grp"><small>&nbsp;</small><div class="seg" role="group"><button id="play" type="button" aria-pressed="true"></button></div></div>
+      <div class="grp"><small>&nbsp;</small><div class="seg" role="group" aria-label="Language">
+        <button id="lang-el" type="button">ΕΛ</button><button id="lang-en" type="button">EN</button></div></div>
+    </div>
+  </div>
+
+  <section class="card">
+    <div class="fig" id="fig1"><svg id="view1" viewBox="0 0 1000 420" role="img" aria-label="A wave on a line of particles"><g id="scene1"></g></svg></div>
+    <div class="fig hide" id="fig2"><canvas class="tank" id="tank" width="1000" height="560"></canvas></div>
+    <div class="fig hide" id="fig3"><svg id="view3" viewBox="0 0 1000 200" role="img" aria-label="The two waves at the probe and their sum"><g id="scene3"></g></svg></div>
+    <div class="legend" id="legend"></div>
+    <p class="note" id="hint"></p>
+  </section>
+
+  <div class="lower">
+    <section class="card">
+      <h2 id="calc-h"></h2>
+      <div class="scroll"><table class="calc" id="calc"></table></div>
+      <div class="steps" id="steps"></div>
+      <p class="status" id="status"></p>
+    </section>
+    <section class="card">
+      <h2 id="ctl-h"></h2>
+      <div id="controls"></div>
+    </section>
+  </div>
+
+  <section class="card quiz" id="quiz"></section>
+  <p class="note" id="foot"></p>
+</div>
+</main>
+
+<script src="assets/sim.js"></script>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const {SimPage, Quiz, pick, dragOn, svgPoint} = Sim;
+
+/* ============================ texts ============================ */
+const T = {
+ el: {
+  h1: 'Κύματα', sub: 'Πλάτος, μήκος κύματος, περίοδος, συχνότητα και ταχύτητα: σε μία διάσταση, σε δύο διαστάσεις και όταν δύο κύματα συναντιούνται.',
+  gMode: 'Προβολή', modes: {d1: '1 διάσταση', d2: '2 διαστάσεις', int: 'Συμβολή'},
+  titles: {d1: 'Κύμα σε μια σειρά σωματιδίων', d2: 'Κύματα στην επιφάνεια του νερού', int: 'Συμβολή από δύο πηγές'},
+  play: '❚❚ Παύση', pause: '▶ Συνέχεια', calc: 'Τα χαρακτηριστικά', ctl: 'Ρυθμίσεις',
+  A: 'Πλάτος A', f: 'Συχνότητα f (πηγή)', v: 'Ταχύτητα v (μέσο)', type: 'Είδος κύματος', trans: 'Εγκάρσιο', longi: 'Διάμηκες',
+  d: 'Απόσταση πηγών d', ph: 'Φάση πηγών', inph: 'Σε φάση', anti: 'Αντίθετη φάση', show: 'Εμφάνιση', inst: 'Στιγμιότυπο', avg: 'Μέση ένταση (μοτίβο)',
+  rows: {A: 'Πλάτος A', f: 'Συχνότητα f', T: 'Περίοδος T = 1/f', v: 'Ταχύτητα v', la: 'Μήκος κύματος λ = v/f', r1: 'Απόσταση από πηγή 1', r2: 'Απόσταση από πηγή 2', dr: 'Διαφορά δρόμων Δ'},
+  st1: 'Κάθε σωματίδιο ταλαντώνεται γύρω από τη θέση του· αυτό που ταξιδεύει είναι η μορφή του κύματος και η ενέργεια.',
+  stL: 'Στο διάμηκες κύμα τα σωματίδια πάνε μπρος-πίσω, κατά τη διεύθυνση διάδοσης: πυκνώματα και αραιώματα, όπως στον ήχο.',
+  st2: 'Κάθε κύκλος είναι ένα όρος του κύματος. Δύο διαδοχικοί κύκλοι απέχουν ένα λ. Αλλάζοντας τη συχνότητα, η ταχύτητα μένει ίδια και αλλάζει το λ.',
+  cons: 'Ενισχυτική συμβολή: τα κύματα φτάνουν σε φάση.', dest: 'Αποσβεστική συμβολή: τα κύματα φτάνουν σε αντίθεση φάσης.', mid: 'Ενδιάμεσο σημείο: μερική ενίσχυση.',
+  rule: 'Σε φάση πηγές: ενίσχυση όταν Δ = 0, λ, 2λ… και απόσβεση όταν Δ = λ/2, 3λ/2…',
+  ruleA: 'Πηγές σε αντίθεση φάσης: οι κανόνες αντιστρέφονται.',
+  legend1: ['Σωματίδια του μέσου', 'Το σωματίδιο που παρακολουθούμε', 'Πλάτος A και μήκος κύματος λ', 'Μετατόπιση του σωματιδίου στον χρόνο'],
+  legend2: ['Όρη (φωτεινά) και κοιλάδες (σκοτεινά)', 'Το μέτωπο που φεύγει τώρα από την πηγή'],
+  legend3: ['Κύμα από πηγή 1', 'Κύμα από πηγή 2', 'Άθροισμα στο σημείο P'],
+  hint1: 'Δες το κόκκινο σωματίδιο: δεν ταξιδεύει μαζί με το κύμα. Το κάτω γράφημα δείχνει την κίνησή του στον χρόνο: η απόσταση δύο κορυφών εκεί είναι η περίοδος T.',
+  hint2: 'Κάνε κλικ ή άγγιξε για να μετακινήσεις την πηγή.',
+  hint3: 'Σύρε το σημείο P (πράσινο) και δες αν εκεί τα δύο κύματα ενισχύονται ή αλληλοαναιρούνται. Το κάτω γράφημα δείχνει τα δύο κύματα στο P και το άθροισμά τους.',
+  time: 'χρόνος', disp: 'μετατόπιση', P: 'P',
+  foot: 'Οι αριθμοί είναι σε «μονάδες της οθόνης» (μονάδες μήκους και δευτερόλεπτα της προσομοίωσης). Οι σχέσεις f = 1/T και v = f·λ ισχύουν ακριβώς όπως στην πραγματικότητα.'
+ },
+ en: {
+  h1: 'Waves', sub: 'Amplitude, wavelength, period, frequency and speed: in one dimension, in two dimensions and when two waves meet.',
+  gMode: 'View', modes: {d1: '1 dimension', d2: '2 dimensions', int: 'Interference'},
+  titles: {d1: 'A wave on a line of particles', d2: 'Waves on the surface of water', int: 'Interference from two sources'},
+  play: '❚❚ Pause', pause: '▶ Play', calc: 'The characteristics', ctl: 'Settings',
+  A: 'Amplitude A', f: 'Frequency f (source)', v: 'Speed v (medium)', type: 'Type of wave', trans: 'Transverse', longi: 'Longitudinal',
+  d: 'Source separation d', ph: 'Source phase', inph: 'In phase', anti: 'Antiphase', show: 'Show', inst: 'Snapshot', avg: 'Average intensity (pattern)',
+  rows: {A: 'Amplitude A', f: 'Frequency f', T: 'Period T = 1/f', v: 'Speed v', la: 'Wavelength λ = v/f', r1: 'Distance from source 1', r2: 'Distance from source 2', dr: 'Path difference Δ'},
+  st1: 'Each particle only oscillates about its own position; what travels is the shape of the wave and its energy.',
+  stL: 'In a longitudinal wave the particles move back and forth along the direction of travel: compressions and rarefactions, as in sound.',
+  st2: 'Each circle is a crest. Two neighbouring circles are one λ apart. Change the frequency: the speed stays the same and λ changes.',
+  cons: 'Constructive interference: the waves arrive in phase.', dest: 'Destructive interference: the waves arrive in antiphase.', mid: 'In between: partial reinforcement.',
+  rule: 'Sources in phase: reinforcement where Δ = 0, λ, 2λ… and cancellation where Δ = λ/2, 3λ/2…',
+  ruleA: 'Sources in antiphase: the rules swap.',
+  legend1: ['Particles of the medium', 'The particle we follow', 'Amplitude A and wavelength λ', 'Displacement of the particle over time'],
+  legend2: ['Crests (bright) and troughs (dark)', 'The wavefront leaving the source now'],
+  legend3: ['Wave from source 1', 'Wave from source 2', 'Sum at point P'],
+  hint1: 'Watch the red particle: it does not travel with the wave. The lower graph shows its motion in time: the distance between two peaks there is the period T.',
+  hint2: 'Click or tap to move the source.',
+  hint3: 'Drag point P (green) and see whether the two waves reinforce or cancel there. The lower graph shows the two waves at P and their sum.',
+  time: 'time', disp: 'displacement', P: 'P',
+  foot: 'Numbers are in "screen units" (simulation lengths and seconds). The relations f = 1/T and v = f·λ hold exactly as in reality.'
+ }
+};
+
+const page = new SimPage(T);
+const Q = (el, en) => ({el, en});
+const fl = (x, d, l) => page.fmtIn(x, d, l);
+const V = (x, u, d = 2) => Q(fl(x, d, 'el') + (u ? ' ' + u : ''), fl(x, d, 'en') + (u ? ' ' + u : ''));
+const TAU = Math.PI * 2;
+
+/* ============================ the page ============================ */
+class WavesPage {
+  constructor() {
+    this.mode = 'd1'; this.t = 0; this.running = true;
+    this.S = {
+      d1: {A: 40, f: 0.5, v: 100, type: 'trans'},
+      d2: {f: 0.8, v: 100, sx: 500, sy: 280},
+      int: {f: 1, v: 80, d: 240, ph: 0, show: 'inst', px: 700, py: 260}
+    };
+    this.trace = [];
+    page.bindLang($('lang-el'), $('lang-en'));
+    page.onLang(() => this.renderAll());
+    $('play').onclick = () => { this.running = !this.running; this.texts(); };
+    $('modes').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { this.mode = b.dataset.m; this.trace = []; this.renderAll(); } });
+    $('controls').addEventListener('input', e => this.input(e));
+    $('controls').addEventListener('change', e => this.input(e));
+    const cv = $('tank');
+    cv.addEventListener('pointerdown', e => { this.dragging = true; cv.setPointerCapture(e.pointerId); this.pointer(e); });
+    cv.addEventListener('pointermove', e => { if (this.dragging) this.pointer(e); });
+    cv.addEventListener('pointerup', () => { this.dragging = false; });
+    this.ctx = cv.getContext('2d');
+    this.img = this.ctx.createImageData(250, 140);
+    this.off = document.createElement('canvas'); this.off.width = 250; this.off.height = 140;
+    this.quiz = new Quiz(page, $('quiz'), QUIZ, {topics: ['waves'], tpls: ['waves.speed_f_lambda', 'waves.wavelength_string', 'waves.period_ms', 'waves.freq_from_period', 'waves.beats', 'waves.wave_theory']});
+    this.renderAll();
+    this.quiz.next();
+    this.last = performance.now();
+    requestAnimationFrame(t => this.tick(t));
+  }
+  get s() { return this.S[this.mode]; }
+  pointer(e) {
+    const r = $('tank').getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width * 1000, y = (e.clientY - r.top) / r.height * 560;
+    if (this.mode === 'd2') { this.S.d2.sx = x; this.S.d2.sy = y; }
+    else if (this.mode === 'int') { this.S.int.px = x; this.S.int.py = y; }
+    this.table();
+  }
+  input(e) {
+    const el = e.target, k = el.dataset.k; if (!k) return;
+    this.s[k] = el.type === 'range' ? +el.value : (el.dataset.num ? +el.value : el.value);
+    if (k === 'f' || k === 'v' || k === 'type') this.trace = [];
+    this.table(); this.outputs();
+  }
+  tick(now) {
+    const dt = Math.min(0.05, (now - this.last) / 1000); this.last = now;
+    if (this.running) this.t += dt;
+    if (this.mode === 'd1') this.draw1(); else if (this.mode === 'd2') this.draw2(); else this.draw3();
+    requestAnimationFrame(t => this.tick(t));
+  }
+
+  /* ---------- 1D: line of particles ---------- */
+  draw1() {
+    const {A, f, v, type} = this.S.d1, la = v / f, k = TAU / la, w = TAU * f, t = this.t, tr = this.texts1 || T.el;
+    const y0 = 150, x0 = 40, x1 = 960, N = 47, track = 23;
+    const disp = x => A * Math.sin(w * t - k * (x - x0));        // wave travels to the right
+    let s = `<rect x="0" y="0" width="1000" height="420" fill="#0f1218"/>`;
+    s += `<line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y0}" stroke="#2d2618" stroke-dasharray="4 6"/>`;
+    // continuous curve (transverse only)
+    if (type === 'trans') {
+      let p = ''; for (let x = x0; x <= x1; x += 4) p += (p ? 'L' : 'M') + x + ',' + (y0 - disp(x)).toFixed(1);
+      s += `<path d="${p}" fill="none" stroke="#5B9BEF" stroke-width="2" opacity=".55"/>`;
+    }
+    for (let i = 0; i < N; i++) {
+      const xr = x0 + i * (x1 - x0) / (N - 1), u = disp(xr);
+      const cx = type === 'trans' ? xr : xr + u * 0.5, cy = type === 'trans' ? y0 - u : y0;
+      if (type === 'longi') s += `<line x1="${cx.toFixed(1)}" y1="${y0 - 60}" x2="${cx.toFixed(1)}" y2="${y0 + 60}" stroke="${i === track ? '#F2704A' : '#5B9BEF'}" stroke-width="${i === track ? 3 : 2}" opacity="${i === track ? 1 : .75}"/>`;
+      else s += `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${i === track ? 8 : 5}" fill="${i === track ? '#F2704A' : '#5B9BEF'}"/>`;
+    }
+    // λ and A markers (on a frozen crest position)
+    const crestX = x0 + ((w * t - Math.PI / 2) / k % la + la) % la;
+    if (type === 'trans') {
+      const cx2 = crestX + la;
+      if (cx2 < x1) {
+        s += `<line x1="${crestX.toFixed(1)}" y1="${y0 - A - 22}" x2="${cx2.toFixed(1)}" y2="${y0 - A - 22}" stroke="#d9a521" stroke-width="2"/>` +
+             `<line x1="${crestX.toFixed(1)}" y1="${y0 - A - 30}" x2="${crestX.toFixed(1)}" y2="${y0 - A - 8}" stroke="#d9a521"/><line x1="${cx2.toFixed(1)}" y1="${y0 - A - 30}" x2="${cx2.toFixed(1)}" y2="${y0 - A - 8}" stroke="#d9a521"/>` +
+             `<text x="${((crestX + cx2) / 2).toFixed(1)}" y="${y0 - A - 30}" fill="#d9a521" font-size="20" text-anchor="middle">λ</text>`;
+      }
+      s += `<line x1="${(crestX - 18).toFixed(1)}" y1="${y0}" x2="${(crestX - 18).toFixed(1)}" y2="${y0 - A}" stroke="#d9a521" stroke-width="2"/>` +
+           `<text x="${(crestX - 26).toFixed(1)}" y="${y0 - A / 2 + 6}" fill="#d9a521" font-size="18" text-anchor="end">A</text>`;
+    } else {
+      // compressions sit where the displacement falls fastest along x: phase w·t − k(x − x0) = 0
+      const c1 = x0 + ((w * t) / k % la + la) % la, c2 = c1 + la;
+      s += `<text x="${c1.toFixed(1)}" y="${y0 + 86}" fill="#d9a521" font-size="15" text-anchor="middle">${page.lang === 'el' ? 'πύκνωμα' : 'compression'}</text>`;
+      if (c2 < x1) s += `<line x1="${c1.toFixed(1)}" y1="${y0 - 76}" x2="${c2.toFixed(1)}" y2="${y0 - 76}" stroke="#d9a521" stroke-width="2"/>` +
+        `<line x1="${c1.toFixed(1)}" y1="${y0 - 84}" x2="${c1.toFixed(1)}" y2="${y0 - 66}" stroke="#d9a521"/><line x1="${c2.toFixed(1)}" y1="${y0 - 84}" x2="${c2.toFixed(1)}" y2="${y0 - 66}" stroke="#d9a521"/>` +
+        `<text x="${((c1 + c2) / 2).toFixed(1)}" y="${y0 - 86}" fill="#d9a521" font-size="20" text-anchor="middle">λ</text>`;
+    }
+    // arrow showing direction of travel
+    s += `<path d="M860,40 h70" stroke="#a09882" stroke-width="2" marker-end="url(#ar)"/><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#a09882"/></marker></defs>` +
+         `<text x="860" y="30" fill="#a09882" font-size="14">${page.lang === 'el' ? 'διάδοση' : 'travel'}</text>`;
+    // time trace of the tracked particle
+    const xr = x0 + track * (x1 - x0) / (N - 1);
+    if (this.running) { this.trace.push({t, u: disp(xr)}); }
+    const span = 8, gy = 335, gx0 = 60, gx1 = 960, sc = 1.1;
+    this.trace = this.trace.filter(p => t - p.t <= span);
+    s += `<line x1="${gx0}" y1="${gy}" x2="${gx1}" y2="${gy}" stroke="#4a3f26"/><line x1="${gx0}" y1="${gy - 70}" x2="${gx0}" y2="${gy + 70}" stroke="#4a3f26"/>` +
+         `<text x="${gx1}" y="${gy + 66}" fill="#a09882" font-size="13" text-anchor="end">${page.t.time} →</text><text x="${gx0 + 6}" y="${gy - 58}" fill="#a09882" font-size="13">${page.t.disp}</text>`;
+    if (this.trace.length > 1) {
+      const X = tt => gx1 - (t - tt) / span * (gx1 - gx0);
+      s += `<path d="${this.trace.map((p, i) => (i ? 'L' : 'M') + X(p.t).toFixed(1) + ',' + (gy - p.u * sc * 0.75).toFixed(1)).join('')}" fill="none" stroke="#F2704A" stroke-width="2"/>`;
+      // mark one period between the two most recent peaks
+      const Tp = 1 / f, phase = (w * t - k * (xr - x0) - Math.PI / 2) / TAU, lastPeak = t - (phase - Math.floor(phase)) * Tp, prev = lastPeak - Tp;
+      if (t - prev < span && prev > (this.trace[0].t)) {
+        const yy = gy - A * sc * 0.75 - 12;
+        s += `<line x1="${X(prev).toFixed(1)}" y1="${yy}" x2="${X(lastPeak).toFixed(1)}" y2="${yy}" stroke="#d9a521" stroke-width="2"/>` +
+             `<line x1="${X(prev).toFixed(1)}" y1="${yy - 6}" x2="${X(prev).toFixed(1)}" y2="${yy + 6}" stroke="#d9a521"/><line x1="${X(lastPeak).toFixed(1)}" y1="${yy - 6}" x2="${X(lastPeak).toFixed(1)}" y2="${yy + 6}" stroke="#d9a521"/>` +
+             `<text x="${((X(prev) + X(lastPeak)) / 2).toFixed(1)}" y="${yy - 8}" fill="#d9a521" font-size="18" text-anchor="middle">T</text>`;
+      }
+    }
+    $('scene1').innerHTML = s;
+  }
+
+  /* ---------- 2D ripple tank, one or two sources ---------- */
+  field(fn) {
+    const W = 250, H = 140, d = this.img.data;
+    for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) {
+      const v = fn(i * 4 + 2, j * 4 + 2), o = (j * W + i) * 4;   // v in [-1, 1]
+      const c = (v + 1) / 2;
+      d[o] = 15 + c * 60; d[o + 1] = 25 + c * 130; d[o + 2] = 45 + c * 210; d[o + 3] = 255;
+    }
+    this.off.getContext('2d').putImageData(this.img, 0, 0);
+    const ctx = this.ctx; ctx.imageSmoothingEnabled = true; ctx.drawImage(this.off, 0, 0, 1000, 560);
+  }
+  draw2() {
+    const {f, v, sx, sy} = this.S.d2, la = v / f, k = TAU / la, w = TAU * f, t = this.t;
+    this.field((x, y) => { const r = Math.hypot(x - sx, y - sy); const out = w * t - k * r; return out < 0 ? 0 : Math.sin(out) / Math.sqrt(1 + r / 120); });
+    const ctx = this.ctx;
+    // newest crest ring and λ marker
+    const ph = (w * t - Math.PI / 2) / TAU, rc = (ph - Math.floor(ph)) * la;
+    ctx.strokeStyle = '#F2704A'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(sx, sy, Math.max(1, rc), 0, TAU); ctx.stroke();
+    ctx.fillStyle = '#d9a521'; ctx.beginPath(); ctx.arc(sx, sy, 7, 0, TAU); ctx.fill();
+    const y = sy + 0.0, xa = sx + rc + la, xb = sx + rc + 2 * la;
+    if (xb < 990) {
+      ctx.strokeStyle = '#d9a521'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(xa, y - 16); ctx.lineTo(xb, y - 16); ctx.stroke();
+      ctx.fillStyle = '#d9a521'; ctx.font = '22px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('λ', (xa + xb) / 2, y - 24);
+    }
+  }
+  draw3() {
+    const {f, v, d, ph, show, px, py} = this.S.int, la = v / f, k = TAU / la, w = TAU * f, t = this.t;
+    const s1 = {x: 500 - d / 2, y: 60}, s2 = {x: 500 + d / 2, y: 60}, p2 = ph ? Math.PI : 0;
+    if (show === 'avg') this.field((x, y) => { const r1 = Math.hypot(x - s1.x, y - s1.y), r2 = Math.hypot(x - s2.x, y - s2.y); return Math.cos((k * (r1 - r2) + p2) / 2) ** 2 * 2 - 1; });
+    else this.field((x, y) => { const r1 = Math.hypot(x - s1.x, y - s1.y), r2 = Math.hypot(x - s2.x, y - s2.y); return (Math.sin(w * t - k * r1) + Math.sin(w * t - k * r2 + p2)) / 2; });
+    const ctx = this.ctx;
+    for (const [s, n] of [[s1, '1'], [s2, '2']]) {
+      ctx.fillStyle = '#d9a521'; ctx.beginPath(); ctx.arc(s.x, s.y, 8, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#0b0a09'; ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(n, s.x, s.y + 4);
+    }
+    // probe and its two paths
+    ctx.setLineDash([6, 6]); ctx.lineWidth = 1.5; ctx.strokeStyle = '#e8e2d0';
+    ctx.beginPath(); ctx.moveTo(s1.x, s1.y); ctx.lineTo(px, py); ctx.moveTo(s2.x, s2.y); ctx.lineTo(px, py); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = '#62b886'; ctx.beginPath(); ctx.arc(px, py, 10, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#0b0a09'; ctx.font = 'bold 13px sans-serif'; ctx.fillText('P', px, py + 5);
+    // the two waves at P over time
+    const r1 = Math.hypot(px - s1.x, py - s1.y), r2 = Math.hypot(px - s2.x, py - s2.y);
+    const g0 = 40, g1 = 960, gy = 100, A = 34, span = 3 / f;
+    const curve = fn => { let p = ''; for (let i = 0; i <= 120; i++) { const tt = t - span + span * i / 120; p += (i ? 'L' : 'M') + (g0 + (g1 - g0) * i / 120).toFixed(1) + ',' + (gy - fn(tt)).toFixed(1); } return p; };
+    const y1 = tt => A * Math.sin(w * tt - k * r1), y2 = tt => A * Math.sin(w * tt - k * r2 + p2);
+    $('scene3').innerHTML = `<rect x="0" y="0" width="1000" height="200" fill="#0f1218"/><line x1="${g0}" y1="${gy}" x2="${g1}" y2="${gy}" stroke="#4a3f26"/>` +
+      `<path d="${curve(y1)}" fill="none" stroke="#5B9BEF" stroke-width="2" opacity=".8"/><path d="${curve(y2)}" fill="none" stroke="#d9a521" stroke-width="2" opacity=".8"/>` +
+      `<path d="${curve(tt => y1(tt) + y2(tt))}" fill="none" stroke="#62b886" stroke-width="3.5"/>` +
+      `<text x="${g1}" y="190" fill="#a09882" font-size="13" text-anchor="end">${page.t.time} →</text>`;
+    this.r12 = {r1, r2};
+    if (!this._tbl || performance.now() - this._tbl > 250) { this._tbl = performance.now(); this.table(); }
+  }
+
+  /* ---------- panels ---------- */
+  table() {
+    const L = page.lang, t = page.t, s = this.s, la = s.v / s.f, R = t.rows;
+    const rows = [];
+    if (this.mode === 'd1') rows.push([R.A, fl(s.A, 0, L)]);
+    rows.push([R.f, fl(s.f, 2, L) + ' Hz'], [R.T, fl(1 / s.f, 2, L) + ' s'], [R.v, fl(s.v, 0, L)], [R.la, fl(la, 1, L)]);
+    let st = [], status = '', cls = 'ok';
+    if (this.mode === 'd1') st = [s.type === 'trans' ? t.st1 : t.stL, `v = f·λ = ${fl(s.f, 2, L)} × ${fl(la, 1, L)} = ${fl(s.v, 0, L)}`];
+    else if (this.mode === 'd2') st = [t.st2, `λ = v/f = ${fl(s.v, 0, L)} / ${fl(s.f, 2, L)} = ${fl(la, 1, L)}`];
+    else {
+      const {r1, r2} = this.r12 || {r1: 0, r2: 0}, D = Math.abs(r1 - r2), n = D / la;
+      rows.push([R.r1, fl(r1, 0, L)], [R.r2, fl(r2, 0, L)], [R.dr, fl(D, 0, L) + ' = ' + fl(n, 2, L) + ' λ']);
+      let frac = n - Math.floor(n); if (s.ph) frac = (frac + 0.5) % 1;
+      const dist = Math.min(frac, 1 - frac);
+      if (dist < 0.12) status = t.cons; else if (Math.abs(frac - 0.5) < 0.12) { status = t.dest; cls = 'bad'; } else status = t.mid;
+      st = [t.rule]; if (s.ph) st.push(t.ruleA);
+    }
+    $('calc').innerHTML = rows.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('');
+    $('steps').innerHTML = st.map(x => `<div>${Sim.esc(x)}</div>`).join('');
+    $('status').textContent = status; $('status').className = 'status ' + cls;
+  }
+  outputs() {
+    const L = page.lang;
+    document.querySelectorAll('#controls output').forEach(o => {
+      const k = o.dataset.k, v = this.s[k];
+      o.textContent = k === 'f' ? fl(v, 2, L) + ' Hz' : fl(v, 0, L);
+    });
+  }
+  controls() {
+    const t = page.t, s = this.s, m = this.mode;
+    const range = (k, label, min, max, step) => `<div class="row"><label>${label}</label><input type="range" data-k="${k}" min="${min}" max="${max}" step="${step}" value="${s[k]}"><output data-k="${k}"></output></div>`;
+    const sel = (k, label, opts, num) => `<div class="row"><label>${label}</label><select data-k="${k}"${num ? ' data-num="1"' : ''}>${opts.map(([v, n]) => `<option value="${v}"${String(s[k]) === String(v) ? ' selected' : ''}>${n}</option>`).join('')}</select></div>`;
+    let h = '';
+    if (m === 'd1') h += sel('type', t.type, [['trans', t.trans], ['longi', t.longi]]) + range('A', t.A, 10, 60, 1);
+    h += range('f', t.f, 0.2, 2, 0.05) + range('v', t.v, 40, 200, 5);
+    if (m === 'int') h += range('d', t.d, 60, 500, 10) + sel('ph', t.ph, [[0, t.inph], [1, t.anti]], true) + sel('show', t.show, [['inst', t.inst], ['avg', t.avg]]);
+    $('controls').innerHTML = h; this.outputs();
+  }
+  texts() {
+    const t = page.t;
+    for (const k of ['h1', 'sub', 'foot']) $(k).textContent = t[k];
+    $('g-mode').textContent = t.gMode; $('title').textContent = t.titles[this.mode];
+    $('calc-h').textContent = t.calc; $('ctl-h').textContent = t.ctl;
+    $('play').textContent = this.running ? t.play : t.pause; $('play').setAttribute('aria-pressed', this.running);
+    $('modes').innerHTML = Object.keys(t.modes).map(m => `<button type="button" data-m="${m}" aria-pressed="${m === this.mode}">${t.modes[m]}</button>`).join('');
+    $('hint').textContent = {d1: t.hint1, d2: t.hint2, int: t.hint3}[this.mode];
+    const L = {d1: [t.legend1, ['#5B9BEF', '#F2704A', '#d9a521', '#F2704A']], d2: [t.legend2, ['#8fd0ff', '#F2704A']], int: [t.legend3, ['#5B9BEF', '#d9a521', '#62b886']]}[this.mode];
+    $('legend').innerHTML = L[0].map((x, i) => `<span><i style="background:${L[1][i]}"></i>${Sim.esc(x)}</span>`).join('');
+    document.title = t.h1;
+  }
+  renderAll() {
+    $('fig1').classList.toggle('hide', this.mode !== 'd1');
+    $('fig2').classList.toggle('hide', this.mode === 'd1');
+    $('fig3').classList.toggle('hide', this.mode !== 'int');
+    this.texts(); this.controls(); this.table();
+  }
+  set(mode, vals) { this.mode = mode; Object.assign(this.S[mode], vals); this.trace = []; this.renderAll(); }
+}
+
+/* ============================ "Solve it" questions ============================ */
+const QUIZ = [
+  // waves.speed_f_lambda
+  () => {
+    const f = pick([50, 100, 200, 250, 500]), la = pick([0.5, 1.2, 2, 3, 4]), v = f * la;
+    return {
+      q: Q(`Ένα κύμα έχει συχνότητα ${f} Hz και μήκος κύματος ${fl(la, 1, 'el')} m. Η ταχύτητά του είναι:`, `A wave has a frequency of ${f} Hz and a wavelength of ${fl(la, 1, 'en')} m. Its speed is:`),
+      o: [V(v, 'm/s', 1), V(f / la, 'm/s', 1), V(f + la, 'm/s', 1)], a: 0,
+      x: Q(`v = f·λ = ${f} × ${fl(la, 1, 'el')} = ${fl(v, 1, 'el')} m/s.`, `v = f·λ = ${f} × ${fl(la, 1, 'en')} = ${fl(v, 1, 'en')} m/s.`),
+      apply: () => app.set('d1', {f: 0.5, v: 100})
+    };
+  },
+  // waves.wavelength_string
+  () => {
+    const v = pick([100, 200, 300, 340]), f = pick([20, 25, 50, 100]), la = v / f;
+    return {
+      q: Q(`Κύμα ταξιδεύει με ${v} m/s και έχει συχνότητα ${f} Hz. Το μήκος κύματος είναι:`, `A wave travels at ${v} m/s with a frequency of ${f} Hz. Its wavelength is:`),
+      o: [V(la, 'm', 2), V(v * f, 'm'), V(f / v, 'm', 3)], a: 0,
+      x: Q(`λ = v/f = ${v}/${f} = ${fl(la, 2, 'el')} m.`, `λ = v/f = ${v}/${f} = ${fl(la, 2, 'en')} m.`),
+      apply: () => app.set('d2', {f: 0.8, v: 100})
+    };
+  },
+  // waves.freq_from_period / period_ms
+  () => {
+    const Tms = pick([2, 4, 5, 10, 20, 25, 40]), f = 1000 / Tms;
+    return {
+      q: Q(`Μια ταλάντωση επαναλαμβάνεται κάθε ${Tms} ms. Η συχνότητά της είναι:`, `An oscillation repeats every ${Tms} ms. Its frequency is:`),
+      o: [V(f, 'Hz', 1), V(Tms, 'Hz'), V(1 / Tms, 'Hz', 3)], a: 0,
+      x: Q(`f = 1/T = 1/${fl(Tms / 1000, 3, 'el')} s = ${fl(f, 1, 'el')} Hz.`, `f = 1/T = 1/${fl(Tms / 1000, 3, 'en')} s = ${fl(f, 1, 'en')} Hz.`),
+      apply: () => app.set('d1', {f: 0.5})
+    };
+  },
+  // same medium, double frequency
+  () => ({
+    q: Q('Στο ίδιο μέσο διπλασιάζουμε τη συχνότητα της πηγής. Τι γίνεται;', 'In the same medium the frequency of the source is doubled. What happens?'),
+    o: [Q('Η ταχύτητα μένει ίδια, το μήκος κύματος υποδιπλασιάζεται', 'The speed stays the same and the wavelength halves'), Q('Η ταχύτητα διπλασιάζεται', 'The speed doubles'), Q('Το μήκος κύματος διπλασιάζεται', 'The wavelength doubles')], a: 0,
+    x: Q('Την ταχύτητα την ορίζει το μέσο· λ = v/f.', 'The medium sets the speed; λ = v/f.'),
+    apply: () => app.set('d2', {f: 1, v: 100})
+  }),
+  // transverse / longitudinal
+  () => ({
+    q: Q('Σε ένα διάμηκες κύμα τα σωματίδια του μέσου ταλαντώνονται:', 'In a longitudinal wave the particles of the medium vibrate:'),
+    o: [Q('κατά τη διεύθυνση διάδοσης', 'along the direction of travel'), Q('κάθετα στη διεύθυνση διάδοσης', 'at right angles to the direction of travel'), Q('κυκλικά', 'in circles')], a: 0,
+    x: Q('Πυκνώματα και αραιώματα, όπως στον ήχο.', 'Compressions and rarefactions, as in sound.'),
+    apply: () => app.set('d1', {type: 'longi'})
+  }),
+  // interference
+  () => {
+    const n = pick([0, 1, 2, 0.5, 1.5, 2.5]), la = pick([0.2, 0.5, 1]), D = n * la, cons = Number.isInteger(n);
+    return {
+      q: Q(`Δύο πηγές σε φάση εκπέμπουν κύματα με λ = ${fl(la, 1, 'el')} m. Σε ένα σημείο η διαφορά δρόμων είναι ${fl(D, 2, 'el')} m. Εκεί έχουμε:`,
+           `Two sources in phase emit waves with λ = ${fl(la, 1, 'en')} m. At a point the path difference is ${fl(D, 2, 'en')} m. There we get:`),
+      o: cons ? [Q('ενισχυτική συμβολή', 'constructive interference'), Q('αποσβεστική συμβολή', 'destructive interference'), Q('κανένα κύμα', 'no wave at all')]
+              : [Q('αποσβεστική συμβολή', 'destructive interference'), Q('ενισχυτική συμβολή', 'constructive interference'), Q('διπλάσια συχνότητα', 'double the frequency')], a: 0,
+      x: Q(`Δ = ${fl(n, 1, 'el')} λ. Ακέραιο πλήθος λ: ενίσχυση· μισό ακέραιο: απόσβεση.`, `Δ = ${fl(n, 1, 'en')} λ. A whole number of λ: reinforcement; a half number: cancellation.`),
+      apply: () => app.set('int', {ph: 0})
+    };
+  },
+  // beats
+  () => {
+    const f1 = pick([100, 200, 440]), df = pick([1, 2, 3, 4, 5]);
+    return {
+      q: Q(`Δύο ήχοι ${f1} Hz και ${f1 + df} Hz ακούγονται μαζί. Τα διακροτήματα είναι:`, `Tones of ${f1} Hz and ${f1 + df} Hz sound together. The beat frequency is:`),
+      o: [V(df, 'Hz'), V(2 * f1 + df, 'Hz'), V(f1 + df / 2, 'Hz', 1)], a: 0,
+      x: Q(`f = |f₁ − f₂| = ${df} Hz.`, `f = |f₁ − f₂| = ${df} Hz.`)
+    };
+  }
+];
+
+const app = new WavesPage();
+</script>
+<script src="assets/landscape.js"></script>
+</body>
+</html>
