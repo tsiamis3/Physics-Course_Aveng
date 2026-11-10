@@ -27,14 +27,14 @@
     <p class="title" id="title"></p>
     <div class="tools">
       <div class="grp"><small id="g-mode"></small><div class="seg" role="group" id="modes"></div></div>
-      <div class="grp"><small>&nbsp;</small><div class="seg" role="group"><button id="play" type="button" aria-pressed="true"></button></div></div>
+      <div class="grp"><small>&nbsp;</small><div class="seg" role="group"><button id="play" type="button" aria-pressed="true"></button><button id="restart" type="button"></button></div></div>
       <div class="grp"><small>&nbsp;</small><div class="seg" role="group" aria-label="Language">
         <button id="lang-el" type="button">ΕΛ</button><button id="lang-en" type="button">EN</button></div></div>
     </div>
   </div>
 
   <section class="card">
-    <div class="fig" id="fig1"><svg id="view1" viewBox="0 0 1000 420" role="img" aria-label="A wave on a line of particles"><g id="scene1"></g></svg></div>
+    <div class="fig" id="fig1"><svg id="view1" viewBox="0 0 1000 450" role="img" aria-label="A wave on a line of particles"><g id="scene1"></g></svg></div>
     <div class="fig hide" id="fig2"><canvas class="tank" id="tank" width="1000" height="560"></canvas></div>
     <div class="fig hide" id="fig3"><svg id="view3" viewBox="0 0 1000 200" role="img" aria-label="The two waves at the probe and their sum"><g id="scene3"></g></svg></div>
     <div class="legend" id="legend"></div>
@@ -72,9 +72,15 @@ const T = {
   gMode: 'Προβολή', modes: {d1: '1 διάσταση', d2: '2 διαστάσεις', int: 'Συμβολή'},
   titles: {d1: 'Κύμα σε μια σειρά σωματιδίων', d2: 'Κύματα στην επιφάνεια του νερού', int: 'Συμβολή από δύο πηγές'},
   play: '❚❚ Παύση', pause: '▶ Συνέχεια', calc: 'Τα χαρακτηριστικά', ctl: 'Ρυθμίσεις',
-  A: 'Πλάτος A', f: 'Συχνότητα f (πηγή)', v: 'Ταχύτητα v (μέσο)', type: 'Είδος κύματος', trans: 'Εγκάρσιο', longi: 'Διάμηκες',
+  A: 'Πλάτος A', f: 'Συχνότητα f (πηγή)', v: 'Ταχύτητα v (μέσο)', type: 'Είδος κύματος', trans: 'Εγκάρσιο', longi: 'Διάμηκες', stand: 'Στάσιμο (δύο κύματα)', restart: '↺ Από ηρεμία',
+  stR: 'Το μέσο ξεκινά ακίνητο. Η διαταραχή φτάνει σε κάθε σημείο μετά από χρόνο απόσταση/v· μέχρι τότε το σωματίδιο μένει ακίνητο.',
+  stS1: 'Δύο ίδια κύματα ξεκινούν από τις δύο άκρες και ταξιδεύουν αντίθετα. Όπου συναντιούνται, οι μετατοπίσεις προστίθενται.',
+  stS2: 'Δεσμοί (Δ): σημεία που δεν κινούνται ποτέ. Κοιλίες (Κ): σημεία με το μέγιστο πλάτος 2A. Δύο διαδοχικοί δεσμοί απέχουν λ/2.',
+  stOK: 'Στάσιμο κύμα: η μορφή δεν ταξιδεύει πια, ταλαντώνεται επί τόπου.', stWait: 'Τα δύο κύματα ακόμα πλησιάζουν…',
+  legendS: ['Κύμα προς τα δεξιά', 'Κύμα προς τα αριστερά', 'Άθροισμα (στάσιμο κύμα)', 'Δεσμοί (Δ) και κοιλίες (Κ)'],
+  hintS: 'Τα δύο κύματα ξεκινούν από τις άκρες. Όταν καλύψουν όλο το μήκος, η πράσινη καμπύλη δεν ταξιδεύει πια: οι δεσμοί μένουν ακίνητοι και οι κοιλίες ταλαντώνονται με πλάτος 2A.',
   d: 'Απόσταση πηγών d', ph: 'Φάση πηγών', inph: 'Σε φάση', anti: 'Αντίθετη φάση', show: 'Εμφάνιση', inst: 'Στιγμιότυπο', avg: 'Μέση ένταση (μοτίβο)',
-  rows: {A: 'Πλάτος A', f: 'Συχνότητα f', T: 'Περίοδος T = 1/f', v: 'Ταχύτητα v', la: 'Μήκος κύματος λ = v/f', r1: 'Απόσταση από πηγή 1', r2: 'Απόσταση από πηγή 2', dr: 'Διαφορά δρόμων Δ'},
+  rows: {nn: 'Απόσταση δεσμών λ/2', A: 'Πλάτος A', f: 'Συχνότητα f', T: 'Περίοδος T = 1/f', v: 'Ταχύτητα v', la: 'Μήκος κύματος λ = v/f', r1: 'Απόσταση από πηγή 1', r2: 'Απόσταση από πηγή 2', dr: 'Διαφορά δρόμων Δ'},
   st1: 'Κάθε σωματίδιο ταλαντώνεται γύρω από τη θέση του· αυτό που ταξιδεύει είναι η μορφή του κύματος και η ενέργεια.',
   stL: 'Στο διάμηκες κύμα τα σωματίδια πάνε μπρος-πίσω, κατά τη διεύθυνση διάδοσης: πυκνώματα και αραιώματα, όπως στον ήχο.',
   st2: 'Κάθε κύκλος είναι ένα όρος του κύματος. Δύο διαδοχικοί κύκλοι απέχουν ένα λ. Αλλάζοντας τη συχνότητα, η ταχύτητα μένει ίδια και αλλάζει το λ.',
@@ -95,9 +101,15 @@ const T = {
   gMode: 'View', modes: {d1: '1 dimension', d2: '2 dimensions', int: 'Interference'},
   titles: {d1: 'A wave on a line of particles', d2: 'Waves on the surface of water', int: 'Interference from two sources'},
   play: '❚❚ Pause', pause: '▶ Play', calc: 'The characteristics', ctl: 'Settings',
-  A: 'Amplitude A', f: 'Frequency f (source)', v: 'Speed v (medium)', type: 'Type of wave', trans: 'Transverse', longi: 'Longitudinal',
+  A: 'Amplitude A', f: 'Frequency f (source)', v: 'Speed v (medium)', type: 'Type of wave', trans: 'Transverse', longi: 'Longitudinal', stand: 'Standing (two waves)', restart: '↺ From rest',
+  stR: 'The medium starts at rest. The disturbance reaches each point after a time distance/v; until then the particle stays still.',
+  stS1: 'Two identical waves start from the two ends and travel in opposite directions. Where they meet, their displacements add.',
+  stS2: 'Nodes (N): points that never move. Antinodes (A): points with the largest amplitude, 2A. Neighbouring nodes are λ/2 apart.',
+  stOK: 'Standing wave: the shape no longer travels; it vibrates in place.', stWait: 'The two waves are still approaching…',
+  legendS: ['Wave travelling right', 'Wave travelling left', 'Sum (standing wave)', 'Nodes (N) and antinodes (A)'],
+  hintS: 'The two waves start from the ends. Once they cover the whole length, the green curve no longer travels: the nodes stay still and the antinodes vibrate with amplitude 2A.',
   d: 'Source separation d', ph: 'Source phase', inph: 'In phase', anti: 'Antiphase', show: 'Show', inst: 'Snapshot', avg: 'Average intensity (pattern)',
-  rows: {A: 'Amplitude A', f: 'Frequency f', T: 'Period T = 1/f', v: 'Speed v', la: 'Wavelength λ = v/f', r1: 'Distance from source 1', r2: 'Distance from source 2', dr: 'Path difference Δ'},
+  rows: {nn: 'Node spacing λ/2', A: 'Amplitude A', f: 'Frequency f', T: 'Period T = 1/f', v: 'Speed v', la: 'Wavelength λ = v/f', r1: 'Distance from source 1', r2: 'Distance from source 2', dr: 'Path difference Δ'},
   st1: 'Each particle only oscillates about its own position; what travels is the shape of the wave and its energy.',
   stL: 'In a longitudinal wave the particles move back and forth along the direction of travel: compressions and rarefactions, as in sound.',
   st2: 'Each circle is a crest. Two neighbouring circles are one λ apart. Change the frequency: the speed stays the same and λ changes.',
@@ -124,7 +136,7 @@ const TAU = Math.PI * 2;
 /* ============================ the page ============================ */
 class WavesPage {
   constructor() {
-    this.mode = 'd1'; this.t = 0; this.running = true;
+    this.mode = 'd1'; this.t = 0; this.t0 = 0; this.running = true;
     this.S = {
       d1: {A: 40, f: 0.5, v: 100, type: 'trans'},
       d2: {f: 0.8, v: 100, sx: 500, sy: 280},
@@ -134,7 +146,8 @@ class WavesPage {
     page.bindLang($('lang-el'), $('lang-en'));
     page.onLang(() => this.renderAll());
     $('play').onclick = () => { this.running = !this.running; this.texts(); };
-    $('modes').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { this.mode = b.dataset.m; this.trace = []; this.renderAll(); } });
+    $('restart').onclick = () => this.restart();
+    $('modes').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { this.mode = b.dataset.m; this.restart(); this.renderAll(); } });
     $('controls').addEventListener('input', e => this.input(e));
     $('controls').addEventListener('change', e => this.input(e));
     const cv = $('tank');
@@ -151,6 +164,7 @@ class WavesPage {
     requestAnimationFrame(t => this.tick(t));
   }
   get s() { return this.S[this.mode]; }
+  restart() { this.t0 = this.t; this.trace = []; this._full = undefined; this.table(); }
   pointer(e) {
     const r = $('tank').getBoundingClientRect();
     const x = (e.clientX - r.left) / r.width * 1000, y = (e.clientY - r.top) / r.height * 560;
@@ -161,7 +175,8 @@ class WavesPage {
   input(e) {
     const el = e.target, k = el.dataset.k; if (!k) return;
     this.s[k] = el.type === 'range' ? +el.value : (el.dataset.num ? +el.value : el.value);
-    if (k === 'f' || k === 'v' || k === 'type') this.trace = [];
+    if (k === 'f' || k === 'v' || k === 'type' || k === 'A') this.restart();
+    if (k === 'type') this.texts();
     this.table(); this.outputs();
   }
   tick(now) {
@@ -173,66 +188,81 @@ class WavesPage {
 
   /* ---------- 1D: line of particles ---------- */
   draw1() {
-    const {A, f, v, type} = this.S.d1, la = v / f, k = TAU / la, w = TAU * f, t = this.t, tr = this.texts1 || T.el;
-    const y0 = 150, x0 = 40, x1 = 960, N = 47, track = 23;
-    const disp = x => A * Math.sin(w * t - k * (x - x0));        // wave travels to the right
-    let s = `<rect x="0" y="0" width="1000" height="420" fill="#0f1218"/>`;
+    const {A, f, v, type} = this.S.d1, la = v / f, k = TAU / la, w = TAU * f, t = this.t - this.t0, el = page.lang === 'el';
+    const y0 = 150, x0 = 40, x1 = 960, N = 47, track = 23, xm = (x0 + x1) / 2, stand = type === 'stand';
+    // Each wave starts from rest at its source and moves out at speed v: ahead of its front the medium is still.
+    const right = x => { const ph = w * t - k * (x - x0); return ph < 0 ? 0 : A * Math.sin(ph); };   // from the left end, travelling right
+    const left = x => { const ph = w * t - k * (x1 - x); return ph < 0 ? 0 : A * Math.sin(ph); };    // from the right end, travelling left
+    const disp = stand ? (x => right(x) + left(x)) : right;
+    const frontR = x0 + v * t, frontL = x1 - v * t, full = stand ? t * v >= (x1 - x0) : frontR >= x1;
+    let s = `<rect x="0" y="0" width="1000" height="450" fill="#0f1218"/><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#a09882"/></marker></defs>`;
     s += `<line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y0}" stroke="#2d2618" stroke-dasharray="4 6"/>`;
-    // continuous curve (transverse only)
-    if (type === 'trans') {
-      let p = ''; for (let x = x0; x <= x1; x += 4) p += (p ? 'L' : 'M') + x + ',' + (y0 - disp(x)).toFixed(1);
-      s += `<path d="${p}" fill="none" stroke="#5B9BEF" stroke-width="2" opacity=".55"/>`;
-    }
+    const path = fn => { let p = ''; for (let x = x0; x <= x1; x += 4) p += (p ? 'L' : 'M') + x + ',' + (y0 - fn(x)).toFixed(1); return p; };
+    if (stand) {
+      s += `<path d="${path(right)}" fill="none" stroke="#5B9BEF" stroke-width="1.5" opacity=".6"/><path d="${path(left)}" fill="none" stroke="#d9a521" stroke-width="1.5" opacity=".6"/>`;
+      s += `<path d="${path(disp)}" fill="none" stroke="#62b886" stroke-width="3"/>`;
+    } else if (type === 'trans') s += `<path d="${path(disp)}" fill="none" stroke="#5B9BEF" stroke-width="2" opacity=".55"/>`;
     for (let i = 0; i < N; i++) {
-      const xr = x0 + i * (x1 - x0) / (N - 1), u = disp(xr);
-      const cx = type === 'trans' ? xr : xr + u * 0.5, cy = type === 'trans' ? y0 - u : y0;
-      if (type === 'longi') s += `<line x1="${cx.toFixed(1)}" y1="${y0 - 60}" x2="${cx.toFixed(1)}" y2="${y0 + 60}" stroke="${i === track ? '#F2704A' : '#5B9BEF'}" stroke-width="${i === track ? 3 : 2}" opacity="${i === track ? 1 : .75}"/>`;
-      else s += `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${i === track ? 8 : 5}" fill="${i === track ? '#F2704A' : '#5B9BEF'}"/>`;
+      const xr = x0 + i * (x1 - x0) / (N - 1), u = disp(xr), me = i === track;
+      if (type === 'longi') { const cx = xr + u * 0.5; s += `<line x1="${cx.toFixed(1)}" y1="${y0 - 60}" x2="${cx.toFixed(1)}" y2="${y0 + 60}" stroke="${me ? '#F2704A' : '#5B9BEF'}" stroke-width="${me ? 3 : 2}" opacity="${me ? 1 : .75}"/>`; }
+      else s += `<circle cx="${xr.toFixed(1)}" cy="${(y0 - u).toFixed(1)}" r="${me ? 8 : 5}" fill="${me ? '#F2704A' : (stand ? '#62b886' : '#5B9BEF')}"/>`;
     }
-    // λ and A markers (on a frozen crest position)
-    const crestX = x0 + ((w * t - Math.PI / 2) / k % la + la) % la;
-    if (type === 'trans') {
-      const cx2 = crestX + la;
-      if (cx2 < x1) {
-        s += `<line x1="${crestX.toFixed(1)}" y1="${y0 - A - 22}" x2="${cx2.toFixed(1)}" y2="${y0 - A - 22}" stroke="#d9a521" stroke-width="2"/>` +
-             `<line x1="${crestX.toFixed(1)}" y1="${y0 - A - 30}" x2="${crestX.toFixed(1)}" y2="${y0 - A - 8}" stroke="#d9a521"/><line x1="${cx2.toFixed(1)}" y1="${y0 - A - 30}" x2="${cx2.toFixed(1)}" y2="${y0 - A - 8}" stroke="#d9a521"/>` +
-             `<text x="${((crestX + cx2) / 2).toFixed(1)}" y="${y0 - A - 30}" fill="#d9a521" font-size="20" text-anchor="middle">λ</text>`;
+    // the wavefront(s): how far the disturbance has travelled
+    const front = (x, dir) => x > x0 && x < x1 ? `<line x1="${x.toFixed(1)}" y1="${y0 - 100}" x2="${x.toFixed(1)}" y2="${y0 + 100}" stroke="#F2704A" stroke-dasharray="3 5"/>` +
+      `<path d="M${x.toFixed(1)},${y0 - 108} h${dir * 40}" stroke="#F2704A" stroke-width="2" marker-end="url(#ar)"/><text x="${(x + dir * 6).toFixed(1)}" y="${y0 - 116}" fill="#F2704A" font-size="13" text-anchor="${dir > 0 ? 'start' : 'end'}">${el ? 'μέτωπο' : 'front'}</text>` : '';
+    s += front(frontR, 1); if (stand) s += front(frontL, -1);
+    if (stand) {
+      if (full) {   // nodes (never move) and antinodes, half a wavelength apart
+        const n0 = Math.ceil(((x0 - xm) / (la / 2)) - 0.5), n1 = Math.floor(((x1 - xm) / (la / 2)) - 0.5);
+        const nodes = []; for (let n = n0; n <= n1; n++) nodes.push(xm + (n + 0.5) * la / 2);
+        for (const x of nodes) s += `<circle cx="${x.toFixed(1)}" cy="${y0}" r="6" fill="none" stroke="#e8e2d0" stroke-width="2"/><text x="${x.toFixed(1)}" y="${Math.min(y0 + 2 * A + 20, 288)}" fill="#e8e2d0" font-size="14" text-anchor="middle">${el ? 'Δ' : 'N'}</text>`;
+        for (let n = n0; n <= n1 + 1; n++) { const x = xm + n * la / 2; if (x > x0 && x < x1) s += `<text x="${x.toFixed(1)}" y="${Math.min(y0 + 2 * A + 20, 288)}" fill="#62b886" font-size="14" text-anchor="middle">${el ? 'Κ' : 'A'}</text>`; }
+        if (nodes.length > 1) { const a1 = nodes[0], a2 = nodes[1], yy = y0 - 2 * A - 20;
+          s += `<line x1="${a1.toFixed(1)}" y1="${yy}" x2="${a2.toFixed(1)}" y2="${yy}" stroke="#d9a521" stroke-width="2"/><line x1="${a1.toFixed(1)}" y1="${yy - 7}" x2="${a1.toFixed(1)}" y2="${yy + 7}" stroke="#d9a521"/><line x1="${a2.toFixed(1)}" y1="${yy - 7}" x2="${a2.toFixed(1)}" y2="${yy + 7}" stroke="#d9a521"/>` +
+               `<text x="${((a1 + a2) / 2).toFixed(1)}" y="${yy - 8}" fill="#d9a521" font-size="18" text-anchor="middle">λ/2</text>`; }
       }
-      s += `<line x1="${(crestX - 18).toFixed(1)}" y1="${y0}" x2="${(crestX - 18).toFixed(1)}" y2="${y0 - A}" stroke="#d9a521" stroke-width="2"/>` +
-           `<text x="${(crestX - 26).toFixed(1)}" y="${y0 - A / 2 + 6}" fill="#d9a521" font-size="18" text-anchor="end">A</text>`;
     } else {
-      // compressions sit where the displacement falls fastest along x: phase w·t − k(x − x0) = 0
-      const c1 = x0 + ((w * t) / k % la + la) % la, c2 = c1 + la;
-      s += `<text x="${c1.toFixed(1)}" y="${y0 + 86}" fill="#d9a521" font-size="15" text-anchor="middle">${page.lang === 'el' ? 'πύκνωμα' : 'compression'}</text>`;
-      if (c2 < x1) s += `<line x1="${c1.toFixed(1)}" y1="${y0 - 76}" x2="${c2.toFixed(1)}" y2="${y0 - 76}" stroke="#d9a521" stroke-width="2"/>` +
-        `<line x1="${c1.toFixed(1)}" y1="${y0 - 84}" x2="${c1.toFixed(1)}" y2="${y0 - 66}" stroke="#d9a521"/><line x1="${c2.toFixed(1)}" y1="${y0 - 84}" x2="${c2.toFixed(1)}" y2="${y0 - 66}" stroke="#d9a521"/>` +
-        `<text x="${((c1 + c2) / 2).toFixed(1)}" y="${y0 - 86}" fill="#d9a521" font-size="20" text-anchor="middle">λ</text>`;
+      // λ and A markers on a crest the wave has already reached
+      const crestX = x0 + ((w * t - Math.PI / 2) / k % la + la) % la, c2 = crestX + la;
+      if (type === 'trans' && c2 < Math.min(x1, frontR)) {
+        s += `<line x1="${crestX.toFixed(1)}" y1="${y0 - A - 22}" x2="${c2.toFixed(1)}" y2="${y0 - A - 22}" stroke="#d9a521" stroke-width="2"/>` +
+             `<line x1="${crestX.toFixed(1)}" y1="${y0 - A - 30}" x2="${crestX.toFixed(1)}" y2="${y0 - A - 8}" stroke="#d9a521"/><line x1="${c2.toFixed(1)}" y1="${y0 - A - 30}" x2="${c2.toFixed(1)}" y2="${y0 - A - 8}" stroke="#d9a521"/>` +
+             `<text x="${((crestX + c2) / 2).toFixed(1)}" y="${y0 - A - 30}" fill="#d9a521" font-size="20" text-anchor="middle">λ</text>` +
+             `<line x1="${(crestX - 18).toFixed(1)}" y1="${y0}" x2="${(crestX - 18).toFixed(1)}" y2="${y0 - A}" stroke="#d9a521" stroke-width="2"/>` +
+             `<text x="${(crestX - 26).toFixed(1)}" y="${y0 - A / 2 + 6}" fill="#d9a521" font-size="18" text-anchor="end">A</text>`;
+      }
+      if (type === 'longi') {   // compressions: where the phase w·t − k(x − x0) is a multiple of 2π
+        const k1 = x0 + ((w * t) / k % la + la) % la, k2 = k1 + la;
+        if (k1 < frontR) s += `<text x="${k1.toFixed(1)}" y="${y0 + 86}" fill="#d9a521" font-size="15" text-anchor="middle">${el ? 'πύκνωμα' : 'compression'}</text>`;
+        if (k2 < Math.min(x1, frontR)) s += `<line x1="${k1.toFixed(1)}" y1="${y0 - 76}" x2="${k2.toFixed(1)}" y2="${y0 - 76}" stroke="#d9a521" stroke-width="2"/>` +
+          `<line x1="${k1.toFixed(1)}" y1="${y0 - 84}" x2="${k1.toFixed(1)}" y2="${y0 - 66}" stroke="#d9a521"/><line x1="${k2.toFixed(1)}" y1="${y0 - 84}" x2="${k2.toFixed(1)}" y2="${y0 - 66}" stroke="#d9a521"/>` +
+          `<text x="${((k1 + k2) / 2).toFixed(1)}" y="${y0 - 86}" fill="#d9a521" font-size="20" text-anchor="middle">λ</text>`;
+      }
     }
-    // arrow showing direction of travel
-    s += `<path d="M860,40 h70" stroke="#a09882" stroke-width="2" marker-end="url(#ar)"/><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#a09882"/></marker></defs>` +
-         `<text x="860" y="30" fill="#a09882" font-size="14">${page.lang === 'el' ? 'διάδοση' : 'travel'}</text>`;
     // time trace of the tracked particle
     const xr = x0 + track * (x1 - x0) / (N - 1);
-    if (this.running) { this.trace.push({t, u: disp(xr)}); }
-    const span = 8, gy = 335, gx0 = 60, gx1 = 960, sc = 1.1;
-    this.trace = this.trace.filter(p => t - p.t <= span);
+    if (this.running) this.trace.push({t, u: disp(xr)});
+    const span = 8, gy = 368, gx0 = 60, gx1 = 960, sc = stand ? 0.55 : 1.1;
+    this.trace = this.trace.filter(p => t - p.t <= span && p.t <= t);
     s += `<line x1="${gx0}" y1="${gy}" x2="${gx1}" y2="${gy}" stroke="#4a3f26"/><line x1="${gx0}" y1="${gy - 70}" x2="${gx0}" y2="${gy + 70}" stroke="#4a3f26"/>` +
          `<text x="${gx1}" y="${gy + 66}" fill="#a09882" font-size="13" text-anchor="end">${page.t.time} →</text><text x="${gx0 + 6}" y="${gy - 58}" fill="#a09882" font-size="13">${page.t.disp}</text>`;
     if (this.trace.length > 1) {
       const X = tt => gx1 - (t - tt) / span * (gx1 - gx0);
       s += `<path d="${this.trace.map((p, i) => (i ? 'L' : 'M') + X(p.t).toFixed(1) + ',' + (gy - p.u * sc * 0.75).toFixed(1)).join('')}" fill="none" stroke="#F2704A" stroke-width="2"/>`;
-      // mark one period between the two most recent peaks
-      const Tp = 1 / f, phase = (w * t - k * (xr - x0) - Math.PI / 2) / TAU, lastPeak = t - (phase - Math.floor(phase)) * Tp, prev = lastPeak - Tp;
-      if (t - prev < span && prev > (this.trace[0].t)) {
-        const yy = gy - A * sc * 0.75 - 12;
-        s += `<line x1="${X(prev).toFixed(1)}" y1="${yy}" x2="${X(lastPeak).toFixed(1)}" y2="${yy}" stroke="#d9a521" stroke-width="2"/>` +
-             `<line x1="${X(prev).toFixed(1)}" y1="${yy - 6}" x2="${X(prev).toFixed(1)}" y2="${yy + 6}" stroke="#d9a521"/><line x1="${X(lastPeak).toFixed(1)}" y1="${yy - 6}" x2="${X(lastPeak).toFixed(1)}" y2="${yy + 6}" stroke="#d9a521"/>` +
-             `<text x="${((X(prev) + X(lastPeak)) / 2).toFixed(1)}" y="${yy - 8}" fill="#d9a521" font-size="18" text-anchor="middle">T</text>`;
+      const arrive = (xr - x0) / v, Tp = 1 / f;
+      if (!stand && t > arrive + 2 * Tp) {
+        const phase = (w * t - k * (xr - x0) - Math.PI / 2) / TAU, lastPeak = t - (phase - Math.floor(phase)) * Tp, prev = lastPeak - Tp;
+        if (t - prev < span && prev > arrive) {
+          const yy = gy - A * sc * 0.75 - 12;
+          s += `<line x1="${X(prev).toFixed(1)}" y1="${yy}" x2="${X(lastPeak).toFixed(1)}" y2="${yy}" stroke="#d9a521" stroke-width="2"/>` +
+               `<line x1="${X(prev).toFixed(1)}" y1="${yy - 6}" x2="${X(prev).toFixed(1)}" y2="${yy + 6}" stroke="#d9a521"/><line x1="${X(lastPeak).toFixed(1)}" y1="${yy - 6}" x2="${X(lastPeak).toFixed(1)}" y2="${yy + 6}" stroke="#d9a521"/>` +
+               `<text x="${((X(prev) + X(lastPeak)) / 2).toFixed(1)}" y="${yy - 8}" fill="#d9a521" font-size="18" text-anchor="middle">T</text>`;
+        }
       }
     }
     $('scene1').innerHTML = s;
+    if (full !== this._full) { this._full = full; this.table(); }
   }
-
   /* ---------- 2D ripple tank, one or two sources ---------- */
   field(fn) {
     const W = 250, H = 140, d = this.img.data;
@@ -293,7 +323,8 @@ class WavesPage {
     if (this.mode === 'd1') rows.push([R.A, fl(s.A, 0, L)]);
     rows.push([R.f, fl(s.f, 2, L) + ' Hz'], [R.T, fl(1 / s.f, 2, L) + ' s'], [R.v, fl(s.v, 0, L)], [R.la, fl(la, 1, L)]);
     let st = [], status = '', cls = 'ok';
-    if (this.mode === 'd1') st = [s.type === 'trans' ? t.st1 : t.stL, `v = f·λ = ${fl(s.f, 2, L)} × ${fl(la, 1, L)} = ${fl(s.v, 0, L)}`];
+    if (this.mode === 'd1' && s.type === 'stand') { st = [t.stS1, t.stS2]; status = this._full ? t.stOK : t.stWait; rows.push([t.rows.nn, fl(la / 2, 1, L)]); }
+    else if (this.mode === 'd1') st = [s.type === 'trans' ? t.st1 : t.stL, t.stR, `v = f·λ = ${fl(s.f, 2, L)} × ${fl(la, 1, L)} = ${fl(s.v, 0, L)}`];
     else if (this.mode === 'd2') st = [t.st2, `λ = v/f = ${fl(s.v, 0, L)} / ${fl(s.f, 2, L)} = ${fl(la, 1, L)}`];
     else {
       const {r1, r2} = this.r12 || {r1: 0, r2: 0}, D = Math.abs(r1 - r2), n = D / la;
@@ -319,7 +350,7 @@ class WavesPage {
     const range = (k, label, min, max, step) => `<div class="row"><label>${label}</label><input type="range" data-k="${k}" min="${min}" max="${max}" step="${step}" value="${s[k]}"><output data-k="${k}"></output></div>`;
     const sel = (k, label, opts, num) => `<div class="row"><label>${label}</label><select data-k="${k}"${num ? ' data-num="1"' : ''}>${opts.map(([v, n]) => `<option value="${v}"${String(s[k]) === String(v) ? ' selected' : ''}>${n}</option>`).join('')}</select></div>`;
     let h = '';
-    if (m === 'd1') h += sel('type', t.type, [['trans', t.trans], ['longi', t.longi]]) + range('A', t.A, 10, 60, 1);
+    if (m === 'd1') h += sel('type', t.type, [['trans', t.trans], ['longi', t.longi], ['stand', t.stand]]) + range('A', t.A, 10, 60, 1);
     h += range('f', t.f, 0.2, 2, 0.05) + range('v', t.v, 40, 200, 5);
     if (m === 'int') h += range('d', t.d, 60, 500, 10) + sel('ph', t.ph, [[0, t.inph], [1, t.anti]], true) + sel('show', t.show, [['inst', t.inst], ['avg', t.avg]]);
     $('controls').innerHTML = h; this.outputs();
@@ -329,10 +360,10 @@ class WavesPage {
     for (const k of ['h1', 'sub', 'foot']) $(k).textContent = t[k];
     $('g-mode').textContent = t.gMode; $('title').textContent = t.titles[this.mode];
     $('calc-h').textContent = t.calc; $('ctl-h').textContent = t.ctl;
-    $('play').textContent = this.running ? t.play : t.pause; $('play').setAttribute('aria-pressed', this.running);
+    $('play').textContent = this.running ? t.play : t.pause; $('play').setAttribute('aria-pressed', this.running); $('restart').textContent = t.restart;
     $('modes').innerHTML = Object.keys(t.modes).map(m => `<button type="button" data-m="${m}" aria-pressed="${m === this.mode}">${t.modes[m]}</button>`).join('');
-    $('hint').textContent = {d1: t.hint1, d2: t.hint2, int: t.hint3}[this.mode];
-    const L = {d1: [t.legend1, ['#5B9BEF', '#F2704A', '#d9a521', '#F2704A']], d2: [t.legend2, ['#8fd0ff', '#F2704A']], int: [t.legend3, ['#5B9BEF', '#d9a521', '#62b886']]}[this.mode];
+    $('hint').textContent = this.mode === 'd1' && this.S.d1.type === 'stand' ? t.hintS : {d1: t.hint1, d2: t.hint2, int: t.hint3}[this.mode];
+    const L = this.mode === 'd1' && this.S.d1.type === 'stand' ? [t.legendS, ['#5B9BEF', '#d9a521', '#62b886', '#e8e2d0']] : {d1: [t.legend1, ['#5B9BEF', '#F2704A', '#d9a521', '#F2704A']], d2: [t.legend2, ['#8fd0ff', '#F2704A']], int: [t.legend3, ['#5B9BEF', '#d9a521', '#62b886']]}[this.mode];
     $('legend').innerHTML = L[0].map((x, i) => `<span><i style="background:${L[1][i]}"></i>${Sim.esc(x)}</span>`).join('');
     document.title = t.h1;
   }
@@ -342,7 +373,7 @@ class WavesPage {
     $('fig3').classList.toggle('hide', this.mode !== 'int');
     this.texts(); this.controls(); this.table();
   }
-  set(mode, vals) { this.mode = mode; Object.assign(this.S[mode], vals); this.trace = []; this.renderAll(); }
+  set(mode, vals) { this.mode = mode; Object.assign(this.S[mode], vals); this.restart(); this.renderAll(); }
 }
 
 /* ============================ "Solve it" questions ============================ */
