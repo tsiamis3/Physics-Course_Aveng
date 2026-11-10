@@ -80,7 +80,7 @@ const T = {
   legendS: ['Κύμα προς τα δεξιά', 'Κύμα προς τα αριστερά', 'Άθροισμα (στάσιμο κύμα)', 'Δεσμοί (Δ) και κοιλίες (Κ)'],
   hintS: 'Τα δύο κύματα ξεκινούν από τις άκρες. Όταν καλύψουν όλο το μήκος, η πράσινη καμπύλη δεν ταξιδεύει πια: οι δεσμοί μένουν ακίνητοι και οι κοιλίες ταλαντώνονται με πλάτος 2A.',
   d: 'Απόσταση πηγών d', ph: 'Φάση πηγών', inph: 'Σε φάση', anti: 'Αντίθετη φάση', show: 'Εμφάνιση', inst: 'Στιγμιότυπο', avg: 'Μέση ένταση (μοτίβο)',
-  rows: {nn: 'Απόσταση δεσμών λ/2', A: 'Πλάτος A', f: 'Συχνότητα f', T: 'Περίοδος T = 1/f', v: 'Ταχύτητα v', la: 'Μήκος κύματος λ = v/f', r1: 'Απόσταση από πηγή 1', r2: 'Απόσταση από πηγή 2', dr: 'Διαφορά δρόμων Δ'},
+  rows: {f2: 'Συχνότητα πηγής 2', la2: 'Μήκος κύματος πηγής 2', fb: 'Διακροτήματα |f₁ − f₂|', nn: 'Απόσταση δεσμών λ/2', A: 'Πλάτος A', f: 'Συχνότητα f', T: 'Περίοδος T = 1/f', v: 'Ταχύτητα v', la: 'Μήκος κύματος λ = v/f', r1: 'Απόσταση από πηγή 1', r2: 'Απόσταση από πηγή 2', dr: 'Διαφορά δρόμων Δ'},
   st1: 'Κάθε σωματίδιο ταλαντώνεται γύρω από τη θέση του· αυτό που ταξιδεύει είναι η μορφή του κύματος και η ενέργεια.',
   stL: 'Στο διάμηκες κύμα τα σωματίδια πάνε μπρος-πίσω, κατά τη διεύθυνση διάδοσης: πυκνώματα και αραιώματα, όπως στον ήχο.',
   st2: 'Κάθε κύκλος είναι ένα όρος του κύματος. Δύο διαδοχικοί κύκλοι απέχουν ένα λ. Αλλάζοντας τη συχνότητα, η ταχύτητα μένει ίδια και αλλάζει το λ.',
@@ -89,10 +89,15 @@ const T = {
   ruleA: 'Πηγές σε αντίθεση φάσης: οι κανόνες αντιστρέφονται.',
   legend1: ['Σωματίδια του μέσου', 'Το σωματίδιο που παρακολουθούμε', 'Πλάτος A και μήκος κύματος λ', 'Μετατόπιση του σωματιδίου στον χρόνο'],
   legend2: ['Όρη (φωτεινά) και κοιλάδες (σκοτεινά)', 'Το μέτωπο που φεύγει τώρα από την πηγή'],
-  legend3: ['Κύμα από πηγή 1', 'Κύμα από πηγή 2', 'Άθροισμα στο σημείο P'],
+  legend3: ['Κύμα από πηγή 1 (στο P)', 'Κύμα από πηγή 2 (στο P)', 'Άθροισμα στο σημείο P', 'Γραμμές ενισχυτικής συμβολής (συνεχείς)', 'Γραμμές αποσβεστικής συμβολής (διακεκομμένες)'],
+  f1: 'Συχνότητα πηγής 1', f2: 'Συχνότητα πηγής 2', lines0: 'Γραμμές συμβολής', on: 'Εμφάνιση', off: 'Απόκρυψη',
+  lines: 'Οι γραμμές είναι υπερβολές με εστίες τις δύο πηγές: σε κάθε μία η διαφορά δρόμων μένει σταθερή.',
+  diff1: 'Με διαφορετικές συχνότητες η διαφορά φάσης αλλάζει συνεχώς, οπότε δεν υπάρχουν σταθερές γραμμές ενίσχυσης και απόσβεσης: το μοτίβο «σαρώνει» τον χώρο.',
+  diff2: 'Σε κάθε σημείο η ενίσχυση και η απόσβεση εναλλάσσονται: αυτά είναι τα διακροτήματα, με συχνότητα |f₁ − f₂|.',
+  diffS: 'Διακροτήματα στο P: {fb} Hz, ένα κάθε {Tb} s.',
   hint1: 'Δες το κόκκινο σωματίδιο: δεν ταξιδεύει μαζί με το κύμα. Το κάτω γράφημα δείχνει την κίνησή του στον χρόνο: η απόσταση δύο κορυφών εκεί είναι η περίοδος T.',
   hint2: 'Κάνε κλικ ή άγγιξε για να μετακινήσεις την πηγή.',
-  hint3: 'Σύρε το σημείο P (πράσινο) και δες αν εκεί τα δύο κύματα ενισχύονται ή αλληλοαναιρούνται. Το κάτω γράφημα δείχνει τα δύο κύματα στο P και το άθροισμά τους.',
+  hint3: 'Σύρε το σημείο P (λευκό) και δες αν εκεί τα δύο κύματα ενισχύονται ή αλληλοαναιρούνται. Το κάτω γράφημα δείχνει τα δύο κύματα στο P και το άθροισμά τους.',
   time: 'χρόνος', disp: 'μετατόπιση', P: 'P',
   foot: 'Οι αριθμοί είναι σε «μονάδες της οθόνης» (μονάδες μήκους και δευτερόλεπτα της προσομοίωσης). Οι σχέσεις f = 1/T και v = f·λ ισχύουν ακριβώς όπως στην πραγματικότητα.'
  },
@@ -109,7 +114,7 @@ const T = {
   legendS: ['Wave travelling right', 'Wave travelling left', 'Sum (standing wave)', 'Nodes (N) and antinodes (A)'],
   hintS: 'The two waves start from the ends. Once they cover the whole length, the green curve no longer travels: the nodes stay still and the antinodes vibrate with amplitude 2A.',
   d: 'Source separation d', ph: 'Source phase', inph: 'In phase', anti: 'Antiphase', show: 'Show', inst: 'Snapshot', avg: 'Average intensity (pattern)',
-  rows: {nn: 'Node spacing λ/2', A: 'Amplitude A', f: 'Frequency f', T: 'Period T = 1/f', v: 'Speed v', la: 'Wavelength λ = v/f', r1: 'Distance from source 1', r2: 'Distance from source 2', dr: 'Path difference Δ'},
+  rows: {f2: 'Frequency of source 2', la2: 'Wavelength of source 2', fb: 'Beats |f₁ − f₂|', nn: 'Node spacing λ/2', A: 'Amplitude A', f: 'Frequency f', T: 'Period T = 1/f', v: 'Speed v', la: 'Wavelength λ = v/f', r1: 'Distance from source 1', r2: 'Distance from source 2', dr: 'Path difference Δ'},
   st1: 'Each particle only oscillates about its own position; what travels is the shape of the wave and its energy.',
   stL: 'In a longitudinal wave the particles move back and forth along the direction of travel: compressions and rarefactions, as in sound.',
   st2: 'Each circle is a crest. Two neighbouring circles are one λ apart. Change the frequency: the speed stays the same and λ changes.',
@@ -118,10 +123,15 @@ const T = {
   ruleA: 'Sources in antiphase: the rules swap.',
   legend1: ['Particles of the medium', 'The particle we follow', 'Amplitude A and wavelength λ', 'Displacement of the particle over time'],
   legend2: ['Crests (bright) and troughs (dark)', 'The wavefront leaving the source now'],
-  legend3: ['Wave from source 1', 'Wave from source 2', 'Sum at point P'],
+  legend3: ['Wave from source 1 (at P)', 'Wave from source 2 (at P)', 'Sum at point P', 'Lines of constructive interference (solid)', 'Lines of destructive interference (dashed)'],
+  f1: 'Frequency of source 1', f2: 'Frequency of source 2', lines0: 'Interference lines', on: 'Show', off: 'Hide',
+  lines: 'The lines are hyperbolas with the two sources as foci: along each one the path difference stays the same.',
+  diff1: 'With different frequencies the phase difference keeps changing, so there are no fixed lines of reinforcement and cancellation: the pattern sweeps across the space.',
+  diff2: 'At every point reinforcement and cancellation take turns: these are beats, at a frequency |f₁ − f₂|.',
+  diffS: 'Beats at P: {fb} Hz, one every {Tb} s.',
   hint1: 'Watch the red particle: it does not travel with the wave. The lower graph shows its motion in time: the distance between two peaks there is the period T.',
   hint2: 'Click or tap to move the source.',
-  hint3: 'Drag point P (green) and see whether the two waves reinforce or cancel there. The lower graph shows the two waves at P and their sum.',
+  hint3: 'Drag point P (white) and see whether the two waves reinforce or cancel there. The lower graph shows the two waves at P and their sum.',
   time: 'time', disp: 'displacement', P: 'P',
   foot: 'Numbers are in "screen units" (simulation lengths and seconds). The relations f = 1/T and v = f·λ hold exactly as in reality.'
  }
@@ -140,7 +150,7 @@ class WavesPage {
     this.S = {
       d1: {A: 40, f: 0.5, v: 100, type: 'trans'},
       d2: {f: 0.8, v: 100, sx: 500, sy: 280},
-      int: {f: 1, v: 80, d: 240, ph: 0, show: 'inst', px: 700, py: 260}
+      int: {f: 1, f2: 1, v: 80, d: 240, ph: 0, show: 'inst', lines: 'on', px: 700, py: 260}
     };
     this.trace = [];
     page.bindLang($('lang-el'), $('lang-en'));
@@ -289,28 +299,47 @@ class WavesPage {
     }
   }
   draw3() {
-    const {f, v, d, ph, show, px, py} = this.S.int, la = v / f, k = TAU / la, w = TAU * f, t = this.t;
-    const s1 = {x: 500 - d / 2, y: 60}, s2 = {x: 500 + d / 2, y: 60}, p2 = ph ? Math.PI : 0;
-    if (show === 'avg') this.field((x, y) => { const r1 = Math.hypot(x - s1.x, y - s1.y), r2 = Math.hypot(x - s2.x, y - s2.y); return Math.cos((k * (r1 - r2) + p2) / 2) ** 2 * 2 - 1; });
-    else this.field((x, y) => { const r1 = Math.hypot(x - s1.x, y - s1.y), r2 = Math.hypot(x - s2.x, y - s2.y); return (Math.sin(w * t - k * r1) + Math.sin(w * t - k * r2 + p2)) / 2; });
+    const {f, f2, v, d, ph, show, lines, px, py} = this.S.int, t = this.t;
+    const k1 = TAU * f / v, k2 = TAU * f2 / v, w1 = TAU * f, w2 = TAU * f2, la = v / f;
+    const s1 = {x: 500 - d / 2, y: 60}, s2 = {x: 500 + d / 2, y: 60}, p2 = ph ? Math.PI : 0, same = Math.abs(f - f2) < 1e-9;
+    if (show === 'avg') this.field((x, y) => { const r1 = Math.hypot(x - s1.x, y - s1.y), r2 = Math.hypot(x - s2.x, y - s2.y); return Math.cos(((w1 - w2) * t - k1 * r1 + k2 * r2 - p2) / 2) ** 2 * 2 - 1; });
+    else this.field((x, y) => { const r1 = Math.hypot(x - s1.x, y - s1.y), r2 = Math.hypot(x - s2.x, y - s2.y); return (Math.sin(w1 * t - k1 * r1) + Math.sin(w2 * t - k2 * r2 + p2)) / 2; });
     const ctx = this.ctx;
-    for (const [s, n] of [[s1, '1'], [s2, '2']]) {
-      ctx.fillStyle = '#d9a521'; ctx.beginPath(); ctx.arc(s.x, s.y, 8, 0, TAU); ctx.fill();
-      ctx.fillStyle = '#0b0a09'; ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(n, s.x, s.y + 4);
+    // lines of constructive (solid) and destructive (dashed) interference: hyperbolas r1 − r2 = const with the sources as foci
+    if (same && lines === 'on') {
+      const c = d / 2, shift = p2 / TAU;
+      const hyper = D => {
+        ctx.beginPath();
+        if (Math.abs(D) < 1e-6) { ctx.moveTo(500, 0); ctx.lineTo(500, 560); }
+        else { const a = Math.abs(D) / 2, b = Math.sqrt(c * c - a * a), sg = Math.sign(D);
+          for (let i = 0; i <= 240; i++) { const u = -5 + 10 * i / 240, x = 500 + sg * a * Math.cosh(u), y = 60 + b * Math.sinh(u); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); } }
+        ctx.stroke();
+      };
+      ctx.lineWidth = 2.5;
+      for (let m = -40; m <= 40; m++) {
+        const Dc = (m - shift) * la, Dd = (m + 0.5 - shift) * la;
+        if (Math.abs(Dc) < d - 1) { ctx.setLineDash([]); ctx.strokeStyle = 'rgba(98,184,134,.95)'; hyper(Dc); }
+        if (Math.abs(Dd) < d - 1) { ctx.setLineDash([8, 7]); ctx.strokeStyle = 'rgba(242,112,74,.95)'; hyper(Dd); }
+      }
+      ctx.setLineDash([]);
+    }
+    for (const [src, n] of [[s1, '1'], [s2, '2']]) {
+      ctx.fillStyle = '#d9a521'; ctx.beginPath(); ctx.arc(src.x, src.y, 8, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#0b0a09'; ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(n, src.x, src.y + 4);
     }
     // probe and its two paths
     ctx.setLineDash([6, 6]); ctx.lineWidth = 1.5; ctx.strokeStyle = '#e8e2d0';
     ctx.beginPath(); ctx.moveTo(s1.x, s1.y); ctx.lineTo(px, py); ctx.moveTo(s2.x, s2.y); ctx.lineTo(px, py); ctx.stroke(); ctx.setLineDash([]);
-    ctx.fillStyle = '#62b886'; ctx.beginPath(); ctx.arc(px, py, 10, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#e8e2d0'; ctx.beginPath(); ctx.arc(px, py, 11, 0, TAU); ctx.fill();
     ctx.fillStyle = '#0b0a09'; ctx.font = 'bold 13px sans-serif'; ctx.fillText('P', px, py + 5);
-    // the two waves at P over time
+    // the two waves at P over time (with different frequencies: long enough to show the beats)
     const r1 = Math.hypot(px - s1.x, py - s1.y), r2 = Math.hypot(px - s2.x, py - s2.y);
-    const g0 = 40, g1 = 960, gy = 100, A = 34, span = 3 / f;
-    const curve = fn => { let p = ''; for (let i = 0; i <= 120; i++) { const tt = t - span + span * i / 120; p += (i ? 'L' : 'M') + (g0 + (g1 - g0) * i / 120).toFixed(1) + ',' + (gy - fn(tt)).toFixed(1); } return p; };
-    const y1 = tt => A * Math.sin(w * tt - k * r1), y2 = tt => A * Math.sin(w * tt - k * r2 + p2);
+    const g0 = 40, g1 = 960, gy = 100, A = 34, span = same ? 3 / f : Math.min(14, Math.max(3 / f, 2 / Math.abs(f - f2))), NP = 400;
+    const curve = fn => { let p = ''; for (let i = 0; i <= NP; i++) { const tt = t - span + span * i / NP; p += (i ? 'L' : 'M') + (g0 + (g1 - g0) * i / NP).toFixed(1) + ',' + (gy - fn(tt)).toFixed(1); } return p; };
+    const y1 = tt => A * Math.sin(w1 * tt - k1 * r1), y2 = tt => A * Math.sin(w2 * tt - k2 * r2 + p2);
     $('scene3').innerHTML = `<rect x="0" y="0" width="1000" height="200" fill="#0f1218"/><line x1="${g0}" y1="${gy}" x2="${g1}" y2="${gy}" stroke="#4a3f26"/>` +
       `<path d="${curve(y1)}" fill="none" stroke="#5B9BEF" stroke-width="2" opacity=".8"/><path d="${curve(y2)}" fill="none" stroke="#d9a521" stroke-width="2" opacity=".8"/>` +
-      `<path d="${curve(tt => y1(tt) + y2(tt))}" fill="none" stroke="#62b886" stroke-width="3.5"/>` +
+      `<path d="${curve(tt => y1(tt) + y2(tt))}" fill="none" stroke="#62b886" stroke-width="3"/>` +
       `<text x="${g1}" y="190" fill="#a09882" font-size="13" text-anchor="end">${page.t.time} →</text>`;
     this.r12 = {r1, r2};
     if (!this._tbl || performance.now() - this._tbl > 250) { this._tbl = performance.now(); this.table(); }
@@ -321,18 +350,24 @@ class WavesPage {
     const L = page.lang, t = page.t, s = this.s, la = s.v / s.f, R = t.rows;
     const rows = [];
     if (this.mode === 'd1') rows.push([R.A, fl(s.A, 0, L)]);
-    rows.push([R.f, fl(s.f, 2, L) + ' Hz'], [R.T, fl(1 / s.f, 2, L) + ' s'], [R.v, fl(s.v, 0, L)], [R.la, fl(la, 1, L)]);
+    rows.push([this.mode === 'int' ? t.f1 : R.f, fl(s.f, 2, L) + ' Hz'], [R.T, fl(1 / s.f, 2, L) + ' s'], [R.v, fl(s.v, 0, L)], [R.la, fl(la, 1, L)]);
     let st = [], status = '', cls = 'ok';
     if (this.mode === 'd1' && s.type === 'stand') { st = [t.stS1, t.stS2]; status = this._full ? t.stOK : t.stWait; rows.push([t.rows.nn, fl(la / 2, 1, L)]); }
     else if (this.mode === 'd1') st = [s.type === 'trans' ? t.st1 : t.stL, t.stR, `v = f·λ = ${fl(s.f, 2, L)} × ${fl(la, 1, L)} = ${fl(s.v, 0, L)}`];
     else if (this.mode === 'd2') st = [t.st2, `λ = v/f = ${fl(s.v, 0, L)} / ${fl(s.f, 2, L)} = ${fl(la, 1, L)}`];
     else {
-      const {r1, r2} = this.r12 || {r1: 0, r2: 0}, D = Math.abs(r1 - r2), n = D / la;
-      rows.push([R.r1, fl(r1, 0, L)], [R.r2, fl(r2, 0, L)], [R.dr, fl(D, 0, L) + ' = ' + fl(n, 2, L) + ' λ']);
-      let frac = n - Math.floor(n); if (s.ph) frac = (frac + 0.5) % 1;
-      const dist = Math.min(frac, 1 - frac);
-      if (dist < 0.12) status = t.cons; else if (Math.abs(frac - 0.5) < 0.12) { status = t.dest; cls = 'bad'; } else status = t.mid;
-      st = [t.rule]; if (s.ph) st.push(t.ruleA);
+      const {r1, r2} = this.r12 || {r1: 0, r2: 0}, D = Math.abs(r1 - r2), n = D / la, df = Math.abs(s.f - s.f2);
+      if (df > 1e-9) {
+        rows.splice(1, 0, [R.f2, fl(s.f2, 2, L) + ' Hz']);
+        rows.push([R.la2, fl(s.v / s.f2, 1, L)], [R.fb, fl(df, 2, L) + ' Hz']);
+        st = [t.diff1, t.diff2]; status = t.diffS.replace('{fb}', fl(df, 2, L)).replace('{Tb}', fl(1 / df, 1, L)); cls = 'ok';
+      } else {
+        rows.push([R.r1, fl(r1, 0, L)], [R.r2, fl(r2, 0, L)], [R.dr, fl(D, 0, L) + ' = ' + fl(n, 2, L) + ' λ']);
+        let frac = n - Math.floor(n); if (s.ph) frac = (frac + 0.5) % 1;
+        const dist = Math.min(frac, 1 - frac);
+        if (dist < 0.12) status = t.cons; else if (Math.abs(frac - 0.5) < 0.12) { status = t.dest; cls = 'bad'; } else status = t.mid;
+        st = [t.rule]; if (s.ph) st.push(t.ruleA); st.push(t.lines);
+      }
     }
     $('calc').innerHTML = rows.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('');
     $('steps').innerHTML = st.map(x => `<div>${Sim.esc(x)}</div>`).join('');
@@ -342,7 +377,7 @@ class WavesPage {
     const L = page.lang;
     document.querySelectorAll('#controls output').forEach(o => {
       const k = o.dataset.k, v = this.s[k];
-      o.textContent = k === 'f' ? fl(v, 2, L) + ' Hz' : fl(v, 0, L);
+      o.textContent = k === 'f' || k === 'f2' ? fl(v, 2, L) + ' Hz' : fl(v, 0, L);
     });
   }
   controls() {
@@ -351,8 +386,8 @@ class WavesPage {
     const sel = (k, label, opts, num) => `<div class="row"><label>${label}</label><select data-k="${k}"${num ? ' data-num="1"' : ''}>${opts.map(([v, n]) => `<option value="${v}"${String(s[k]) === String(v) ? ' selected' : ''}>${n}</option>`).join('')}</select></div>`;
     let h = '';
     if (m === 'd1') h += sel('type', t.type, [['trans', t.trans], ['longi', t.longi], ['stand', t.stand]]) + range('A', t.A, 10, 60, 1);
-    h += range('f', t.f, 0.2, 2, 0.05) + range('v', t.v, 40, 200, 5);
-    if (m === 'int') h += range('d', t.d, 60, 500, 10) + sel('ph', t.ph, [[0, t.inph], [1, t.anti]], true) + sel('show', t.show, [['inst', t.inst], ['avg', t.avg]]);
+    h += range('f', m === 'int' ? t.f1 : t.f, 0.2, 2, 0.05) + (m === 'int' ? range('f2', t.f2, 0.2, 2, 0.05) : '') + range('v', t.v, 40, 200, 5);
+    if (m === 'int') h += range('d', t.d, 60, 500, 10) + sel('ph', t.ph, [[0, t.inph], [1, t.anti]], true) + sel('show', t.show, [['inst', t.inst], ['avg', t.avg]]) + sel('lines', t.lines0, [['on', t.on], ['off', t.off]]);
     $('controls').innerHTML = h; this.outputs();
   }
   texts() {
@@ -363,7 +398,7 @@ class WavesPage {
     $('play').textContent = this.running ? t.play : t.pause; $('play').setAttribute('aria-pressed', this.running); $('restart').textContent = t.restart;
     $('modes').innerHTML = Object.keys(t.modes).map(m => `<button type="button" data-m="${m}" aria-pressed="${m === this.mode}">${t.modes[m]}</button>`).join('');
     $('hint').textContent = this.mode === 'd1' && this.S.d1.type === 'stand' ? t.hintS : {d1: t.hint1, d2: t.hint2, int: t.hint3}[this.mode];
-    const L = this.mode === 'd1' && this.S.d1.type === 'stand' ? [t.legendS, ['#5B9BEF', '#d9a521', '#62b886', '#e8e2d0']] : {d1: [t.legend1, ['#5B9BEF', '#F2704A', '#d9a521', '#F2704A']], d2: [t.legend2, ['#8fd0ff', '#F2704A']], int: [t.legend3, ['#5B9BEF', '#d9a521', '#62b886']]}[this.mode];
+    const L = this.mode === 'd1' && this.S.d1.type === 'stand' ? [t.legendS, ['#5B9BEF', '#d9a521', '#62b886', '#e8e2d0']] : {d1: [t.legend1, ['#5B9BEF', '#F2704A', '#d9a521', '#F2704A']], d2: [t.legend2, ['#8fd0ff', '#F2704A']], int: [t.legend3, ['#5B9BEF', '#d9a521', '#62b886', '#62b886', '#F2704A']]}[this.mode];
     $('legend').innerHTML = L[0].map((x, i) => `<span><i style="background:${L[1][i]}"></i>${Sim.esc(x)}</span>`).join('');
     document.title = t.h1;
   }
