@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Beats</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600&display=swap">
+<link rel="stylesheet" href="assets/sim.css">
+<link rel="stylesheet" href="assets/theme.css">
+<link rel="stylesheet" href="assets/dock.css">
+<style>
+  .legend{display:flex;flex-wrap:wrap;gap:6px 18px;margin:6px 4px 0;font-size:13px;color:var(--muted)}
+  .legend i{display:inline-block;width:14px;height:3px;vertical-align:middle;margin-right:6px}
+  .checks{display:flex;flex-wrap:wrap;gap:8px 18px;margin:0 4px 12px}
+  .checks label{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center}
+  #view text{font-family:var(--f-mono,monospace)}
+  #sound.on{background:var(--accent);color:#0b0a09}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="h1"></h1>
+  <p id="sub"></p>
+  <nav><a href="index.html">← Home</a><a href="test.html">Test builder</a><a href="waves.html">Waves</a><a href="sound.html">Doppler &amp; Mach</a></nav>
+</header>
+<main>
+<div class="wrap">
+  <div class="topbar">
+    <p class="title" id="title"></p>
+    <div class="tools">
+      <div class="grp"><small>&nbsp;</small><div class="seg" role="group"><button id="sound" type="button" aria-pressed="false"></button><button id="play" type="button" aria-pressed="true"></button><button id="reset" type="button"></button></div></div>
+      <div class="grp"><small>&nbsp;</small><div class="seg" role="group" aria-label="Language">
+        <button id="lang-el" type="button">ΕΛ</button><button id="lang-en" type="button">EN</button></div></div>
+    </div>
+  </div>
+
+  <div class="dock">
+    <div class="dock-viz">
+      <section class="card dock-fig">
+        <div class="fig"><svg id="view" viewBox="0 0 1000 560" role="img" aria-label="Beats: two waves of close frequencies and their sum"><g id="top"></g><line id="head" x1="0" y1="60" x2="0" y2="268" stroke="#F2704A" stroke-width="2"/><g id="zoom"></g></svg></div>
+      </section>
+      <div class="dock-cap"><div class="legend" id="legend"></div><p class="note" id="hint"></p></div>
+    </div>
+    <section class="card dock-ctl">
+      <h2 id="ctl-h"></h2>
+      <div class="row"><label for="f1" id="l-f1"></label><input type="range" id="f1" min="0" max="1000" step="1"><output id="o-f1"></output></div>
+      <div class="row"><label for="f2" id="l-f2"></label><input type="range" id="f2" step="0.5"><output id="o-f2"></output></div>
+      <div class="row"><label for="a2" id="l-a2"></label><input type="range" id="a2" min="0" max="100" step="5" value="100"><output id="o-a2"></output></div>
+      <div class="checks">
+        <label><input type="checkbox" id="on1" checked> <span id="on1-l"></span></label>
+        <label><input type="checkbox" id="on2" checked> <span id="on2-l"></span></label>
+      </div>
+      <div class="row"><label for="vol" id="l-vol"></label><input type="range" id="vol" min="0" max="100" step="5" value="50"><output id="o-vol"></output></div>
+      <div class="row"><span class="note" id="presets-l"></span></div>
+      <div class="row" id="presets"></div>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2 id="calc-h"></h2>
+    <div class="scroll"><table class="calc" id="calc"></table></div>
+    <div class="steps" id="steps"></div>
+    <p class="status" id="status"></p>
+  </section>
+
+  <section class="card quiz" id="quiz"></section>
+  <p class="note" id="foot"></p>
+</div>
+</main>
+
+<script src="assets/sim.js"></script>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const {SimPage, Quiz, pick} = Sim;
+
+/* ============================ texts ============================ */
+const T = {
+ el: {
+  h1: 'Διακρότημα', sub: 'Δύο ήχοι με λίγο διαφορετική συχνότητα συμβάλλουν. Ο ήχος που ακούμε δυναμώνει και σβήνει τόσες φορές το δευτερόλεπτο όση είναι η διαφορά των συχνοτήτων.',
+  title: 'Δύο πηγές, κοντινές συχνότητες', soundOn: '🔊 Ήχος: ON', soundOff: '🔇 Ήχος: OFF', play: '❚❚ Παύση', pause: '▶ Συνέχεια', reset: '↺ Από την αρχή',
+  calc: 'Τι συμβαίνει', ctl: 'Ρυθμίσεις',
+  f1: 'Συχνότητα πηγής 1', f2: 'Συχνότητα πηγής 2', a2: 'Πλάτος πηγής 2', vol: 'Ένταση ηχείων',
+  on1: 'Ακούω την πηγή 1', on2: 'Ακούω την πηγή 2',
+  presets: 'Έτοιμα παραδείγματα:', pre: {tune: 'Κούρδισμα 440 / 442', fast: 'Γρήγορο 440 / 450', same: 'Ίδιες 440 / 440', slow: 'Αργή κίνηση 6 / 7', half: 'Άνισα πλάτη'},
+  rows: {f1: 'Συχνότητα πηγής 1, f₁', f2: 'Συχνότητα πηγής 2, f₂', fb: 'Συχνότητα διακροτήματος f_b = |f₁ − f₂|', Tb: 'Περίοδος διακροτήματος T_b = 1/f_b', tone: 'Τόνος που ακούγεται ≈ (f₁ + f₂)/2', win: 'Χρόνος που δείχνει το πάνω διάγραμμα'},
+  none: 'δεν υπάρχει', inf: '∞ (σταθερή ένταση)',
+  top: 'Άθροισμα των δύο κυμάτων στο χρόνο', zoom: 'Μεγέθυνση τη στιγμή της κόκκινης γραμμής',
+  inPhase: 'σε φάση → ενισχυτική συμβολή → δυνατός ήχος', outPhase: 'αντίθετη φάση → ακυρωτική συμβολή → σιγή', mid: 'ενδιάμεση φάση',
+  loud: 'ένταση', env: 'περιβάλλουσα',
+  legend: ['Κύμα πηγής 1', 'Κύμα πηγής 2', 'Άθροισμα (αυτό που φτάνει στο αυτί)', 'Περιβάλλουσα: πώς αλλάζει η ένταση', 'Τώρα (συγχρονισμένο με τον ήχο)'],
+  hint: 'Πάτησε «Ήχος» και άκουσε πρώτα κάθε πηγή μόνη της, μετά και τις δύο. Το κάτω διάγραμμα δείχνει γιατί: το κύμα 2 «γλιστράει» σιγά-σιγά σε σχέση με το κύμα 1, άλλοτε βρίσκονται σε φάση και άλλοτε σε αντίθετη φάση.',
+  st0: 'Ίδιες συχνότητες: τα κύματα μένουν συνεχώς στην ίδια φάση. Η ένταση είναι σταθερή, δεν υπάρχει διακρότημα.',
+  st1: n => `Ο ήχος δυναμώνει και σβήνει ${n} φορές το δευτερόλεπτο.`,
+  stFast: 'Τα διακροτήματα είναι τόσο γρήγορα που δεν τα ξεχωρίζουμε εύκολα ένα-ένα: ο ήχος ακούγεται «τραχύς».',
+  stLow: 'Οι συχνότητες είναι πολύ χαμηλές για να ακουστούν από ηχεία. Εδώ το σχήμα δείχνει το διακρότημα σε αργή κίνηση: φαίνεται κάθε ταλάντωση ξεχωριστά.',
+  stAmp: 'Με άνισα πλάτη η ακύρωση δεν είναι πλήρης: ο ήχος δεν σβήνει τελείως, απλώς χαμηλώνει.',
+  stTune: 'Όσο οι συχνότητες πλησιάζουν, τα διακροτήματα αραιώνουν. Όταν σταματήσουν, οι δύο πηγές έχουν ίδια συχνότητα: έτσι κουρδίζουμε όργανα.',
+  noAudio: 'Ο browser δεν υποστηρίζει ήχο (Web Audio).',
+  foot: 'Οι δύο πηγές είναι καθαροί ημιτονικοί τόνοι που παράγει ο browser. Η κόκκινη γραμμή κινείται σε πραγματικό χρόνο, μαζί με τον ήχο: όταν βρίσκεται σε «κοιλιά» της περιβάλλουσας ακούς δυνατά, όταν βρίσκεται σε «στένωση» σχεδόν τίποτα.'
+ },
+ en: {
+  h1: 'Beats', sub: 'Two sounds of slightly different frequency interfere. The sound we hear swells and fades as many times per second as the difference of the frequencies.',
+  title: 'Two sources, close frequencies', soundOn: '🔊 Sound: ON', soundOff: '🔇 Sound: OFF', play: '❚❚ Pause', pause: '▶ Play', reset: '↺ Restart',
+  calc: 'What is happening', ctl: 'Settings',
+  f1: 'Frequency of source 1', f2: 'Frequency of source 2', a2: 'Amplitude of source 2', vol: 'Speaker volume',
+  on1: 'Hear source 1', on2: 'Hear source 2',
+  presets: 'Ready examples:', pre: {tune: 'Tuning 440 / 442', fast: 'Fast 440 / 450', same: 'Equal 440 / 440', slow: 'Slow motion 6 / 7', half: 'Unequal amplitudes'},
+  rows: {f1: 'Frequency of source 1, f₁', f2: 'Frequency of source 2, f₂', fb: 'Beat frequency f_b = |f₁ − f₂|', Tb: 'Beat period T_b = 1/f_b', tone: 'Pitch heard ≈ (f₁ + f₂)/2', win: 'Time shown in the top graph'},
+  none: 'none', inf: '∞ (steady loudness)',
+  top: 'Sum of the two waves against time', zoom: 'Close-up at the red line',
+  inPhase: 'in phase → constructive → loud', outPhase: 'opposite phase → destructive → silence', mid: 'in between',
+  loud: 'loudness', env: 'envelope',
+  legend: ['Wave from source 1', 'Wave from source 2', 'Sum (what reaches the ear)', 'Envelope: how the loudness changes', 'Now (in step with the sound)'],
+  hint: 'Press "Sound" and first listen to each source on its own, then to both. The lower graph shows why: wave 2 slowly slides past wave 1, so they are sometimes in phase and sometimes in opposite phase.',
+  st0: 'Equal frequencies: the waves stay in the same phase all the time. The loudness is steady, there are no beats.',
+  st1: n => `The sound swells and fades ${n} times per second.`,
+  stFast: 'The beats are so fast that they are hard to tell apart one by one: the sound is heard as "rough".',
+  stLow: 'These frequencies are too low to come out of a speaker. Here the picture shows beats in slow motion: every oscillation can be seen.',
+  stAmp: 'With unequal amplitudes the cancellation is not complete: the sound never dies away, it only gets quieter.',
+  stTune: 'As the frequencies get closer the beats slow down. When they stop, the two sources have the same frequency: this is how instruments are tuned.',
+  noAudio: 'This browser does not support sound (Web Audio).',
+  foot: 'The two sources are pure sine tones made by the browser. The red line moves in real time, in step with the sound: on a bulge of the envelope you hear a loud sound, at a narrow point almost nothing.'
+ }
+};
+
+const page = new SimPage(T);
+const Q = (el, en) => ({el, en});
+const fl = (x, d, l) => page.fmtIn(x, d, l);
+const V = (x, u, d = 2) => Q(fl(x, d, 'el') + (u ? ' ' + u : ''), fl(x, d, 'en') + (u ? ' ' + u : ''));
+
+/* f1 slider is logarithmic: 2 Hz … 1000 Hz */
+const F_MIN = 2, F_MAX = 1000;
+const sl2f = v => { const f = F_MIN * Math.pow(F_MAX / F_MIN, v / 1000); return f < 20 ? Math.round(f * 2) / 2 : Math.round(f); };
+const f2sl = f => Math.round(1000 * Math.log(f / F_MIN) / Math.log(F_MAX / F_MIN));
+
+/* ============================ geometry ============================ */
+const X0 = 70, X1 = 900, TOP_Y = 162, TOP_H = 92, Z_Y = 440, Z_H = 52, BAR_X = 945;
+const C1 = '#5B9BEF', C2 = '#F2A64A', CS = '#e8e2d0', CE = '#62b886', CH = '#F2704A';
+
+class BeatsPage {
+  constructor() {
+    this.S = {f1: 440, f2: 442, a2: 1, on1: true, on2: true, vol: 0.5};
+    this.running = true; this.t = 0; this.win = -1;
+    this.ctx = null; this.osc = null; this.soundOn = false;
+    page.bindLang($('lang-el'), $('lang-en'));
+    page.onLang(() => this.texts());
+    $('f1').addEventListener('input', () => { this.S.f1 = sl2f(+$('f1').value); this.clampF2(); this.changed(true); });
+    $('f2').addEventListener('input', () => { this.S.f2 = +$('f2').value; this.changed(true); });
+    $('a2').addEventListener('input', () => { this.S.a2 = +$('a2').value / 100; this.changed(false); });
+    $('vol').addEventListener('input', () => { this.S.vol = +$('vol').value / 100; this.gains(); this.outputs(); });
+    for (const k of ['on1', 'on2']) $(k).addEventListener('change', () => { this.S[k] = $(k).checked; this.gains(); });
+    $('sound').onclick = () => this.toggleSound();
+    $('play').onclick = () => { this.running = !this.running; if (this.ctx) this.running ? this.ctx.resume() : this.ctx.suspend(); this.texts(); };
+    $('reset').onclick = () => this.restart();
+    this.quiz = new Quiz(page, $('quiz'), QUIZ, {topics: ['waves'], tpls: ['waves.beats']});
+    this.sliders();
+    this.texts();
+    this.quiz.next();
+    this.last = performance.now();
+    requestAnimationFrame(t => this.tick(t));
+  }
+
+  /* ---------- state ---------- */
+  clampF2() {
+    const {f1} = this.S, lo = Math.max(0.5, f1 - 20), hi = f1 + 20;
+    this.S.f2 = Math.min(hi, Math.max(lo, Math.round(this.S.f2 * 2) / 2));
+    $('f2').min = lo; $('f2').max = hi; $('f2').value = this.S.f2;
+  }
+  sliders() {
+    $('f1').value = f2sl(this.S.f1); this.clampF2();
+    $('a2').value = Math.round(this.S.a2 * 100); $('on1').checked = this.S.on1; $('on2').checked = this.S.on2;
+  }
+  set(v) { Object.assign(this.S, v); this.sliders(); this.changed(true); }
+  changed(freq) {
+    if (freq) this.restart(); else { this.win = -1; this.gains(); }
+    this.table();
+  }
+  get fb() { return Math.abs(this.S.f1 - this.S.f2); }
+  get Tw() {                         // length of the top graph: three beat periods, within limits
+    const fb = this.fb, f1 = this.S.f1;
+    let w = fb > 0 ? 3 / fb : 12 / f1 > 0.2 ? 12 / f1 : 0.2;
+    if (fb > 0 && w > 6) w = 1 / fb;
+    return Math.min(6, Math.max(0.06, w));
+  }
+
+  /* ---------- sound ---------- */
+  toggleSound() {
+    if (!this.ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) { $('status').textContent = page.t.noAudio; return; }
+      this.ctx = new AC();
+      this.master = this.ctx.createGain(); this.master.gain.value = 0; this.master.connect(this.ctx.destination);
+    }
+    this.soundOn = !this.soundOn;
+    if (this.soundOn) { this.ctx.resume(); if (!this.running) { this.running = true; } this.restart(); }
+    else this.master.gain.setTargetAtTime(0, this.ctx.currentTime, 0.02);
+    this.texts();
+  }
+  gains() {
+    if (!this.osc) return;
+    const c = this.ctx.currentTime, k = 0.25;
+    this.osc.g1.gain.setTargetAtTime(this.S.on1 ? k : 0, c, 0.015);
+    this.osc.g2.gain.setTargetAtTime(this.S.on2 ? k * this.S.a2 : 0, c, 0.015);
+    this.master.gain.setTargetAtTime(this.soundOn ? this.S.vol : 0, c, 0.02);
+  }
+  // Start both tones together, so that the picture and the sound share one clock.
+  restart() {
+    this.t = 0; this.win = -1;
+    if (!this.ctx || !this.soundOn) return;
+    const c = this.ctx, now = c.currentTime, start = now + 0.04;
+    if (this.osc) {
+      const o = this.osc; o.g1.gain.setTargetAtTime(0, now, 0.008); o.g2.gain.setTargetAtTime(0, now, 0.008);
+      o.o1.stop(start); o.o2.stop(start);
+    }
+    const mk = f => { const o = c.createOscillator(), g = c.createGain(); o.type = 'sine'; o.frequency.value = f; g.gain.value = 0; o.connect(g); g.connect(this.master); o.start(start); return [o, g]; };
+    const [o1, g1] = mk(this.S.f1), [o2, g2] = mk(this.S.f2);
+    this.osc = {o1, g1, o2, g2}; this.t0 = start;
+    const k = 0.25;
+    g1.gain.setValueAtTime(0, start); g1.gain.linearRampToValueAtTime(this.S.on1 ? k : 0, start + 0.015);
+    g2.gain.setValueAtTime(0, start); g2.gain.linearRampToValueAtTime(this.S.on2 ? k * this.S.a2 : 0, start + 0.015);
+    this.master.gain.setTargetAtTime(this.S.vol, now, 0.02);
+  }
+
+  /* ---------- loop ---------- */
+  tick(now) {
+    const dt = Math.min(0.05, (now - this.last) / 1000); this.last = now;
+    if (this.soundOn && this.ctx && this.osc) this.t = Math.max(0, this.ctx.currentTime - this.t0);
+    else if (this.running) this.t += dt;
+    this.draw();
+    requestAnimationFrame(t => this.tick(t));
+  }
+
+  y(t) { const {f1, f2, a2} = this.S; return Math.sin(2 * Math.PI * f1 * t) + a2 * Math.sin(2 * Math.PI * f2 * t); }
+  env(t) { const {f1, f2, a2} = this.S; return Math.sqrt(Math.max(0, 1 + a2 * a2 + 2 * a2 * Math.cos(2 * Math.PI * (f1 - f2) * t))); }
+
+  // Top graph: one window of the summed signal. Drawn as a band of min/max per pixel,
+  // so that even 1000 Hz looks right (the carrier fills the envelope).
+  drawTop(k) {
+    const Tw = this.Tw, t0 = k * Tw, A = 1 + this.S.a2, sc = TOP_H / A, cols = X1 - X0, t = page.t, L = page.lang;
+    const cyc = this.S.f1 * Tw / cols, n = Math.max(4, Math.ceil(cyc * 10));
+    let up = [], dn = [], line = cyc < 0.25;
+    for (let i = 0; i <= cols; i++) {
+      const ta = t0 + i / cols * Tw;
+      if (line) { up.push(`${X0 + i},${(TOP_Y - this.y(ta) * sc).toFixed(1)}`); continue; }
+      let mn = 9, mx = -9;
+      for (let j = 0; j < n; j++) { const v = this.y(ta + j / n * Tw / cols); if (v < mn) mn = v; if (v > mx) mx = v; }
+      up.push(`${X0 + i},${(TOP_Y - mx * sc).toFixed(1)}`); dn.push(`${X0 + i},${(TOP_Y - mn * sc).toFixed(1)}`);
+    }
+    let s = `<rect x="0" y="0" width="1000" height="560" fill="#0f1218"/>` +
+      `<text x="${X0}" y="22" fill="#a9a193" font-size="15">${Sim.esc(t.top)}</text>` +
+      `<line x1="${X0}" y1="${TOP_Y}" x2="${X1}" y2="${TOP_Y}" stroke="#333" />` +
+      `<line x1="${X0}" y1="${TOP_Y - TOP_H - 6}" x2="${X0}" y2="${TOP_Y + TOP_H + 6}" stroke="#555"/>`;
+    s += line ? `<polyline points="${up.join(' ')}" fill="none" stroke="${CS}" stroke-width="1.6"/>`
+              : `<polygon points="${up.join(' ')} ${dn.reverse().join(' ')}" fill="${CS}" fill-opacity=".85" stroke="${CS}" stroke-width=".6"/>`;
+    // envelope
+    const e = [], e2 = [];
+    for (let i = 0; i <= cols; i += 2) { const ta = t0 + i / cols * Tw, v = this.env(ta) * sc; e.push(`${X0 + i},${(TOP_Y - v).toFixed(1)}`); e2.push(`${X0 + i},${(TOP_Y + v).toFixed(1)}`); }
+    s += `<polyline points="${e.join(' ')}" fill="none" stroke="${CE}" stroke-width="2.2" stroke-dasharray="7 4"/><polyline points="${e2.join(' ')}" fill="none" stroke="${CE}" stroke-width="2.2" stroke-dasharray="7 4"/>`;
+    // time axis ticks
+    const step = niceStep(Tw / 5);
+    for (let v = Math.ceil(t0 / step) * step; v <= t0 + Tw + 1e-9; v += step) {
+      const x = X0 + (v - t0) / Tw * cols;
+      s += `<line x1="${x.toFixed(1)}" y1="${TOP_Y + TOP_H + 4}" x2="${x.toFixed(1)}" y2="${TOP_Y + TOP_H + 10}" stroke="#777"/>` +
+           `<text x="${x.toFixed(1)}" y="${TOP_Y + TOP_H + 26}" fill="#8a8274" font-size="13" text-anchor="middle">${fl(v, step < 0.01 ? 3 : step < 0.1 ? 2 : 1, L)} s</text>`;
+    }
+    // beat period bracket between the first two loud points
+    if (this.fb > 0 && 1 / this.fb <= Tw) {
+      const Tb = 1 / this.fb, first = Math.ceil(t0 / Tb - 1e-9) * Tb;
+      if (first + Tb <= t0 + Tw + 1e-9) {
+        const xa = X0 + (first - t0) / Tw * cols, xb = X0 + (first + Tb - t0) / Tw * cols, yb = TOP_Y - TOP_H - 14;
+        s += `<path d="M${xa.toFixed(1)},${yb + 6} V${yb} H${xb.toFixed(1)} V${yb + 6}" fill="none" stroke="${CE}" stroke-width="1.6"/>` +
+             `<text x="${((xa + xb) / 2).toFixed(1)}" y="${yb - 6}" fill="${CE}" font-size="15" text-anchor="middle">T_b = 1/f_b = ${fl(Tb, Tb < 0.1 ? 3 : 2, L)} s</text>`;
+      }
+    }
+    $('top').innerHTML = s;
+  }
+
+  draw() {
+    const Tw = this.Tw, k = Math.floor(this.t / Tw);
+    if (k !== this.win) { this.win = k; this.drawTop(k); }
+    const xh = X0 + (this.t - k * Tw) / Tw * (X1 - X0);
+    $('head').setAttribute('x1', xh.toFixed(1)); $('head').setAttribute('x2', xh.toFixed(1));
+    this.drawZoom();
+  }
+
+  // Lower graph: about four periods of wave 1, starting at a crest-free point of wave 1,
+  // so wave 1 stands still and wave 2 slides past it at the beat rate.
+  drawZoom() {
+    const {f1, f2, a2} = this.S, t = page.t, P = 4, ts = Math.floor(this.t * f1) / f1, span = P / f1, cols = X1 - X0;
+    const p1 = [], p2 = [], ps = [];
+    for (let i = 0; i <= cols; i += 2) {
+      const ta = ts + i / cols * span, a = Math.sin(2 * Math.PI * f1 * ta), b = a2 * Math.sin(2 * Math.PI * f2 * ta), x = X0 + i;
+      p1.push(`${x},${(Z_Y - 70 - a * Z_H * 0.55).toFixed(1)}`); p2.push(`${x},${(Z_Y - 70 - b * Z_H * 0.55).toFixed(1)}`);
+      ps.push(`${x},${(Z_Y + 40 - (a + b) * Z_H * 0.55).toFixed(1)}`);
+    }
+    const ph = ((2 * Math.PI * (f2 - f1) * this.t) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI), c = Math.cos(ph);
+    const msg = c > 0.85 ? t.inPhase : c < -0.85 ? t.outPhase : t.mid, col = c > 0.85 ? CE : c < -0.85 ? CH : '#a9a193';
+    const loud = this.env(this.t) / (1 + a2), bh = 150;
+    let s = `<line x1="0" y1="298" x2="1000" y2="298" stroke="#2a2a2a"/>` +
+      `<text x="${X0}" y="324" fill="#a9a193" font-size="15">${Sim.esc(t.zoom)}</text>` +
+      `<text x="${X1}" y="324" fill="${col}" font-size="15" text-anchor="end">${Sim.esc(msg)}</text>` +
+      `<line x1="${X0}" y1="${Z_Y - 70}" x2="${X1}" y2="${Z_Y - 70}" stroke="#333"/><line x1="${X0}" y1="${Z_Y + 40}" x2="${X1}" y2="${Z_Y + 40}" stroke="#333"/>` +
+      `<polyline points="${p1.join(' ')}" fill="none" stroke="${C1}" stroke-width="2.2"/>` +
+      `<polyline points="${p2.join(' ')}" fill="none" stroke="${C2}" stroke-width="2.2"/>` +
+      `<polyline points="${ps.join(' ')}" fill="none" stroke="${CS}" stroke-width="2.6"/>` +
+      `<text x="12" y="${Z_Y - 66}" fill="#a9a193" font-size="14">1 + 2</text><text x="12" y="${Z_Y + 44}" fill="${CS}" font-size="14">Σ</text>` +
+      `<rect x="${BAR_X}" y="${Z_Y + 88 - bh}" width="26" height="${bh}" fill="none" stroke="#555"/>` +
+      `<rect x="${BAR_X}" y="${(Z_Y + 88 - bh * loud).toFixed(1)}" width="26" height="${(bh * loud).toFixed(1)}" fill="${col}"/>` +
+      `<text x="${BAR_X + 13}" y="${Z_Y + 108}" fill="#a9a193" font-size="13" text-anchor="middle">${Sim.esc(t.loud)}</text>`;
+    $('zoom').innerHTML = s;
+  }
+
+  /* ---------- texts and table ---------- */
+  outputs() {
+    const L = page.lang, d = v => v < 20 ? 1 : 0;
+    $('o-f1').textContent = fl(this.S.f1, d(this.S.f1), L) + ' Hz';
+    $('o-f2').textContent = fl(this.S.f2, d(this.S.f2), L) + ' Hz';
+    $('o-a2').textContent = Math.round(this.S.a2 * 100) + ' %';
+    $('o-vol').textContent = Math.round(this.S.vol * 100) + ' %';
+  }
+  table() {
+    this.outputs();
+    const {f1, f2, a2} = this.S, t = page.t, L = page.lang, fb = this.fb, d = v => (v < 20 && v % 1) ? 1 : 0;
+    const rows = [
+      [t.rows.f1, fl(f1, d(f1), L) + ' Hz'],
+      [t.rows.f2, fl(f2, d(f2), L) + ' Hz'],
+      [t.rows.fb, fb ? fl(fb, d(fb), L) + ' Hz' : '0 Hz · ' + t.none],
+      [t.rows.Tb, fb ? fl(1 / fb, 1 / fb < 0.1 ? 3 : 2, L) + ' s' : t.inf],
+      [t.rows.tone, fl((f1 + f2) / 2, (f1 + f2) / 2 < 20 ? 2 : 1, L) + ' Hz'],
+      [t.rows.win, fl(this.Tw, this.Tw < 0.1 ? 3 : 2, L) + ' s']
+    ];
+    $('calc').innerHTML = rows.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('');
+    const st = [];
+    st.push(L === 'el' ? `f_b = |f₁ − f₂| = |${fl(f1, d(f1), L)} − ${fl(f2, d(f2), L)}| = ${fl(fb, d(fb), L)} Hz.`
+                       : `f_b = |f₁ − f₂| = |${fl(f1, d(f1), L)} − ${fl(f2, d(f2), L)}| = ${fl(fb, d(fb), L)} Hz.`);
+    if (fb === 0) st.push(t.st0); else st.push(t.st1(fl(fb, d(fb), L)));
+    if (fb > 12) st.push(t.stFast);
+    if (fb > 0 && fb <= 3) st.push(t.stTune);
+    if (f1 < 60) st.push(t.stLow);
+    if (a2 < 0.999 && fb > 0) st.push(t.stAmp);
+    $('steps').innerHTML = st.map(x => `<div>${Sim.esc(x)}</div>`).join('');
+    $('status').textContent = ''; $('status').className = 'status';
+  }
+  texts() {
+    const t = page.t;
+    for (const k of ['h1', 'sub', 'title', 'hint', 'foot']) $(k).textContent = t[k];
+    $('calc-h').textContent = t.calc; $('ctl-h').textContent = t.ctl;
+    for (const k of ['f1', 'f2', 'a2', 'vol']) $('l-' + k).textContent = t[k];
+    $('on1-l').textContent = t.on1; $('on2-l').textContent = t.on2;
+    $('sound').textContent = this.soundOn ? t.soundOn : t.soundOff; $('sound').classList.toggle('on', this.soundOn); $('sound').setAttribute('aria-pressed', this.soundOn);
+    $('play').textContent = this.running ? t.play : t.pause; $('play').setAttribute('aria-pressed', this.running);
+    $('reset').textContent = t.reset; $('presets-l').textContent = t.presets;
+    const P = {tune: {f1: 440, f2: 442, a2: 1}, fast: {f1: 440, f2: 450, a2: 1}, same: {f1: 440, f2: 440, a2: 1}, slow: {f1: 6, f2: 7, a2: 1}, half: {f1: 440, f2: 443, a2: 0.5}};
+    $('presets').innerHTML = Object.keys(P).map(k => `<button class="btn alt" type="button" data-p="${k}">${Sim.esc(t.pre[k])}</button>`).join('');
+    $('presets').querySelectorAll('button').forEach(b => b.onclick = () => this.set(P[b.dataset.p]));
+    const col = [C1, C2, CS, CE, CH];
+    $('legend').innerHTML = t.legend.map((x, i) => `<span><i style="background:${col[i]}"></i>${Sim.esc(x)}</span>`).join('');
+    document.title = t.h1;
+    this.win = -1;
+    this.table();
+  }
+}
+function niceStep(x) { const p = Math.pow(10, Math.floor(Math.log10(x))), m = x / p; return (m < 1.5 ? 1 : m < 3.5 ? 2 : m < 7.5 ? 5 : 10) * p; }
+
+/* ============================ "Solve it" questions ============================ */
+const QUIZ = [
+  // beat frequency
+  () => {
+    const f1 = pick([256, 320, 400, 440, 500, 512]), d = pick([1, 2, 3, 4, 5, 6, 8]), f2 = f1 + pick([-1, 1]) * d;
+    return {
+      q: Q(`Δύο πηγές εκπέμπουν ταυτόχρονα ήχους ${f1} Hz και ${f2} Hz. Η συχνότητα του διακροτήματος είναι:`, `Two sources sound together at ${f1} Hz and ${f2} Hz. The beat frequency is:`),
+      o: [V(d, 'Hz', 0), V(f1 + f2, 'Hz', 0), V((f1 + f2) / 2, 'Hz', 1)], a: 0,
+      x: Q(`f_b = |f₁ − f₂| = |${f1} − ${f2}| = ${d} Hz.`, `f_b = |f₁ − f₂| = |${f1} − ${f2}| = ${d} Hz.`),
+      apply: () => app.set({f1, f2, a2: 1})
+    };
+  },
+  // number of beats in some seconds
+  () => {
+    const f1 = pick([300, 400, 440, 500]), d = pick([2, 3, 4, 5]), s = pick([5, 10, 20]), f2 = f1 + d;
+    return {
+      q: Q(`Δύο διαπασών ${f1} Hz και ${f2} Hz ηχούν μαζί. Πόσα διακροτήματα ακούγονται σε ${s} s;`, `Two tuning forks of ${f1} Hz and ${f2} Hz sound together. How many beats are heard in ${s} s?`),
+      o: [V(d * s, '', 0), V(d, '', 0), V(s / d, '', 1)], a: 0,
+      x: Q(`f_b = ${d} Hz, άρα ${d} διακροτήματα το δευτερόλεπτο: ${d} × ${s} = ${d * s}.`, `f_b = ${d} Hz, so ${d} beats per second: ${d} × ${s} = ${d * s}.`),
+      apply: () => app.set({f1, f2, a2: 1})
+    };
+  },
+  // find the other frequency
+  () => {
+    const f1 = pick([256, 400, 440, 512]), d = pick([2, 3, 4, 5, 6]), hi = Math.random() < .5, f2 = hi ? f1 + d : f1 - d;
+    return {
+      q: Q(`Ένα διαπασών ${f1} Hz και μια χορδή δίνουν ${d} διακροτήματα το δευτερόλεπτο. Η χορδή έχει ${hi ? 'υψηλότερη' : 'χαμηλότερη'} συχνότητα. Η συχνότητά της είναι:`,
+           `A ${f1} Hz tuning fork and a string give ${d} beats per second. The string has the ${hi ? 'higher' : 'lower'} frequency. Its frequency is:`),
+      o: [V(f2, 'Hz', 0), V(hi ? f1 - d : f1 + d, 'Hz', 0), V(f1 * d, 'Hz', 0)], a: 0,
+      x: Q(`|f₁ − f₂| = ${d} Hz και η χορδή είναι ${hi ? 'ψηλότερα' : 'χαμηλότερα'}: f = ${f1} ${hi ? '+' : '−'} ${d} = ${f2} Hz.`, `|f₁ − f₂| = ${d} Hz and the string is ${hi ? 'higher' : 'lower'}: f = ${f1} ${hi ? '+' : '−'} ${d} = ${f2} Hz.`),
+      apply: () => app.set({f1, f2, a2: 1})
+    };
+  },
+  // beat period
+  () => {
+    const f1 = pick([400, 440, 500]), d = pick([2, 4, 5, 10]), f2 = f1 + d;
+    return {
+      q: Q(`Ήχοι ${f1} Hz και ${f2} Hz ηχούν μαζί. Κάθε πόσο φτάνει ο ήχος στη μέγιστη ένταση;`, `Sounds of ${f1} Hz and ${f2} Hz play together. How often does the sound reach its loudest?`),
+      o: [V(1 / d, 's', 2), V(d, 's', 0), V(1 / f1, 's', 4)], a: 0,
+      x: Q(`f_b = ${d} Hz, άρα T_b = 1/f_b = ${fl(1 / d, 2, 'el')} s.`, `f_b = ${d} Hz, so T_b = 1/f_b = ${fl(1 / d, 2, 'en')} s.`),
+      apply: () => app.set({f1, f2, a2: 1})
+    };
+  },
+  // tuning
+  () => ({
+    q: Q('Κουρδίζουμε μια χορδή δίπλα σε ένα διαπασών. Καθώς πλησιάζουμε τη σωστή συχνότητα, τα διακροτήματα:', 'A string is tuned next to a tuning fork. As it gets close to the right frequency, the beats:'),
+    o: [Q('αραιώνουν και τελικά σταματούν', 'slow down and finally stop'), Q('πυκνώνουν', 'get faster'), Q('δεν αλλάζουν', 'do not change')], a: 0,
+    x: Q('f_b = |f₁ − f₂|: όσο μικραίνει η διαφορά, τόσο λιγότερα διακροτήματα. Στην ίδια συχνότητα f_b = 0.', 'f_b = |f₁ − f₂|: the smaller the difference, the fewer the beats. At the same frequency f_b = 0.'),
+    apply: () => app.set({f1: 440, f2: 441, a2: 1})
+  }),
+  // loud moment = in phase
+  () => ({
+    q: Q('Τη στιγμή που ο ήχος ενός διακροτήματος είναι πιο δυνατός, τα δύο κύματα βρίσκονται:', 'At the moment the sound of a beat is loudest, the two waves are:'),
+    o: [Q('σε φάση (ενισχυτική συμβολή)', 'in phase (constructive interference)'), Q('σε αντίθετη φάση (ακυρωτική συμβολή)', 'in opposite phase (destructive interference)'), Q('με διαφορά φάσης 90°', 'a quarter of a cycle apart')], a: 0,
+    x: Q('Όταν οι κορυφές συμπίπτουν τα πλάτη προστίθενται. Όταν η κορυφή του ενός πέφτει στην κοιλάδα του άλλου, ακυρώνονται.', 'When the crests line up the amplitudes add. When the crest of one meets the trough of the other, they cancel.'),
+    apply: () => app.set({f1: 6, f2: 7, a2: 1})
+  }),
+  // equal frequencies
+  () => ({
+    q: Q('Δύο πηγές εκπέμπουν ακριβώς την ίδια συχνότητα, 500 Hz. Ο ήχος που ακούμε:', 'Two sources emit exactly the same frequency, 500 Hz. The sound we hear:'),
+    o: [Q('έχει σταθερή ένταση, χωρίς διακροτήματα', 'has a steady loudness, with no beats'), Q('δίνει 500 διακροτήματα το δευτερόλεπτο', 'gives 500 beats per second'), Q('δίνει 1000 διακροτήματα το δευτερόλεπτο', 'gives 1000 beats per second')], a: 0,
+    x: Q('f_b = |500 − 500| = 0 Hz: η φάση τους δεν αλλάζει, άρα ούτε η ένταση.', 'f_b = |500 − 500| = 0 Hz: their phase never changes, so neither does the loudness.'),
+    apply: () => app.set({f1: 500, f2: 500, a2: 1})
+  })
+];
+
+const app = new BeatsPage();
+</script>
+<script src="assets/landscape.js"></script>
+</body>
+</html>
