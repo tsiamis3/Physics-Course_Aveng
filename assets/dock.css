@@ -1,0 +1,16 @@
+/* Figure and controls side by side, so a change on a slider is seen at once.
+   Wide screens: figure on the left, controls on the right (the controls stay in view while scrolling).
+   Narrow screens: the figure sticks to the top of the screen and the controls scroll underneath it. */
+.dock{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,360px);gap:16px;align-items:start}
+.dock-viz{min-width:0;display:flex;flex-direction:column;gap:8px}
+.dock-cap{padding:0 4px}
+.dock-cap .note,.dock-cap .legend{margin-left:0}
+.dock-ctl{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto;min-width:0}
+.dock-ctl .row label{min-width:120px}
+@media (max-width:1000px){
+  .dock{grid-template-columns:1fr}
+  .dock-viz{display:contents}
+  .dock .dock-fig{position:sticky;top:0;z-index:20;box-shadow:0 8px 18px rgba(0,0,0,.65)}
+  .dock .dock-fig svg,.dock .dock-fig canvas{max-height:42vh;object-fit:contain}
+  .dock-ctl{position:static;max-height:none;overflow:visible}
+}

@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600&display=swap">
 <link rel="stylesheet" href="assets/sim.css">
 <link rel="stylesheet" href="assets/theme.css">
+<link rel="stylesheet" href="assets/dock.css">
 <style>
 /* The chain Newton → kinematics → energy, one box per step. */
 .chain{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 4px}
@@ -40,15 +41,24 @@
     </div>
   </div>
 
-  <section class="card">
-    <div class="fig"><svg id="view" viewBox="0 0 1000 300" role="img" aria-label="Motion diagram"><g id="scene"></g></svg></div>
-    <div class="timebar">
-      <button class="btn primary" id="play" type="button"></button>
-      <input type="range" id="t" min="0" max="1000" step="1" value="0" aria-label="time">
-      <output id="t-o"></output>
+  <div class="dock">
+    <div class="dock-viz">
+      <section class="card dock-fig">
+        <div class="fig"><svg id="view" viewBox="0 0 1000 300" role="img" aria-label="Motion diagram"><g id="scene"></g></svg></div>
+        <div class="timebar">
+          <button class="btn primary" id="play" type="button"></button>
+          <input type="range" id="t" min="0" max="1000" step="1" value="0" aria-label="time">
+          <output id="t-o"></output>
+        </div>
+      </section>
+      <div class="dock-cap"><p class="note" id="hint" style="margin:8px 4px 0"></p></div>
     </div>
-    <p class="note" id="hint" style="margin:8px 4px 0"></p>
-  </section>
+    <section class="card dock-ctl">
+      <h2 id="ctl-h"></h2>
+      <div id="presets" class="row"></div>
+      <div id="controls"></div>
+    </section>
+  </div>
 
   <section class="card">
     <h2 id="chain-h"></h2>
@@ -67,11 +77,6 @@
     </section>
   </div>
 
-  <section class="card">
-    <h2 id="ctl-h"></h2>
-    <div id="presets" class="row"></div>
-    <div id="controls"></div>
-  </section>
 
   <section class="card quiz" id="quiz"></section>
   <p class="note" id="foot"></p>

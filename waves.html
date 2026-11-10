@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600&display=swap">
 <link rel="stylesheet" href="assets/sim.css">
 <link rel="stylesheet" href="assets/theme.css">
+<link rel="stylesheet" href="assets/dock.css">
 <style>
   canvas.tank{display:block;width:100%;height:auto;image-rendering:auto;touch-action:none;background:#0f1218}
   .legend{display:flex;flex-wrap:wrap;gap:6px 18px;margin:6px 4px 0;font-size:13px;color:var(--muted)}
@@ -33,26 +34,28 @@
     </div>
   </div>
 
-  <section class="card">
-    <div class="fig" id="fig1"><svg id="view1" viewBox="0 0 1000 450" role="img" aria-label="A wave on a line of particles"><g id="scene1"></g></svg></div>
-    <div class="fig hide" id="fig2"><canvas class="tank" id="tank" width="1000" height="560"></canvas></div>
-    <div class="fig hide" id="fig3"><svg id="view3" viewBox="0 0 1000 200" role="img" aria-label="The two waves at the probe and their sum"><g id="scene3"></g></svg></div>
-    <div class="legend" id="legend"></div>
-    <p class="note" id="hint"></p>
-  </section>
-
-  <div class="lower">
-    <section class="card">
-      <h2 id="calc-h"></h2>
-      <div class="scroll"><table class="calc" id="calc"></table></div>
-      <div class="steps" id="steps"></div>
-      <p class="status" id="status"></p>
-    </section>
-    <section class="card">
+  <div class="dock">
+    <div class="dock-viz">
+      <section class="card dock-fig">
+        <div class="fig" id="fig1"><svg id="view1" viewBox="0 0 1000 450" role="img" aria-label="A wave on a line of particles"><g id="scene1"></g></svg></div>
+        <div class="fig hide" id="fig2"><canvas class="tank" id="tank" width="1000" height="560"></canvas></div>
+        <div class="fig hide" id="fig3"><svg id="view3" viewBox="0 0 1000 200" role="img" aria-label="The two waves at the probe and their sum"><g id="scene3"></g></svg></div>
+      </section>
+      <div class="dock-cap"><div class="legend" id="legend"></div>
+<p class="note" id="hint"></p></div>
+    </div>
+    <section class="card dock-ctl">
       <h2 id="ctl-h"></h2>
       <div id="controls"></div>
     </section>
   </div>
+
+  <section class="card">
+    <h2 id="calc-h"></h2>
+    <div class="scroll"><table class="calc" id="calc"></table></div>
+    <div class="steps" id="steps"></div>
+    <p class="status" id="status"></p>
+  </section>
 
   <section class="card quiz" id="quiz"></section>
   <p class="note" id="foot"></p>

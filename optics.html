@@ -63,6 +63,7 @@ svg{display:block;width:100%;height:auto;touch-action:none}
 text{font-family:var(--f-body)}
 </style>
 <link rel="stylesheet" href="assets/theme.css">
+<link rel="stylesheet" href="assets/dock.css">
 </head>
 <body>
 <header>
@@ -90,21 +91,14 @@ text{font-family:var(--f-body)}
     </div>
   </div>
 
-  <section class="card">
-    <div id="diagram"></div>
-    <div class="legend" id="legend"></div>
-  </section>
-
-  <div class="lower">
-    <section class="card">
-      <h2 id="img-h"></h2>
-      <div class="badges" id="badges"></div>
-      <div class="read" id="read"></div>
-      <p id="zone"></p>
-      <p id="use"></p>
-      <p id="formula" hidden></p>
-    </section>
-    <section class="card">
+  <div class="dock">
+    <div class="dock-viz">
+      <section class="card dock-fig">
+        <div id="diagram"></div>
+      </section>
+      <div class="dock-cap"><div class="legend" id="legend"></div></div>
+    </div>
+    <section class="card dock-ctl">
       <h2 id="obj-h"></h2>
       <div class="pills" id="pills"></div>
       <div class="row">
@@ -117,6 +111,15 @@ text{font-family:var(--f-body)}
       <p class="note" id="hint"></p>
     </section>
   </div>
+
+  <section class="card">
+    <h2 id="img-h"></h2>
+    <div class="badges" id="badges"></div>
+    <div class="read" id="read"></div>
+    <p id="zone"></p>
+    <p id="use"></p>
+    <p id="formula" hidden></p>
+  </section>
   <p class="note" id="foot"></p>
 </div>
 </main>
