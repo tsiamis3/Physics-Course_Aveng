@@ -90,7 +90,7 @@ const T = {
   obsA: 'Ο παρατηρητής ακούει υψηλότερο ήχο (το αεροσκάφος πλησιάζει).', obsR: 'Ο παρατηρητής ακούει χαμηλότερο ήχο (το αεροσκάφος απομακρύνεται).',
   obsQ: 'Ο παρατηρητής δεν ακούει ακόμα τίποτα: είναι μπροστά από τον κώνο.', obsIn: 'Ο κώνος πέρασε από τον παρατηρητή: άκουσε την ηχητική έκρηξη.',
   boom: 'ΜΠΑΜ!', still: 'ακίνητο', inf: 'όλα στο ίδιο σημείο',
-  foot: 'Η ταχύτητα του ήχου υπολογίζεται με a ≈ 331 + 0,6·T m/s και τη θερμοκρασία ISA (15 °C στη θάλασσα, −2 °C ανά 1000 ft, −56,5 °C πάνω από 36 000 ft). Τα κύματα στο σχήμα είναι πολύ αργότερα από την πραγματικότητα.'
+  foot: 'Η ταχύτητα του ήχου υπολογίζεται με a = 20,05·√(θ + 273,15) m/s (θ σε °C, όπως στις διαφάνειες) και τη θερμοκρασία ISA (15 °C στη θάλασσα, −2 °C ανά 1000 ft, −56,5 °C πάνω από 36 000 ft). Τα κύματα στο σχήμα είναι πολύ αργότερα από την πραγματικότητα.'
  },
  en: {
   h1: 'Doppler and Mach', sub: 'An aircraft makes sound while it moves. Watch the waves bunch up in front of it, spread out behind it and, above Mach 1, form a cone.',
@@ -111,7 +111,7 @@ const T = {
   obsA: 'The observer hears a higher pitch (the aircraft is approaching).', obsR: 'The observer hears a lower pitch (the aircraft is moving away).',
   obsQ: 'The observer hears nothing yet: they are ahead of the cone.', obsIn: 'The cone has swept over the observer: they heard the sonic boom.',
   boom: 'BOOM!', still: 'still', inf: 'all at one point',
-  foot: 'The speed of sound uses a ≈ 331 + 0.6·T m/s and the ISA temperature (15 °C at sea level, −2 °C per 1000 ft, −56.5 °C above 36 000 ft). The waves in the picture are much slower than in reality.'
+  foot: 'The speed of sound uses a = 20.05·√(θ + 273.15) m/s (θ in °C, as in the slides) and the ISA temperature (15 °C at sea level, −2 °C per 1000 ft, −56.5 °C above 36 000 ft). The waves in the picture are much slower than in reality.'
  }
 };
 
@@ -123,7 +123,7 @@ const KT = 1.94384;
 
 /* ============================ physics ============================ */
 const isaT = ft => Math.max(-56.5, 15 - 1.98 * ft / 1000);
-const sound = T => 331 + 0.6 * T;                       // m/s, as in the lesson
+const sound = T => 20.05 * Math.sqrt(T + 273.15);       // m/s, deck slide 18
 const regime = M => M < 0.8 ? 0 : M <= 1.2 ? 1 : M <= 5 ? 2 : 3;
 
 /* ============================ the page ============================ */
@@ -289,12 +289,12 @@ const QUIZ = [
   },
   // waves.sound_speed_temp
   () => {
-    const Tc = pick([-55, -40, -30, -20, -10, 5, 10, 20, 25, 30, 35]), v = 331 + 0.6 * Tc;
+    const Tc = pick([-55, -40, -30, -20, -10, 5, 10, 20, 25, 30, 35]), v = sound(Tc);
     return {
-      q: Q(`Η ταχύτητα του ήχου στον αέρα είναι 331 m/s στους 0 °C και αυξάνεται 0,6 m/s ανά °C. Στους ${fl(Tc, 0, 'el')} °C είναι:`,
-           `The speed of sound in air is 331 m/s at 0 °C and rises by 0.6 m/s per °C. At ${fl(Tc, 0, 'en')} °C it is:`),
-      o: [V(v, 'm/s', 1), V(331 - 0.6 * Tc, 'm/s', 1), V(331, 'm/s')], a: 0,
-      x: Q(`v = 331 + 0,6 × (${fl(Tc, 0, 'el')}) = ${fl(v, 1, 'el')} m/s.`, `v = 331 + 0.6 × (${fl(Tc, 0, 'en')}) = ${fl(v, 1, 'en')} m/s.`)
+      q: Q(`Η ταχύτητα του ήχου σε ξηρό αέρα δίνεται από c = 20,05·√(θ + 273,15) m/s. Στους ${fl(Tc, 0, 'el')} °C είναι περίπου:`,
+           `The speed of sound in dry air is c = 20.05·√(θ + 273.15) m/s. At ${fl(Tc, 0, 'en')} °C it is about:`),
+      o: [V(v, 'm/s', 1), V(sound(-Tc), 'm/s', 1), V(sound(0), 'm/s', 1)], a: 0,
+      x: Q(`c = 20,05 × √(${fl(Tc, 0, 'el')} + 273,15) ≈ ${fl(v, 1, 'el')} m/s.`, `c = 20.05 × √(${fl(Tc, 0, 'en')} + 273.15) ≈ ${fl(v, 1, 'en')} m/s.`)
     };
   },
   // altitude and Mach
