@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ramp, Loop &amp; Collision</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600&display=swap">
+<link rel="stylesheet" href="assets/sim.css">
+<link rel="stylesheet" href="assets/theme.css">
+<link rel="stylesheet" href="assets/dock.css">
+<style>
+/* One box per stage of the track: incline → loop → collision → fall. The current stage is lit. */
+.chain{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 4px}
+@media (max-width:860px){.chain{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:480px){.chain{grid-template-columns:1fr}}
+.step{border:1px solid var(--line);background:#0d0c0a;padding:10px 12px}
+.step.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.step.off{opacity:.45}
+.step h3{margin:0 0 6px;font:700 13px var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.step p{margin:2px 0;font:14px/1.6 var(--f-mono)}
+.step p.f{color:var(--muted);font-size:13px}
+.step p.w{color:var(--bad);font-family:var(--f-body)}
+.step p.k{color:var(--ok);font-family:var(--f-body)}
+.step b{color:var(--fg)}
+.timebar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 4px 0}
+.timebar input{flex:1;min-width:180px;accent-color:var(--accent);box-shadow:none;border:0;background:none}
+.timebar output{font:16px var(--f-mono);min-width:90px}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="h1"></h1>
+  <p id="sub"></p>
+  <nav><a href="index.html">← Home</a><a href="test.html">Test builder</a><a href="motion.html">Motion &amp; Energy</a><a href="formula.html">Formula sheet</a></nav>
+</header>
+<main>
+<div class="wrap">
+  <div class="topbar">
+    <p class="title" id="title"></p>
+    <div class="tools">
+      <div class="grp"><small id="g-units"></small><div class="seg" role="group" id="units"></div></div>
+      <div class="grp"><small>&nbsp;</small><div class="seg" role="group" aria-label="Language">
+        <button id="lang-el" type="button">ΕΛ</button><button id="lang-en" type="button">EN</button></div></div>
+    </div>
+  </div>
+
+  <div class="dock">
+    <div class="dock-viz">
+      <section class="card dock-fig">
+        <div class="fig"><svg id="view" viewBox="0 0 1000 440" role="img" aria-label="Ramp, loop and collision"><g id="scene"></g></svg></div>
+        <div class="timebar">
+          <button class="btn primary" id="play" type="button"></button>
+          <input type="range" id="t" min="0" max="1000" step="1" value="0" aria-label="time">
+          <output id="t-o"></output>
+        </div>
+      </section>
+      <div class="dock-cap"><p class="note" id="hint" style="margin:8px 4px 0"></p></div>
+    </div>
+    <section class="card dock-ctl">
+      <h2 id="ctl-h"></h2>
+      <div id="presets" class="row"></div>
+      <div class="row"><label id="l-type"></label><div class="seg" role="group" id="ctype"></div></div>
+      <div id="controls"></div>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2 id="chain-h"></h2>
+    <div class="chain" id="chain"></div>
+  </section>
+
+  <div class="lower">
+    <section class="card">
+      <h2 id="graph-h"></h2>
+      <div class="fig"><svg id="graph" viewBox="0 0 520 300" role="img" aria-label="Speed graph"></svg></div>
+    </section>
+    <section class="card">
+      <h2 id="energy-h"></h2>
+      <div class="fig"><svg id="energy" viewBox="0 0 520 270" role="img" aria-label="Energy"></svg></div>
+      <p class="note" id="energy-note" style="margin:6px 4px 0"></p>
+    </section>
+  </div>
+
+  <section class="card quiz" id="quiz"></section>
+  <p class="note" id="foot"></p>
+</div>
+</main>
+
+<script src="assets/sim.js"></script>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const {SimPage, Quiz, rnd, pick} = Sim;
+
+/* ============================ texts ============================ */
+const T = {
+ el: {
+  h1: 'Ράμπα, ανακύκλωση, κρούση', sub: 'Ένα σώμα κατεβαίνει λείο κεκλιμένο επίπεδο, κάνει ανακύκλωση, συγκρούεται με δεύτερο σώμα στην άκρη του τραπεζιού και τα δύο πέφτουν στο έδαφος. Όλα τα κεφάλαια σε μία κίνηση.',
+  title: 'Κεκλιμένο → ανακύκλωση → κρούση → βολή', gUnits: 'Μονάδες',
+  play: 'Αναπαραγωγή', pause: 'Παύση',
+  hint: 'Διάλεξε σενάριο ή άλλαξε τα μεγέθη και πάτα αναπαραγωγή. Κάνε την ανακύκλωση πολύ μεγάλη ή τη ράμπα πολύ χαμηλή για να δεις πότε το σώμα δεν τα καταφέρνει. Όλες οι επιφάνειες είναι λείες και δεν υπάρχει αντίσταση αέρα.',
+  ctl: 'Ρυθμίσεις', type: 'Κρούση', plastic: 'Πλαστική', elastic: 'Ελαστική',
+  presets: {ex: 'Η άσκηση', el: 'Ελαστική, ίσες μάζες', heavy: 'Βαρύ σε ελαφρύ', fail: 'Δεν φτάνει'},
+  m1: 'Μάζα Σ₁', m2: 'Μάζα Σ₂ (στο τραπέζι)', phi: 'Γωνία κεκλιμένου φ', L: 'Μήκος κεκλιμένου L', R: 'Ακτίνα ανακύκλωσης R', H: 'Ύψος τραπεζιού H',
+  chain: 'Η λύση βήμα βήμα', s1: '1. Κεκλιμένο επίπεδο', s2: '2. Ανακύκλωση', s3: '3. Κρούση', s4: '4. Οριζόντια βολή',
+  graph: 'Ταχύτητα – χρόνος', energy: 'Ενέργεια του συστήματος',
+  phases: {incline: 'κεκλ.', flat1: '', loop: 'loop', flat2: '', fall: 'βολή', fly: 'πτήση'},
+  pe: 'Δυναμική PE', ke: 'Κινητική KE', lost: 'Χάθηκε στην κρούση', tot: 'Σύνολο',
+  eNote: 'Στο κεκλιμένο και στην ανακύκλωση η μηχανική ενέργεια διατηρείται (PE + KE = σταθερό). Στην πλαστική κρούση χάνεται κινητική ενέργεια (θερμότητα, παραμόρφωση)· η ορμή όμως διατηρείται.',
+  passes: 'Ολοκληρώνει την ανακύκλωση', okTop: 'v_top ≥ √(g·R)', back: 'Δεν φτάνει ούτε στο μισό ύψος του κύκλου: σταματά και γυρίζει πίσω.',
+  detach: 'Χάνει την επαφή με την τροχιά σε ύψος', noTop: 'v_top² < g·R: δεν ολοκληρώνει την ανακύκλωση.',
+  hmin: 'Ελάχιστο ύψος: h_min = 2,5·R', notReached: 'Δεν φτάνει ως εδώ.',
+  b1back: 'Το Σ₁ γυρίζει πίσω', b1stop: 'Το Σ₁ σταματά (ανταλλαγή ταχυτήτων)', b1fwd: 'Το Σ₁ συνεχίζει',
+  lossT: 'Απώλεια KE', sameT: 'Και τα δύο σώματα φτάνουν στο έδαφος ταυτόχρονα: ο χρόνος πτώσης εξαρτάται μόνο από το ύψος.',
+  ground: 'Στο έδαφος', angle: 'γωνία με το έδαφος',
+  top: 'πάνω', bottom: 'κάτω', N: 'N',
+  foot: 'Λείες επιφάνειες, χωρίς αντίσταση αέρα, τα σώματα θεωρούνται υλικά σημεία. g = 10 m/s² ή 32 ft/s², όπως στις ασκήσεις. Στο αγγλοσαξονικό σύστημα η μάζα μετριέται σε slug και η δύναμη σε lb. Τα οριζόντια τμήματα πριν και μετά την ανακύκλωση έχουν μήκος 2R.'
+ },
+ en: {
+  h1: 'Ramp, loop, collision', sub: 'A body slides down a smooth incline, goes round a loop, hits a second body at the edge of the table and both fall to the floor. Every chapter in one motion.',
+  title: 'Incline → loop → collision → projectile', gUnits: 'Units',
+  play: 'Play', pause: 'Pause',
+  hint: 'Pick a scenario or change the values and press play. Make the loop very large or the ramp very low to see when the body fails. All surfaces are smooth and there is no air resistance.',
+  ctl: 'Controls', type: 'Collision', plastic: 'Inelastic (stick)', elastic: 'Elastic',
+  presets: {ex: 'The exercise', el: 'Elastic, equal masses', heavy: 'Heavy hits light', fail: 'Does not make it'},
+  m1: 'Mass of body 1', m2: 'Mass of body 2 (on the table)', phi: 'Incline angle φ', L: 'Incline length L', R: 'Loop radius R', H: 'Table height H',
+  chain: 'The solution step by step', s1: '1. Inclined plane', s2: '2. Loop', s3: '3. Collision', s4: '4. Horizontal projectile',
+  graph: 'Speed – time', energy: 'Energy of the system',
+  phases: {incline: 'incl.', flat1: '', loop: 'loop', flat2: '', fall: 'proj.', fly: 'flight'},
+  pe: 'Potential PE', ke: 'Kinetic KE', lost: 'Lost in the collision', tot: 'Total',
+  eNote: 'On the incline and in the loop mechanical energy is conserved (PE + KE = constant). In an inelastic collision kinetic energy is lost (heat, deformation), but momentum is conserved.',
+  passes: 'It completes the loop', okTop: 'v_top ≥ √(g·R)', back: 'It does not even reach half the height of the loop: it stops and slides back.',
+  detach: 'It leaves the track at a height of', noTop: 'v_top² < g·R: it does not complete the loop.',
+  hmin: 'Minimum height: h_min = 2.5·R', notReached: 'Not reached.',
+  b1back: 'Body 1 bounces back', b1stop: 'Body 1 stops (speeds are exchanged)', b1fwd: 'Body 1 carries on',
+  lossT: 'KE lost', sameT: 'Both bodies reach the floor at the same time: the fall time depends only on the height.',
+  ground: 'On the floor', angle: 'angle with the floor',
+  top: 'top', bottom: 'bottom', N: 'N',
+  foot: 'Smooth surfaces, no air resistance, bodies treated as point masses. g = 10 m/s² or 32 ft/s², as in the questions. In imperial units mass is in slugs and force in lb. The flat parts before and after the loop are 2R long.'
+ }
+};
+const page = new SimPage(T);
+const t = () => page.t, f = (x, d = 2) => page.fmt(x, d);
+const UN = {
+  SI:       {m: 'kg', F: 'N', s: 'm', v: 'm/s', a: 'm/s²', E: 'J', g: 10},
+  imperial: {m: 'slug', F: 'lb', s: 'ft', v: 'ft/s', a: 'ft/s²', E: 'ft·lb', g: 32}
+};
+
+/* ============================ model ============================ */
+// Coordinates: x to the right, y up, floor at y = 0, table top at y = H.
+// The incline starts at x = 0. Each stage is a segment of the timeline: {kind, t0, dur}.
+class TrackModel {
+  constructor(p, g) {
+    Object.assign(this, p); this.g = g;
+    const s = Math.sin(this.phi * Math.PI / 180), c = Math.cos(this.phi * Math.PI / 180);
+    this.sin = s; this.cos = c;
+    this.a1 = g * s;                                  // acceleration on the incline
+    this.h = this.L * s;                              // height of the incline
+    this.t1 = Math.sqrt(2 * this.L / this.a1);
+    this.v0 = this.a1 * this.t1;                      // = √(2gh)
+    this.xb = this.L * c;                             // foot of the incline
+    this.f = 2 * this.R;                              // flat parts before and after the loop
+    this.xc = this.xb + this.f;                       // loop centre (x)
+    this.xe = this.xc + this.f;                       // table edge, where body 2 waits
+    this.vt2 = this.v0 * this.v0 - 4 * g * this.R;    // v² at the top of the loop
+    this.ok = this.vt2 >= g * this.R - 1e-9;
+    this.hmin = 2.5 * this.R;
+    this.buildLoop();
+    // collision
+    const m1 = this.m1, m2 = this.m2, u = this.v0;
+    if (this.type === 'plastic') { this.v1 = this.v2 = m1 * u / (m1 + m2); }
+    else { this.v1 = (m1 - m2) / (m1 + m2) * u; this.v2 = 2 * m1 / (m1 + m2) * u; }
+    this.KEb = 0.5 * m1 * u * u;
+    this.KEa = 0.5 * m1 * this.v1 * this.v1 + 0.5 * m2 * this.v2 * this.v2;
+    this.t3 = Math.sqrt(2 * this.H / g);
+    // timeline
+    const seg = [['incline', this.t1], ['flat1', this.f / this.v0], ['loop', this.tl]];
+    if (this.ok) seg.push(['flat2', this.f / this.v0], ['fall', this.t3]);
+    else if (this.fail === 'detach') seg.push(['fly', this.tp]);
+    let t0 = 0; this.seg = seg.map(([kind, dur]) => { const o = {kind, t0, dur}; t0 += dur; return o; });
+    this.tEnd = t0;
+  }
+  speedAt(th) { return Math.sqrt(Math.max(0, this.v0 * this.v0 - 2 * this.g * this.R * (1 - Math.cos(th)))); }
+  // θ is measured from the bottom of the loop; the body goes up the right-hand side first.
+  loopPos(th) { return {x: this.xc + this.R * Math.sin(th), y: this.H + this.R - this.R * Math.cos(th)}; }
+  buildLoop() {
+    const g = this.g, R = this.R, h = this.v0 * this.v0 / (2 * g);
+    let thEnd = 2 * Math.PI; this.fail = null;
+    if (!this.ok) {
+      if (h <= R) { this.fail = 'back'; thEnd = Math.acos(1 - h / R); }
+      else { this.fail = 'detach'; thEnd = Math.acos((2 * R - 2 * h) / (3 * R)); this.yd = R * (1 - Math.cos(thEnd)); }
+    }
+    this.thEnd = thEnd;
+    // time along the loop: dt = R·dθ / v(θ), midpoint rule
+    const N = 1500, tab = [[0, 0]]; let tt = 0;
+    for (let i = 1; i <= N; i++) {
+      const a = thEnd * (i - 1) / N, b = thEnd * i / N, v = this.speedAt((a + b) / 2);
+      tt += R * (b - a) / Math.max(v, 1e-6 * this.v0 + 1e-9); tab.push([tt, b]);
+    }
+    this.tab = tab; this.tl = tt;
+    if (this.fail === 'detach') {                    // free flight inside the loop until it meets the track or the table
+      const th = thEnd, p = this.loopPos(th), v = this.speedAt(th);
+      this.fp = {x: p.x, y: p.y, vx: v * Math.cos(th), vy: v * Math.sin(th)};
+      let tp = 0; const dt = this.tl / 4000 + 1e-4;
+      for (let k = 0; k < 200000; k++) {
+        tp += dt; const q = this.flyAt(tp), d = Math.hypot(q.x - this.xc, q.y - (this.H + R));
+        if ((d >= R && tp > 5 * dt) || q.y <= this.H) break;
+      }
+      this.tp = tp;
+    }
+  }
+  flyAt(tt) { const p = this.fp; return {x: p.x + p.vx * tt, y: p.y + p.vy * tt - 0.5 * this.g * tt * tt, vx: p.vx, vy: p.vy - this.g * tt}; }
+  thetaAt(tt) {                                       // binary search in the loop table
+    const tab = this.tab; let lo = 0, hi = tab.length - 1;
+    if (tt >= tab[hi][0]) return tab[hi][1];
+    while (hi - lo > 1) { const m = (lo + hi) >> 1; if (tab[m][0] <= tt) lo = m; else hi = m; }
+    const [ta, a] = tab[lo], [tb, b] = tab[hi]; return a + (b - a) * (tt - ta) / ((tb - ta) || 1);
+  }
+  // State at time tt: positions and velocities of both bodies and the current stage.
+  at(time) {
+    const tt = Math.max(0, Math.min(time, this.tEnd));
+    let sg = this.seg[0]; for (const s of this.seg) if (tt >= s.t0) sg = s;
+    const tau = tt - sg.t0, g = this.g;
+    const b2rest = {x: this.xe, y: this.H, vx: 0, vy: 0};
+    let b1, b2 = b2rest, hit = false;
+    switch (sg.kind) {
+      case 'incline': { const s = 0.5 * this.a1 * tau * tau, v = this.a1 * tau;
+        b1 = {x: s * this.cos, y: this.H + this.h - s * this.sin, vx: v * this.cos, vy: -v * this.sin}; break; }
+      case 'flat1': b1 = {x: this.xb + this.v0 * tau, y: this.H, vx: this.v0, vy: 0}; break;
+      case 'loop': { const th = this.thetaAt(tau), p = this.loopPos(th), v = this.speedAt(th);
+        b1 = {x: p.x, y: p.y, vx: v * Math.cos(th), vy: v * Math.sin(th), th}; break; }
+      case 'flat2': b1 = {x: this.xc + this.v0 * tau, y: this.H, vx: this.v0, vy: 0}; break;
+      case 'fly': b1 = this.flyAt(tau); break;
+      case 'fall': {
+        hit = true;
+        const fall = v => ({x: this.xe + v * tau, y: this.H - 0.5 * g * tau * tau, vx: v, vy: -g * tau});
+        b2 = fall(this.v2);
+        if (this.v1 > 1e-9) b1 = fall(this.v1);
+        else b1 = {x: Math.max(this.xc, this.xe + this.v1 * tau), y: this.H, vx: this.v1, vy: 0};
+        break;
+      }
+    }
+    return {t: tt, kind: sg.kind, prog: sg.dur ? tau / sg.dur : 1, b1, b2, hit};
+  }
+}
+
+const PRESETS = {
+  SI: {
+    ex:    {m1: 1, m2: 1, phi: 30, L: 10, R: 1.6, H: 1.25, type: 'plastic'},
+    el:    {m1: 1, m2: 1, phi: 30, L: 10, R: 1.6, H: 1.25, type: 'elastic'},
+    heavy: {m1: 3, m2: 1, phi: 30, L: 10, R: 1.6, H: 1.25, type: 'elastic'},
+    fail:  {m1: 1, m2: 1, phi: 30, L: 6, R: 1.6, H: 1.25, type: 'plastic'}
+  },
+  imperial: {
+    ex:    {m1: 1, m2: 1, phi: 30, L: 50, R: 8, H: 4, type: 'plastic'},
+    el:    {m1: 1, m2: 1, phi: 30, L: 50, R: 8, H: 4, type: 'elastic'},
+    heavy: {m1: 3, m2: 1, phi: 30, L: 50, R: 8, H: 4, type: 'elastic'},
+    fail:  {m1: 1, m2: 1, phi: 30, L: 30, R: 8, H: 4, type: 'plastic'}
+  }
+};
+const RANGES = {
+  SI:       {m1: [0.5, 5, 0.5], m2: [0.5, 5, 0.5], phi: [10, 60, 5], L: [1, 20, 0.5], R: [0.2, 3, 0.1], H: [0.2, 5, 0.05]},
+  imperial: {m1: [0.5, 5, 0.5], m2: [0.5, 5, 0.5], phi: [10, 60, 5], L: [4, 80, 1], R: [1, 15, 0.5], H: [1, 16, 0.25]}
+};
+
+/* ============================ page ============================ */
+class RampPage {
+  constructor() {
+    this.units = 'SI'; this.time = 0; this.playing = false; this.last = null;
+    this.P = {...PRESETS.SI.ex}; this.preset = 'ex';
+    page.bindLang($('lang-el'), $('lang-en'));
+    page.onLang(() => this.renderAll());
+    $('play').onclick = () => this.toggle();
+    $('t').oninput = e => { this.stop(); this.time = +e.target.value / 1000 * this.model().tEnd; this.draw(); };
+    this.quiz = new Quiz(page, $('quiz'), QUIZ, {topics: ['kinetics', 'energy', 'circular', 'momentum'], tpls: [
+      'kinetics.free_fall_', 'kinetics.v_from_distance', 'kinetics.distance_accel',
+      'energy.speed_from_height', 'energy.potential', 'energy.kinetic', 'energy.energy_theory', 'energy2.total_mech_SI',
+      'circular.centripetal_force', 'circular.centripetal_accel', 'circular.theory',
+      'momentum.p', 'momentum.stick_rest', 'momentum.stick_same_direction', 'momentum.conservation_theory', 'momentum.theory']});
+    this.renderAll(); this.quiz.next();
+    requestAnimationFrame(ts => this.tick(ts));
+  }
+  get u() { return UN[this.units]; }
+  model() { return this._m && this._mk === JSON.stringify([this.P, this.units]) ? this._m : (this._mk = JSON.stringify([this.P, this.units]), this._m = new TrackModel(this.P, this.u.g)); }
+
+  /* ---------- play ---------- */
+  toggle() {
+    if (this.playing) return this.stop();
+    if (this.time >= this.model().tEnd - 1e-9) this.time = 0;
+    this.playing = true; this.last = null; this.label();
+  }
+  stop() { this.playing = false; this.label(); }
+  label() { $('play').textContent = this.playing ? t().pause : t().play; }
+  tick(ts) {
+    if (this.playing) {
+      if (this.last !== null) {
+        const M = this.model(), speed = M.tEnd / 7;           // a whole run takes about 7 s on screen
+        this.time = Math.min(M.tEnd, this.time + (ts - this.last) / 1000 * speed);
+        if (this.time >= M.tEnd) this.stop();
+        this.draw();
+      }
+      this.last = ts;
+    }
+    requestAnimationFrame(x => this.tick(x));
+  }
+
+  /* ---------- structure ---------- */
+  setUnits(un) {
+    if (un === this.units) return;
+    this.units = un; this.time = 0; this.stop();
+    this.P = {...PRESETS[un][this.preset || 'ex']}; this.preset = this.preset || 'ex';
+    this.renderAll();
+  }
+  renderAll() {
+    const L = t();
+    document.title = L.h1; $('h1').textContent = L.h1; $('sub').textContent = L.sub; $('title').textContent = L.title;
+    $('g-units').textContent = L.gUnits; $('hint').textContent = L.hint; $('ctl-h').textContent = L.ctl; $('l-type').textContent = L.type;
+    $('chain-h').textContent = L.chain; $('graph-h').textContent = L.graph; $('energy-h').textContent = L.energy;
+    $('energy-note').textContent = L.eNote; $('foot').textContent = L.foot;
+    $('units').innerHTML = ['SI', 'imperial'].map(k => `<button type="button" data-u="${k}" aria-pressed="${k === this.units}">${k === 'SI' ? 'SI' : 'Imperial'}</button>`).join('');
+    $('units').onclick = e => { const b = e.target.closest('[data-u]'); if (b) this.setUnits(b.dataset.u); };
+    this.label(); this.controls(); this.draw();
+  }
+  controls() {
+    const L = t(), u = this.u, R = RANGES[this.units], P = this.P;
+    $('presets').innerHTML = `<div class="seg" role="group">${Object.keys(L.presets).map(k => `<button type="button" data-p="${k}" aria-pressed="${this.preset === k}">${L.presets[k]}</button>`).join('')}</div>`;
+    $('presets').onclick = e => {
+      const b = e.target.closest('[data-p]'); if (!b) return;
+      this.P = {...PRESETS[this.units][b.dataset.p]}; this.preset = b.dataset.p; this.time = 0; this.stop(); this.controls(); this.draw();
+    };
+    $('ctype').innerHTML = ['plastic', 'elastic'].map(k => `<button type="button" data-c="${k}" aria-pressed="${P.type === k}">${L[k]}</button>`).join('');
+    $('ctype').onclick = e => {
+      const b = e.target.closest('[data-c]'); if (!b) return;
+      P.type = b.dataset.c; this.preset = null; this.controls(); this.draw();
+    };
+    const unit = {m1: u.m, m2: u.m, phi: '°', L: u.s, R: u.s, H: u.s};
+    const sl = k => `<div class="row"><label for="s-${k}">${L[k]}</label><input type="range" id="s-${k}" data-k="${k}" min="${R[k][0]}" max="${R[k][1]}" step="${R[k][2]}" value="${P[k]}"><output id="o-${k}">${f(P[k])} ${unit[k]}</output></div>`;
+    $('controls').innerHTML = ['m1', 'm2', 'phi', 'L', 'R', 'H'].map(sl).join('');
+    $('controls').oninput = e => {
+      const k = e.target.dataset.k; if (!k) return;
+      P[k] = +e.target.value; this.preset = null; this.time = 0;
+      $('o-' + k).textContent = f(P[k]) + ' ' + unit[k];
+      $('presets').querySelectorAll('[data-p]').forEach(b => b.setAttribute('aria-pressed', 'false'));
+      this.draw();
+    };
+  }
+
+  draw() {
+    const M = this.model(), S = M.at(this.time);
+    $('t').value = M.tEnd > 0 ? Math.round(this.time / M.tEnd * 1000) : 0;
+    $('t-o').textContent = 't = ' + f(S.t, 2) + ' s';
+    this.drawScene(M, S); this.drawGraph(M, S); this.drawEnergy(M, S); this.drawChain(M, S);
+  }
+
+  /* ---------- helpers ---------- */
+  arrow(x1, y1, x2, y2, col, w = 3) {
+    const dx = x2 - x1, dy = y2 - y1, n = Math.hypot(dx, dy); if (n < 4) return '';
+    const ux = dx / n, uy = dy / n, hx = x2 - ux * 10, hy = y2 - uy * 10;
+    return `<line x1="${x1}" y1="${y1}" x2="${hx}" y2="${hy}" stroke="${col}" stroke-width="${w}"/><path d="M${x2} ${y2}L${hx + uy * 6} ${hy - ux * 6}L${hx - uy * 6} ${hy + ux * 6}Z" fill="${col}"/>`;
+  }
+  txt(x, y, s, col = 'var(--fg)', anchor = 'start', size = 13) {
+    return `<text x="${x}" y="${y}" text-anchor="${anchor}" font-size="${size}" fill="${col}" style="paint-order:stroke" stroke="var(--panel)" stroke-width="4">${s}</text>`;
+  }
+
+  /* ---------- the track, drawn to scale ---------- */
+  drawScene(M, S) {
+    const L = t(), u = this.u, g = M.g;
+    const land = Math.max(M.v1 > 0 ? M.v1 : 0, M.v2) * M.t3;           // farthest landing point
+    const xmax = M.xe + Math.max(land, M.f) + M.f * 0.3, ymax = M.H + Math.max(M.h, 2 * M.R);
+    const VW = 1000, VH = 440, ml = 70, mr = 40, mt = 40, mb = 40;
+    const k = Math.min((VW - ml - mr) / xmax, (VH - mt - mb) / ymax);
+    const X = x => ml + x * k, Y = y => VH - mb - y * k;
+    const r1 = 7 + 3 * Math.cbrt(M.m1), r2 = 7 + 3 * Math.cbrt(M.m2);
+    let s = '';
+    // floor and table
+    s += `<rect x="0" y="${Y(0)}" width="${VW}" height="${mb}" fill="#22201b"/>`;
+    s += `<rect x="${X(0) - 6}" y="${Y(M.H)}" width="${X(M.xe) + r2 - X(0) + 6}" height="${Y(0) - Y(M.H)}" fill="#1b1813" stroke="#6b5a35"/>`;
+    // incline (filled wedge) and track
+    s += `<path d="M${X(0)} ${Y(M.H + M.h)} L${X(M.xb)} ${Y(M.H)} L${X(0)} ${Y(M.H)} Z" fill="#2a2620" stroke="#6b5a35"/>`;
+    s += `<path d="M${X(0)} ${Y(M.H + M.h)} L${X(M.xb)} ${Y(M.H)} L${X(M.xe) + r2} ${Y(M.H)}" fill="none" stroke="var(--accent)" stroke-width="3"/>`;
+    s += `<circle cx="${X(M.xc)}" cy="${Y(M.H + M.R)}" r="${M.R * k}" fill="none" stroke="var(--accent)" stroke-width="3"/>`;
+    // dimensions: h, angle, R, H
+    s += `<line x1="${X(0) - 22}" y1="${Y(M.H)}" x2="${X(0) - 22}" y2="${Y(M.H + M.h)}" stroke="var(--muted)" stroke-dasharray="3 3"/>` +
+      this.txt(X(0) - 26, (Y(M.H) + Y(M.H + M.h)) / 2 + 4, `h = ${f(M.h)} ${u.s}`, 'var(--muted)', 'end', 12);
+    s += this.txt(X(M.xb) - 46, Y(M.H) - 6, `φ = ${f(M.phi, 0)}°`, 'var(--muted)', 'start', 12);
+    s += `<line x1="${X(M.xc)}" y1="${Y(M.H + M.R)}" x2="${X(M.xc - M.R * 0.7071)}" y2="${Y(M.H + M.R + M.R * 0.7071)}" stroke="var(--muted)" stroke-dasharray="3 3"/>` +
+      this.txt(X(M.xc) - 8, Y(M.H + M.R) + 16, `R = ${f(M.R)} ${u.s}`, 'var(--muted)', 'middle', 12);
+    s += this.txt(X(M.xe) + r2 + 8, (Y(0) + Y(M.H)) / 2 + 4, `H = ${f(M.H)} ${u.s}`, 'var(--muted)', 'start', 12);
+    // minimum-height mark on the incline
+    { const yy = Y(M.H + M.hmin), col = M.ok ? 'var(--ok)' : 'var(--bad)';
+      if (yy > 30) s += `<line x1="${X(0) - 10}" y1="${yy}" x2="${X(M.xc)}" y2="${yy}" stroke="${col}" stroke-dasharray="6 5" opacity=".7"/>` +
+        this.txt(X(M.xc) + M.R * k + 8, yy + 4, `h_min = ${page.lang === 'el' ? '2,5' : '2.5'}·R = ${f(M.hmin)} ${u.s}`, col, 'start', 12); }
+    // landing marks and trajectories (dashed preview)
+    if (M.ok) {
+      const traj = v => { let d = ''; for (let i = 0; i <= 30; i++) { const tt = M.t3 * i / 30; d += (i ? 'L' : 'M') + X(M.xe + v * tt) + ' ' + Y(M.H - 0.5 * g * tt * tt); } return d; };
+      s += `<path d="${traj(M.v2)}" fill="none" stroke="var(--cold)" stroke-dasharray="4 5" opacity=".6"/>`;
+      if (M.type === 'elastic' && M.v1 > 1e-9) s += `<path d="${traj(M.v1)}" fill="none" stroke="var(--accent)" stroke-dasharray="4 5" opacity=".6"/>`;
+      const xl = M.xe + M.v2 * M.t3;
+      s += `<line x1="${X(M.xe)}" y1="${Y(0) + 14}" x2="${X(xl)}" y2="${Y(0) + 14}" stroke="var(--muted)"/>` +
+        this.txt((X(M.xe) + X(xl)) / 2, Y(0) + 30, `x = ${f(xl - M.xe)} ${u.s}`, 'var(--muted)', 'middle', 12);
+    } else if (M.fail === 'detach') {
+      let d = ''; for (let i = 0; i <= 40; i++) { const q = M.flyAt(M.tp * i / 40); d += (i ? 'L' : 'M') + X(q.x) + ' ' + Y(q.y); }
+      s += `<path d="${d}" fill="none" stroke="var(--bad)" stroke-dasharray="4 5"/>`;
+    }
+
+    // the bodies: during the run to the table edge, body 1 slides back by (r1 + r2) px so the two just touch at the collision
+    const B1 = S.b1, B2 = S.b2;
+    let off = 0;
+    if (S.kind === 'flat2') off = (r1 + r2) * S.prog; else if (S.kind === 'fall') off = r1 + r2;
+    const p1 = {x: X(B1.x) - off, y: Y(B1.y) - (S.kind === 'loop' ? 0 : r1)};
+    if (S.kind === 'loop') { p1.x += Math.sin(B1.th) * -r1; p1.y += -Math.cos(B1.th) * r1; }  // sit on the inside of the loop
+    if (S.kind === 'incline') { p1.x += M.sin * r1; p1.y += r1 - M.cos * r1; }
+    const p2 = {x: X(B2.x), y: Y(B2.y) - r2};
+    s += `<circle cx="${p2.x}" cy="${p2.y}" r="${r2}" fill="var(--cold)" stroke="#0b0a09"/>` + this.txt(p2.x, p2.y - r2 - 4, '2', 'var(--cold)', 'middle', 12);
+    s += `<circle cx="${p1.x}" cy="${p1.y}" r="${r1}" fill="var(--accent)" stroke="#0b0a09"/>` + this.txt(p1.x, p1.y - r1 - 4, '1', 'var(--accent)', 'middle', 12);
+    // velocity of body 1 (and of body 2 after the collision)
+    const vmax = Math.max(M.v0, 1e-9), A = 70;
+    const vArrow = (p, b, col) => this.arrow(p.x, p.y, p.x + b.vx / vmax * A, p.y - b.vy / vmax * A, col);
+    s += vArrow(p1, B1, 'var(--hot)');
+    if (S.hit) s += vArrow(p2, B2, 'var(--hot)');
+    // forces in the loop: weight and normal reaction
+    if (S.kind === 'loop') {
+      const v = Math.hypot(B1.vx, B1.vy), N = M.m1 * v * v / M.R + M.m1 * g * Math.cos(B1.th), W = M.m1 * g;
+      const sc = 60 / Math.max(W, M.m1 * M.v0 * M.v0 / M.R + W);
+      s += this.arrow(p1.x, p1.y, p1.x, p1.y + W * sc + 12, 'var(--bad)');
+      if (N > 1e-6) s += this.arrow(p1.x, p1.y, p1.x + (-Math.sin(B1.th)) * (N * sc + 12), p1.y - Math.cos(B1.th) * (N * sc + 12), 'var(--ok)');
+      s += this.txt(20, 24, `v = ${f(v, 1)} ${u.v} · N = ${f(Math.max(0, N), 1)} ${u.F} · W = ${f(W, 1)} ${u.F}`, 'var(--fg)', 'start', 14);
+    } else {
+      s += this.txt(20, 24, `v₁ = ${f(Math.hypot(B1.vx, B1.vy), 1)} ${u.v}` + (S.hit ? ` · v₂ = ${f(Math.hypot(B2.vx, B2.vy), 1)} ${u.v}` : ''), 'var(--fg)', 'start', 14);
+    }
+    // messages at the end
+    const end = S.t >= M.tEnd - 1e-9;
+    if (end && M.fail === 'back') s += this.txt(VW / 2, 52, L.back, 'var(--bad)', 'middle', 15);
+    if (end && M.fail === 'detach') s += this.txt(VW / 2, 52, `${L.detach} ${f(M.yd)} ${u.s}`, 'var(--bad)', 'middle', 15);
+    if (end && M.ok) s += this.txt(VW / 2, 52, `${L.ground}: t = ${f(M.t3)} s, x₂ = ${f(M.v2 * M.t3)} ${u.s}`, 'var(--accent)', 'middle', 15);
+    $('scene').innerHTML = s;
+  }
+
+  /* ---------- speed–time graph with the stages shaded ---------- */
+  drawGraph(M, S) {
+    const L = t(), u = this.u, X0 = 50, W = 450, top = 20, H = 230, end = M.tEnd || 1;
+    const sp = b => Math.hypot(b.vx, b.vy);
+    const N = 240, p1 = [], p2 = [];
+    for (let i = 0; i <= N; i++) { const q = M.at(end * i / N); p1.push(sp(q.b1)); p2.push(q.hit ? sp(q.b2) : null); }
+    const vmax = Math.max(1e-9, ...p1, ...p2.filter(v => v !== null)) * 1.1;
+    const Xt = tt => X0 + tt / end * W, Yv = v => top + H - v / vmax * H;
+    let g = '';
+    M.seg.forEach((sg, i) => {
+      g += `<rect x="${Xt(sg.t0)}" y="${top}" width="${Xt(sg.t0 + sg.dur) - Xt(sg.t0)}" height="${H}" fill="${i % 2 ? '#1b1813' : '#0d0c0a'}"/>`;
+      const lab = L.phases[sg.kind]; if (lab) g += `<text x="${Xt(sg.t0 + sg.dur / 2)}" y="${top + H - 6}" text-anchor="middle" font-size="11" fill="var(--muted)">${lab}</text>`;
+    });
+    g += `<line x1="${X0}" y1="${top}" x2="${X0}" y2="${top + H}" stroke="var(--muted)"/><line x1="${X0}" y1="${top + H}" x2="${X0 + W}" y2="${top + H}" stroke="var(--muted)"/>` +
+      `<text x="${X0 - 6}" y="${top + 10}" text-anchor="end" font-size="11" fill="var(--muted)">${f(vmax, 0)}</text><text x="${X0 - 6}" y="${top + H}" text-anchor="end" font-size="11" fill="var(--muted)">0</text>` +
+      `<text x="${X0 + 6}" y="${top - 6}" font-size="12" fill="var(--fg)">v (${u.v})</text>` +
+      `<text x="${X0 + W}" y="${top + H + 16}" text-anchor="end" font-size="11" fill="var(--muted)">${f(end, 2)} s</text>`;
+    g += `<polyline points="${p1.map((v, i) => Xt(end * i / N) + ',' + Yv(v)).join(' ')}" fill="none" stroke="var(--accent)" stroke-width="2.5"/>`;
+    const seg2 = p2.map((v, i) => v === null ? null : Xt(end * i / N) + ',' + Yv(v)).filter(Boolean);
+    if (seg2.length) g += `<polyline points="${seg2.join(' ')}" fill="none" stroke="var(--cold)" stroke-width="2.5"/>`;
+    const n1 = sp(S.b1);
+    g += `<line x1="${Xt(S.t)}" y1="${top}" x2="${Xt(S.t)}" y2="${top + H}" stroke="var(--fg)" stroke-dasharray="2 4"/><circle cx="${Xt(S.t)}" cy="${Yv(n1)}" r="5" fill="var(--accent)"/>`;
+    if (S.hit) g += `<circle cx="${Xt(S.t)}" cy="${Yv(sp(S.b2))}" r="5" fill="var(--cold)"/>`;
+    g += `<text x="${X0 + W}" y="${top + 14}" text-anchor="end" font-size="12" fill="var(--accent)">v₁</text>` +
+      (seg2.length ? `<text x="${X0 + W}" y="${top + 30}" text-anchor="end" font-size="12" fill="var(--cold)">v₂</text>` : '');
+    $('graph').innerHTML = g;
+  }
+
+  /* ---------- energy bars: PE + KE + lost = constant ---------- */
+  drawEnergy(M, S) {
+    const L = t(), u = this.u, g = M.g;
+    const PE = M.m1 * g * S.b1.y + M.m2 * g * S.b2.y;
+    const KE = 0.5 * M.m1 * (S.b1.vx ** 2 + S.b1.vy ** 2) + 0.5 * M.m2 * (S.b2.vx ** 2 + S.b2.vy ** 2);
+    const lost = S.hit ? M.KEb - M.KEa : 0;
+    const tot = M.m1 * g * (M.H + M.h) + M.m2 * g * M.H;
+    const items = [{l: L.pe, v: PE, c: 'var(--cold)'}, {l: L.ke, v: KE, c: 'var(--hot)'}, {l: L.lost, v: lost, c: 'var(--bad)'}, {l: L.tot, v: PE + KE + lost, c: 'var(--accent)'}];
+    const X0 = 190, W = 300;
+    $('energy').innerHTML = items.map((it, k) => {
+      const y = 16 + k * 62, w = Math.max(0, it.v) / Math.max(tot, 1e-9) * W;
+      return `<text x="${X0 - 10}" y="${y + 22}" text-anchor="end" font-size="13" fill="var(--fg)">${it.l}</text>` +
+        `<rect x="${X0}" y="${y}" width="${Math.max(1, w)}" height="34" fill="${it.c}" fill-opacity=".85"/>` +
+        `<text x="${X0 + Math.min(w, W - 90) + 8}" y="${y + 22}" font-size="13" fill="var(--fg)" style="paint-order:stroke" stroke="var(--panel)" stroke-width="4">${f(it.v, 1)} ${u.E}</text>`;
+    }).join('');
+  }
+
+  /* ---------- the four steps with the numbers of this scenario ---------- */
+  drawChain(M, S) {
+    const L = t(), u = this.u, g = M.g, el = page.lang === 'el';
+    const stage = {incline: 0, flat1: 1, loop: 1, fly: 1, flat2: 2, fall: 3}[S.kind];
+    const cells = [];
+    cells.push([L.s1,
+      `<p class="f">a = g·sinφ</p><p>a = ${g}×sin${f(M.phi, 0)}° = <b>${f(M.a1)} ${u.a}</b></p>` +
+      `<p class="f">L = ½·a·t² ⇒ t = √(2L/a)</p><p>t = √(2×${f(M.L)}/${f(M.a1)}) = <b>${f(M.t1)} s</b></p>` +
+      `<p class="f">h = L·sinφ, v₀ = √(2·g·h)</p><p>h = ${f(M.h)} ${u.s}, v₀ = <b>${f(M.v0)} ${u.v}</b></p>`]);
+    let c2 = `<p class="f">v_top² = v₀² − 4·g·R</p><p>v_top² = ${f(M.v0 * M.v0, 1)} − 4×${g}×${f(M.R)} = <b>${f(M.vt2, 1)}</b></p>` +
+      `<p class="f">${L.hmin}</p><p>h_min = <b>${f(M.hmin)} ${u.s}</b> ${M.ok ? '≤' : '>'} h = ${f(M.h)} ${u.s}</p>`;
+    if (M.ok) {
+      const vt = Math.sqrt(M.vt2), Nt = M.m1 * M.vt2 / M.R - M.m1 * g, Nb = M.m1 * M.v0 * M.v0 / M.R + M.m1 * g;
+      c2 += `<p>v_top = <b>${f(vt)} ${u.v}</b> ≥ √(gR) = ${f(Math.sqrt(g * M.R))}</p>` +
+        `<p class="f">N_${L.top} = m·v²/R − m·g</p><p>N_${L.top} = <b>${f(Nt, 1)} ${u.F}</b></p>` +
+        `<p class="f">N_${L.bottom} = m·v₀²/R + m·g</p><p>N_${L.bottom} = <b>${f(Nb, 1)} ${u.F}</b></p><p class="k">✔ ${L.passes}</p>`;
+    } else c2 += `<p class="w">✖ ${M.fail === 'back' ? L.back : L.noTop + ' ' + L.detach + ' ' + f(M.yd) + ' ' + u.s + '.'}</p>`;
+    cells.push([L.s2, c2]);
+    if (M.ok) {
+      const p = M.m1 * M.v0;
+      let c3 = `<p class="f">p = m₁·v₀</p><p>p = ${f(M.m1)}×${f(M.v0)} = <b>${f(p)}</b></p>`;
+      if (M.type === 'plastic') c3 += `<p class="f">m₁·v₀ = (m₁ + m₂)·V</p><p>V = ${f(p)}/${f(M.m1 + M.m2)} = <b>${f(M.v2)} ${u.v}</b></p>`;
+      else {
+        c3 += `<p class="f">v₁' = (m₁−m₂)/(m₁+m₂)·v₀</p><p>v₁' = <b>${f(M.v1)} ${u.v}</b></p><p class="f">v₂' = 2m₁/(m₁+m₂)·v₀</p><p>v₂' = <b>${f(M.v2)} ${u.v}</b></p>`;
+        c3 += `<p class="f">${Math.abs(M.v1) < 1e-9 ? L.b1stop : M.v1 < 0 ? L.b1back : L.b1fwd}</p>`;
+      }
+      const loss = M.KEb - M.KEa;
+      c3 += `<p class="f">${L.lossT}</p><p>${f(M.KEb, 1)} − ${f(M.KEa, 1)} = <b>${f(loss, 1)} ${u.E}</b> (${f(loss / M.KEb * 100, 0)}%)</p>`;
+      cells.push([L.s3, c3]);
+      const vy = g * M.t3, V = M.v2, ang = Math.atan2(vy, V) * 180 / Math.PI;
+      let c4 = `<p class="f">H = ½·g·t² ⇒ t = √(2H/g)</p><p>t = √(2×${f(M.H)}/${g}) = <b>${f(M.t3)} s</b></p>` +
+        `<p class="f">x = v·t</p><p>x₂ = ${f(V)}×${f(M.t3)} = <b>${f(V * M.t3)} ${u.s}</b></p>` +
+        `<p class="f">v_y = g·t, v = √(vₓ² + v_y²)</p><p>v = √(${f(V * V, 1)} + ${f(vy * vy, 1)}) = <b>${f(Math.hypot(V, vy))} ${u.v}</b></p>` +
+        `<p>${L.angle}: <b>${f(ang, 1)}°</b></p>`;
+      if (M.type === 'elastic' && M.v1 > 1e-9) c4 += `<p class="f">x₁ = ${f(M.v1)}×${f(M.t3)} = ${f(M.v1 * M.t3)} ${u.s}. ${L.sameT}</p>`;
+      cells.push([L.s4, c4]);
+    } else { cells.push([L.s3, `<p class="w">${L.notReached}</p>`]); cells.push([L.s4, `<p class="w">${L.notReached}</p>`]); }
+    $('chain').innerHTML = cells.map((c, i) => `<div class="step${i === stage ? ' on' : ''}${!M.ok && i > 1 ? ' off' : ''}"><h3>${c[0]}</h3>${c[1]}</div>`).join('');
+  }
+}
+
+/* ============================ "Solve it" questions ============================ */
+// Every question has easy numbers (g = 10 m/s² or 32 ft/s²) and can be loaded into the simulation.
+const Q = (el, en) => ({el, en});
+const fl = (x, d, l) => page.fmtIn(x, d, l);
+const V = (x, u, d = 2) => Q(fl(x, d, 'el') + ' ' + u, fl(x, d, 'en') + ' ' + u);
+const N2 = (x, d = 2) => Q(fl(x, d, 'el'), fl(x, d, 'en'));       // a bare number in both languages
+const base = {m1: 1, m2: 1, phi: 30, L: 10, R: 1.6, H: 1.25, type: 'plastic'};
+const QUIZ = [
+  // incline: time and speed at the foot (a = g·sin30° = 5 m/s²)
+  () => {
+    const tt = pick([1, 2, 3, 4]), Lx = 2.5 * tt * tt, v = 5 * tt;
+    if (Math.random() < .5) return {
+      q: Q(`Σώμα αφήνεται στην κορυφή λείου κεκλιμένου επιπέδου γωνίας 30° και μήκους ${fl(Lx, 2, 'el')} m (g = 10 m/s²). Σε πόσο χρόνο φτάνει στη βάση;`,
+           `A body is released at the top of a smooth 30° incline ${fl(Lx, 2, 'en')} m long (g = 10 m/s²). How long does it take to reach the bottom?`),
+      o: [V(tt, 's'), V(Math.sqrt(2 * Lx / 10), 's'), V(2 * tt, 's')], a: 0,
+      x: Q(`a = g·ημ30° = 5 m/s². L = ½·a·t² ⇒ t = √(2×${fl(Lx, 2, 'el')}/5) = ${tt} s.`, `a = g·sin30° = 5 m/s². L = ½·a·t² so t = √(2×${fl(Lx, 2, 'en')}/5) = ${tt} s.`),
+      apply: () => load('SI', {...base, L: Lx, R: Math.min(1.6, Lx / 2 / 2.5)}, 'incline')
+    };
+    return {
+      q: Q(`Σώμα αφήνεται στην κορυφή λείου κεκλιμένου επιπέδου γωνίας 30° και μήκους ${fl(Lx, 2, 'el')} m (g = 10 m/s²). Η ταχύτητά του στη βάση είναι:`,
+           `A body is released at the top of a smooth 30° incline ${fl(Lx, 2, 'en')} m long (g = 10 m/s²). Its speed at the bottom is:`),
+      o: [V(v, 'm/s'), V(Math.sqrt(2 * 10 * Lx), 'm/s'), V(10 * tt, 'm/s')], a: 0,
+      x: Q(`h = L·ημ30° = ${fl(Lx / 2, 2, 'el')} m, v = √(2·g·h) = ${v} m/s. Σε λείο επίπεδο μετράει μόνο το ύψος, όχι το μήκος.`,
+           `h = L·sin30° = ${fl(Lx / 2, 2, 'en')} m, v = √(2·g·h) = ${v} m/s. On a smooth incline only the height matters, not the length.`),
+      apply: () => load('SI', {...base, L: Lx, R: Math.min(1.6, Lx / 2 / 2.5)}, 'incline')
+    };
+  },
+  // speed from height, imperial (v = √(2gh) with g = 32 ft/s²)
+  () => {
+    const v = pick([32, 64, 96]), h = v * v / 64;
+    return {
+      q: Q(`Σώμα κατεβαίνει λείο κεκλιμένο επίπεδο από ύψος ${h} ft (g = 32 ft/s²). Η ταχύτητά του στη βάση είναι:`,
+           `A body slides down a smooth incline from a height of ${h} ft (g = 32 ft/s²). Its speed at the bottom is:`),
+      o: [V(v, 'ft/s'), V(64 * h, 'ft/s'), V(Math.sqrt(32 * h), 'ft/s')], a: 0,
+      x: Q(`m·g·h = ½·m·v² ⇒ v = √(2·g·h) = √(64×${h}) = ${v} ft/s.`, `m·g·h = ½·m·v² so v = √(2·g·h) = √(64×${h}) = ${v} ft/s.`),
+      apply: () => load('imperial', {m1: 1, m2: 1, phi: 30, L: 2 * h, R: Math.min(8, Math.round(h / 3)), H: 4, type: 'plastic'}, 'incline')
+    };
+  },
+  // minimum release height for the loop
+  () => {
+    const R = pick([0.8, 1.2, 1.6, 2, 4]);
+    return {
+      q: Q(`Από ποιο ελάχιστο ύψος πρέπει να αφεθεί ένα σώμα σε λεία ράμπα ώστε να ολοκληρώσει ανακύκλωση ακτίνας ${fl(R, 2, 'el')} m;`,
+           `From what minimum height must a body be released on a smooth ramp to complete a loop of radius ${fl(R, 2, 'en')} m?`),
+      o: [V(2.5 * R, 'm'), V(2 * R, 'm'), V(R, 'm')], a: 0,
+      x: Q(`Στο ανώτατο σημείο πρέπει v² ≥ g·R. Ενέργεια: m·g·h = m·g·2R + ½·m·g·R ⇒ h_min = 2,5·R = ${fl(2.5 * R, 2, 'el')} m. Το 2R δεν αρκεί: το σώμα θα έφτανε εκεί με μηδενική ταχύτητα.`,
+           `At the top v² ≥ g·R is needed. Energy: m·g·h = m·g·2R + ½·m·g·R so h_min = 2.5·R = ${fl(2.5 * R, 2, 'en')} m. 2R is not enough: the body would arrive there with zero speed.`),
+      apply: () => load('SI', {...base, L: 2 * 2.5 * R, R}, 'loop')
+    };
+  },
+  // speed at the top of the loop
+  () => {
+    const [v0, R, vt] = pick([[10, 1.6, 6], [10, 0.9, 8], [20, 3.6, 16], [20, 7.5, 10]]);
+    return {
+      q: Q(`Σώμα μπαίνει σε λεία ανακύκλωση ακτίνας ${fl(R, 2, 'el')} m με ταχύτητα ${v0} m/s (g = 10 m/s²). Η ταχύτητά του στο ανώτατο σημείο είναι:`,
+           `A body enters a smooth loop of radius ${fl(R, 2, 'en')} m at ${v0} m/s (g = 10 m/s²). Its speed at the top is:`),
+      o: [V(vt, 'm/s'), V(Math.sqrt(v0 * v0 - 20 * R), 'm/s'), V(Math.sqrt(10 * R), 'm/s')], a: 0,
+      x: Q(`Το ανώτατο σημείο είναι σε ύψος 2R: v² = v₀² − 4·g·R = ${v0 * v0} − ${fl(40 * R, 2, 'el')} = ${vt * vt} ⇒ v = ${vt} m/s.`,
+           `The top is at a height of 2R: v² = v₀² − 4·g·R = ${v0 * v0} − ${fl(40 * R, 2, 'en')} = ${vt * vt} so v = ${vt} m/s.`),
+      apply: () => load('SI', {...base, L: v0 * v0 / 10, R}, 'loop', 0.5)
+    };
+  },
+  // normal force at the top or at the bottom
+  () => {
+    const m = pick([1, 2]);
+    if (Math.random() < .5) {
+      const [v0, R, vt] = pick([[10, 1.6, 6], [6, 0.5, 4], [11, 1, 9]]), N = m * (vt * vt / R - 10);
+      return {
+        q: Q(`Σώμα μάζας ${m} kg περνά από το ανώτατο σημείο ανακύκλωσης ακτίνας ${fl(R, 2, 'el')} m με ${vt} m/s (g = 10 m/s²). Η δύναμη που του ασκεί η τροχιά είναι:`,
+             `A body of mass ${m} kg passes the top of a loop of radius ${fl(R, 2, 'en')} m at ${vt} m/s (g = 10 m/s²). The force from the track on it is:`),
+        o: [V(N, 'N'), V(m * vt * vt / R, 'N'), V(m * (vt * vt / R + 10), 'N')], a: 0,
+        x: Q(`Στην κορυφή και το βάρος και η N δείχνουν προς το κέντρο: N + m·g = m·v²/R ⇒ N = ${fl(m * vt * vt / R, 2, 'el')} − ${10 * m} = ${fl(N, 2, 'el')} N.`,
+             `At the top both the weight and N point to the centre: N + m·g = m·v²/R so N = ${fl(m * vt * vt / R, 2, 'en')} − ${10 * m} = ${fl(N, 2, 'en')} N.`),
+        apply: () => load('SI', {...base, m1: m, L: v0 * v0 / 10, R}, 'loop', 0.5)
+      };
+    }
+    const [v0, R] = pick([[10, 2], [10, 2.5], [20, 4]]), N = m * (v0 * v0 / R + 10);
+    return {
+      q: Q(`Σώμα μάζας ${m} kg περνά από το κατώτατο σημείο ανακύκλωσης ακτίνας ${fl(R, 2, 'el')} m με ${v0} m/s (g = 10 m/s²). Η δύναμη που του ασκεί η τροχιά είναι:`,
+           `A body of mass ${m} kg passes the bottom of a loop of radius ${fl(R, 2, 'en')} m at ${v0} m/s (g = 10 m/s²). The force from the track on it is:`),
+      o: [V(N, 'N'), V(m * v0 * v0 / R, 'N'), V(m * (v0 * v0 / R - 10), 'N')], a: 0,
+      x: Q(`Στο κάτω σημείο η N δείχνει προς το κέντρο και το βάρος αντίθετα: N − m·g = m·v²/R ⇒ N = ${fl(m * v0 * v0 / R, 2, 'el')} + ${10 * m} = ${fl(N, 2, 'el')} N.`,
+           `At the bottom N points to the centre and the weight away from it: N − m·g = m·v²/R so N = ${fl(m * v0 * v0 / R, 2, 'en')} + ${10 * m} = ${fl(N, 2, 'en')} N.`),
+      apply: () => load('SI', {...base, m1: m, L: v0 * v0 / 10, R}, 'flat1')
+    };
+  },
+  // inelastic collision: common speed
+  () => {
+    const [m1, v, m2] = pick([[1, 10, 1], [1, 10, 4], [2, 9, 1], [3, 8, 1], [2, 6, 2]]), Vc = m1 * v / (m1 + m2);
+    return {
+      q: Q(`Σώμα μάζας ${m1} kg με ταχύτητα ${v} m/s συγκρούεται πλαστικά με ακίνητο σώμα μάζας ${m2} kg. Η κοινή ταχύτητα μετά την κρούση είναι:`,
+           `A ${m1} kg body moving at ${v} m/s collides with a stationary ${m2} kg body and they stick together. Their common speed afterwards is:`),
+      o: [V(Vc, 'm/s'), V(v, 'm/s'), V(Vc / 2, 'm/s')], a: 0,
+      x: Q(`Διατήρηση ορμής: ${m1}×${v} = (${m1} + ${m2})·V ⇒ V = ${fl(Vc, 2, 'el')} m/s.`, `Conservation of momentum: ${m1}×${v} = (${m1} + ${m2})·V so V = ${fl(Vc, 2, 'en')} m/s.`),
+      apply: () => load('SI', {...base, m1, m2, L: v * v / 10, R: Math.min(1.6, v * v / 20 / 2.5)}, 'flat2')
+    };
+  },
+  // kinetic energy lost in an inelastic collision
+  () => {
+    const [m1, m2] = pick([[1, 1], [1, 4], [1, 3], [3, 1], [2, 2]]), pc = m2 / (m1 + m2) * 100;
+    return {
+      q: Q(`Σώμα μάζας ${m1} kg συγκρούεται πλαστικά με ακίνητο σώμα μάζας ${m2} kg. Τι ποσοστό της κινητικής ενέργειας χάνεται;`,
+           `A ${m1} kg body collides inelastically (they stick) with a stationary ${m2} kg body. What fraction of the kinetic energy is lost?`),
+      o: [Q(fl(pc, 1, 'el') + '%', fl(pc, 1, 'en') + '%'), Q('0%', '0%'), Q('100%', '100%')], a: 0,
+      x: Q(`V = m₁v/(m₁+m₂). Η KE μετά είναι m₁/(m₁+m₂) της αρχικής, άρα χάνεται m₂/(m₁+m₂) = ${fl(pc, 1, 'el')}%. Η ορμή διατηρείται, η κινητική ενέργεια όχι.`,
+           `V = m₁v/(m₁+m₂). The KE afterwards is m₁/(m₁+m₂) of the initial, so m₂/(m₁+m₂) = ${fl(pc, 1, 'en')}% is lost. Momentum is conserved, kinetic energy is not.`),
+      apply: () => load('SI', {...base, m1, m2}, 'fall', 0.01)
+    };
+  },
+  // horizontal projectile from the table
+  () => {
+    const [H, tt] = pick([[1.25, 0.5], [5, 1], [0.45, 0.3], [0.8, 0.4], [20, 2]]), v = pick([2, 4, 5, 10]);
+    if (Math.random() < .5) return {
+      q: Q(`Σώμα φεύγει οριζόντια από την άκρη τραπεζιού ύψους ${fl(H, 2, 'el')} m με ταχύτητα ${v} m/s (g = 10 m/s²). Σε πόσο χρόνο φτάνει στο έδαφος;`,
+           `A body leaves the edge of a table ${fl(H, 2, 'en')} m high horizontally at ${v} m/s (g = 10 m/s²). How long does it take to reach the floor?`),
+      o: [V(tt, 's'), V(2 * tt, 's'), V(Math.sqrt(H / 10), 's')], a: 0,
+      x: Q(`Κατακόρυφα είναι ελεύθερη πτώση: H = ½·g·t² ⇒ t = √(2×${fl(H, 2, 'el')}/10) = ${fl(tt, 2, 'el')} s. Η οριζόντια ταχύτητα δεν επηρεάζει τον χρόνο.`,
+           `Vertically it is a free fall: H = ½·g·t² so t = √(2×${fl(H, 2, 'en')}/10) = ${fl(tt, 2, 'en')} s. The horizontal speed does not change the time.`),
+      apply: () => load('SI', {...base, H, m2: 1, m1: 1, L: 4 * v * v / 10, R: Math.min(1.6, 4 * v * v / 20 / 2.5)}, 'fall')
+    };
+    return {
+      q: Q(`Σώμα φεύγει οριζόντια από την άκρη τραπεζιού ύψους ${fl(H, 2, 'el')} m με ταχύτητα ${v} m/s (g = 10 m/s²). Σε ποια οριζόντια απόσταση από το τραπέζι πέφτει;`,
+           `A body leaves the edge of a table ${fl(H, 2, 'en')} m high horizontally at ${v} m/s (g = 10 m/s²). How far from the table does it land?`),
+      o: [V(v * tt, 'm'), V(v * H, 'm'), V(v * tt / 2, 'm')], a: 0,
+      x: Q(`t = √(2H/g) = ${fl(tt, 2, 'el')} s, x = v·t = ${v}×${fl(tt, 2, 'el')} = ${fl(v * tt, 2, 'el')} m.`, `t = √(2H/g) = ${fl(tt, 2, 'en')} s, x = v·t = ${v}×${fl(tt, 2, 'en')} = ${fl(v * tt, 2, 'en')} m.`),
+      apply: () => load('SI', {...base, H, L: 4 * v * v / 10, R: Math.min(1.6, 4 * v * v / 20 / 2.5)}, 'fall')
+    };
+  },
+  // projectile, imperial
+  () => {
+    const [H, tt] = pick([[4, 0.5], [16, 1], [64, 2]]), v = pick([10, 20, 40]);
+    return {
+      q: Q(`Σώμα φεύγει οριζόντια από ύψος ${H} ft με ${v} ft/s (g = 32 ft/s²). Σε ποια οριζόντια απόσταση πέφτει;`,
+           `A body leaves a height of ${H} ft horizontally at ${v} ft/s (g = 32 ft/s²). How far does it travel horizontally?`),
+      o: [V(v * tt, 'ft'), V(v * tt / 2, 'ft'), V(v * tt * 2, 'ft')], a: 0,
+      x: Q(`t = √(2H/g) = √(${2 * H}/32) = ${fl(tt, 2, 'el')} s, x = ${v}×${fl(tt, 2, 'el')} = ${fl(v * tt, 2, 'el')} ft.`, `t = √(2H/g) = √(${2 * H}/32) = ${fl(tt, 2, 'en')} s, x = ${v}×${fl(tt, 2, 'en')} = ${fl(v * tt, 2, 'en')} ft.`)
+    };
+  },
+  // theory
+  () => pick([
+    {q: Q('Δύο σώματα φεύγουν οριζόντια από την ίδια άκρη τραπεζιού, το ένα με διπλάσια ταχύτητα. Ποιο φτάνει πρώτο στο έδαφος;', 'Two bodies leave the same table edge horizontally, one at twice the speed of the other. Which reaches the floor first?'),
+     o: [Q('Φτάνουν ταυτόχρονα', 'They arrive at the same time'), Q('Το γρηγορότερο', 'The faster one'), Q('Το πιο αργό', 'The slower one')], a: 0,
+     x: Q('Ο χρόνος πτώσης εξαρτάται μόνο από το ύψος (H = ½·g·t²). Το γρηγορότερο απλώς πέφτει πιο μακριά.', 'The fall time depends only on the height (H = ½·g·t²). The faster one simply lands farther away.'),
+     apply: () => load('SI', {...PRESETS.SI.heavy}, 'fall', 0.6)},
+    {q: Q('Σε μια πλαστική κρούση διατηρείται:', 'In an inelastic (sticking) collision, what is conserved?'),
+     o: [Q('η ορμή', 'momentum'), Q('η κινητική ενέργεια', 'kinetic energy'), Q('και η ορμή και η κινητική ενέργεια', 'both momentum and kinetic energy')], a: 0,
+     x: Q('Η ορμή διατηρείται σε κάθε κρούση. Η κινητική ενέργεια διατηρείται μόνο στην ελαστική.', 'Momentum is conserved in every collision. Kinetic energy is conserved only in an elastic one.'),
+     apply: () => load('SI', {...PRESETS.SI.ex}, 'fall', 0.01)},
+    {q: Q('Στην ελαστική κρούση ίσων μαζών, με το δεύτερο σώμα ακίνητο:', 'In an elastic collision of equal masses, with the second body at rest:'),
+     o: [Q('το πρώτο σταματά και το δεύτερο φεύγει με την ταχύτητα του πρώτου', 'the first stops and the second moves off with the speed of the first'), Q('κινούνται μαζί με τη μισή ταχύτητα', 'they move together at half the speed'), Q('το πρώτο γυρίζει πίσω με την ίδια ταχύτητα', 'the first bounces back at the same speed')], a: 0,
+     x: Q('v₁\' = (m₁−m₂)/(m₁+m₂)·v = 0 και v₂\' = 2m₁/(m₁+m₂)·v = v: ανταλλάσσουν ταχύτητες.', 'v₁\' = (m₁−m₂)/(m₁+m₂)·v = 0 and v₂\' = 2m₁/(m₁+m₂)·v = v: they exchange speeds.'),
+     apply: () => load('SI', {...PRESETS.SI.el}, 'fall', 0.5)},
+    {q: Q('Ένα σώμα περνά από την κορυφή μιας ανακύκλωσης με την ελάχιστη δυνατή ταχύτητα. Η κεντρομόλος δύναμη εκεί είναι:', 'A body passes the top of a loop at the lowest possible speed. The centripetal force there is provided by:'),
+     o: [Q('μόνο το βάρος του', 'its weight alone'), Q('μόνο η κάθετη δύναμη της τροχιάς', 'the normal force of the track alone'), Q('μηδέν', 'nothing, it is zero')], a: 0,
+     x: Q('Με την ελάχιστη ταχύτητα η N μηδενίζεται: m·g = m·v²/R ⇒ v = √(g·R).', 'At the minimum speed N becomes zero: m·g = m·v²/R so v = √(g·R).'),
+     apply: () => load('SI', {...base, L: 8, R: 1.6}, 'loop', 0.5)}
+  ])
+];
+
+// Load a scenario and move the time to a stage: at its end, or at a fraction of it.
+function load(units, vals, kind, frac = 1) {
+  const P = app; P.units = units; P.stop(); P.P = {...vals}; P.preset = null;
+  P.renderAll();
+  const M = P.model(), sg = M.seg.find(s => s.kind === kind) || M.seg[M.seg.length - 1];
+  P.time = sg.t0 + sg.dur * frac; P.draw();
+}
+
+const app = new RampPage();
+</script>
+<script src="assets/landscape.js"></script>
+</body>
+</html>
