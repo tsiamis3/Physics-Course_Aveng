@@ -118,6 +118,7 @@ const CONFIG = {
       {ref: '2.5',    name: 'Wave motion and sound',                 n: 4, topics: ['waves']}
     ]
   },
+  TEACHER: 'Maevius',      // only this logged-in account sees the answers of the custom mock exams
   BOARD_LESSON: 'm2-test'  // id used on the shared scoreboard (timed tests of 10 to 50 questions only)
 };
 
@@ -149,9 +150,27 @@ class TestApp {
     // Custom mock exams (exams.js): fixed questions in a fixed order, English only. Same shape as the bank questions.
     this.EX = (window.M2_EXAMS || []).map(e => ({...e, questions: e.questions.map((q, i) => ({
       id: 'cx.' + e.id + '.' + (i + 1), topic: q.topic, d: 2, units: '', tpl: 'custom', sec: q.sec,
-      q: {el: q.q, en: q.q}, o: q.o.map(t => ({el: t, en: t})), a: q.a, tags: [], x: {el: q.x, en: q.x}}))}));
+      q: {el: q.q, en: q.q}, o: q.o.map(t => ({el: t, en: t})), tags: [], ...TestApp.unhide(q.k)}))}));
     this.R = null; this.tick = null;
+    this.teacher = false;   // set by checkTeacher() once the server confirms the login
   }
+
+  // exams.js keeps [answer, explanation] as base64 of the reversed UTF-8 JSON, so they are not in plain sight.
+  static unhide(k) {
+    const b = Uint8Array.from(atob(k), c => c.charCodeAt(0)).reverse(), [a, x] = JSON.parse(new TextDecoder().decode(b));
+    return {a, x: {el: x, en: x}};
+  }
+
+  // The teacher account sees the answers of the custom exams. The token is checked by the server, not only in this browser.
+  async checkTeacher() {
+    const t = (this.cfg.TEACHER || '').toLowerCase();
+    if (!t || !this.board.loggedIn || this.board.nick.toLowerCase() !== t) return;
+    const r = await this.board.me();
+    this.teacher = r.ok && String(r.data.nick || '').toLowerCase() === t;
+    if (this.teacher && this.F.exam === 'custom' && !this.R) { this.side(); this.idle(); }
+  }
+  // Answers and explanations are shown for everything except the custom exams, where only the teacher sees them.
+  showKey() { return this.F.exam !== 'custom' || this.teacher; }
 
   tname(t) { const i = this.meta.topics[t]; return i ? i.en : t; }
   txt(o) { const l = this.F.lang; if (o.el === o.en) return esc(o.en); return l === 'el' ? esc(o.el) : l === 'en' ? esc(o.en) : esc(o.en) + '<span class="en">' + esc(o.el) + '</span>'; }
@@ -178,6 +197,7 @@ class TestApp {
     this.bind();
     this.side(); this.idle();
     if (go && this.pool(false).length) this.start();
+    this.checkTeacher();
   }
 
   // Links from the home page: test.html#topic=statics,fluids&n=20&mode=test&mins=40&go=1
@@ -307,7 +327,10 @@ class TestApp {
         `<p>${e.questions.length} questions in ${e.minutes} minutes, three options each, explanations at the end. Pass mark ${Math.round(this.cfg.PASS * 100)} %.</p>` +
         '<div class="blk"><h2>Questions per syllabus section</h2>' +
         Object.keys(per).map(k => `<div class="tb"><span>${esc(k)}</span><span></span><span>${per[k]}</span></div>`).join('') + '</div>' +
-        '<div class="row"><button class="btn go" id="go2" type="button">Start</button><button class="btn alt" type="button" data-cx="">All custom exams</button></div>';
+        '<div class="row"><button class="btn go" id="go2" type="button">Start</button>' +
+        (this.teacher ? '<button class="btn alt" id="key" type="button">Answer key</button>' : '') +
+        '<button class="btn alt" type="button" data-cx="">All custom exams</button></div>' +
+        `<p class="note">${this.teacher ? 'You are logged in as the teacher: you see the answers. Students see only their score per syllabus section.' : 'At the end you see your score per syllabus section; your teacher goes through the answers in class.'}</p><div id="rev"></div>`;
       return;
     }
     if (F.exam) {
@@ -360,6 +383,7 @@ class TestApp {
       const b = e.target.closest('button'); if (!b) return;
       if (b.id === 'go2') this.start();
       else if (b.dataset.cx !== undefined) { this.setCustom(b.dataset.cx); this.side(); this.idle(); }
+      else if (b.id === 'key' && this.teacher) this.answerKey();
       else if (b.id === 'reset') { this.st.reset(); this.side(); this.idle(); }
     };
   }
@@ -514,8 +538,22 @@ class TestApp {
     });
   }
 
+  // Teacher only: every question of the custom exam with the correct answer and the working.
+  answerKey() {
+    const e = this.cur(); if (!e || !this.teacher) return;
+    $('rev').innerHTML = '<div class="blk"><h2>Answer key</h2></div>' + e.questions.map((q, i) =>
+      `<article class="rev"><div class="mk ok">${i + 1} · ${esc(q.sec)} · ${'ABC'[q.a]}</div><p class="q">${this.txt(q.q)}</p>` +
+      q.o.map((o, k) => `<div class="o"><b>${'ABC'[k]})</b> ${this.txt(o)}${k === q.a ? ' <span class="mk ok">✓</span>' : ''}</div>`).join('') +
+      `<div class="expl"><p>${this.txt(q.x)}</p></div></article>`).join('');
+  }
+
   review() {
     const R = this.R; $('wo').setAttribute('aria-pressed', R.onlyWrong);
+    if (!this.showKey()) {          // custom exam, student: score and sections only. Right/wrong per question would give the key away after two retakes.
+      $('wo').hidden = true;
+      $('rev').innerHTML = '<p class="note">The answers of this exam are gone through in class.</p>';
+      return;
+    }
     $('rev').innerHTML = R.qs.map((q, i) => {
       const a = R.ans[i], g = a === q.a; if (R.onlyWrong && g) return '';
       const m = !g && a !== undefined && q.tags[a] && this.mist(q.tags[a]);
