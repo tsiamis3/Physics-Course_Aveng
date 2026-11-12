@@ -60,6 +60,7 @@ input{font:inherit;padding:8px;border:1px solid var(--line);border-radius:4px;ba
 const CONFIG = {
   LINKS: [
     {label: 'Test builder', href: 'test.html'},
+    {label: 'Custom mock exams', href: 'test.html#custom'},
     {label: 'Formula sheet', href: 'formula.html'},
     {label: 'Unit conversions', href: 'units.html'},
     {label: 'My profile', href: 'profile.html'},
@@ -98,6 +99,7 @@ class HomePage {
       `<p>${m.count} bilingual (EN + EL) exam-style questions. Choose chapters, units and difficulty, then practise with instant explanations or take a timed test.</p>` +
       `<div class="cta"><a class="btn go" href="${esc(test({n: 20, mode: 'practice'}))}">Practice, 20 questions</a>` +
       `<a class="btn" href="${esc(test({exam: 'b1'}))}">Mock exam B1, 52 in 65 min</a>` +
+      '<a class="btn" href="test.html#custom">Custom mock exams</a>' +
       '<a class="btn" href="test.html">Choose filters</a></div>' +
       '<h3>Practice one chapter</h3>' +
       `<div class="chips">${Object.keys(m.topics).map(t => `<a class="chip" href="${esc(test({topic: t, n: 15, mode: 'practice'}))}">${esc(m.topics[t].en)}</a>`).join('')}</div>`;

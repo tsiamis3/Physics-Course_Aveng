@@ -86,12 +86,14 @@ input[type=number]{width:100%;padding:8px;border:1px solid var(--line);border-ra
   <section id="stage" aria-live="polite"></section>
 </main>
 <script src="m2bank.js"></script>
+<script src="exams.js"></script>
 <script src="scoreboard.js"></script>
 <script>
 // ---- Configuration: edit the header links here ----
 const CONFIG = {
   LINKS: [
     {label: 'Home', href: 'index.html'},
+    {label: 'Custom mock exams', href: 'test.html#custom'},
     {label: 'Unit conversions', href: 'units.html'},
     {label: 'Formula sheet', href: 'formula.html'}
   ],
@@ -143,7 +145,11 @@ class TestApp {
     this.cfg = cfg; this.board = board; this.Q = bank.questions; this.MISC = bank.misc; this.meta = bank.meta;
     this.topics = Object.keys(bank.meta.topics);
     this.st = new Store();
-    this.F = {topics: new Set(this.topics), units: 'both', d: new Set([1, 2, 3]), n: 20, mode: 'practice', mins: 25, lang: 'both', only: 'all', tpl: null, exam: null};
+    this.F = {topics: new Set(this.topics), units: 'both', d: new Set([1, 2, 3]), n: 20, mode: 'practice', mins: 25, lang: 'both', only: 'all', tpl: null, exam: null, custom: null};
+    // Custom mock exams (exams.js): fixed questions in a fixed order, English only. Same shape as the bank questions.
+    this.EX = (window.M2_EXAMS || []).map(e => ({...e, questions: e.questions.map((q, i) => ({
+      id: 'cx.' + e.id + '.' + (i + 1), topic: q.topic, d: 2, units: '', tpl: 'custom', sec: q.sec,
+      q: {el: q.q, en: q.q}, o: q.o.map(t => ({el: t, en: t})), a: q.a, tags: [], x: {el: q.x, en: q.x}}))}));
     this.R = null; this.tick = null;
   }
 
@@ -188,6 +194,7 @@ class TestApp {
     if (['all', 'new', 'wrong'].includes(p.get('only'))) F.only = p.get('only');
     if (p.get('tpl')) { const t = p.get('tpl').split(',').map(x => x.trim()).filter(Boolean); if (t.length) F.tpl = t; }
     if (p.get('exam') === 'b1') this.setExam(true);
+    if (p.has('custom')) this.setCustom(p.get('custom'));
     return p.get('go') === '1';
   }
 
@@ -197,6 +204,14 @@ class TestApp {
     F.exam = on ? 'b1' : null;
     if (on) { F.mode = 'test'; F.mins = E.minutes; F.n = E.sections.reduce((s, x) => s + x.n, 0); }
   }
+
+  // Custom mock exam: id of one exam, or empty for the list of all of them.
+  setCustom(id) {
+    const F = this.F, e = this.EX.find(x => x.id === id);
+    F.exam = 'custom'; F.custom = e ? e.id : null; F.mode = 'test'; F.tpl = null;
+    if (e) { F.mins = e.minutes; F.n = e.questions.length; }
+  }
+  cur() { return this.EX.find(x => x.id === this.F.custom); }
 
   isTheory(q) { return /theory/.test(q.tpl); }
 
@@ -240,6 +255,14 @@ class TestApp {
   // Left column: all filters.
   side() {
     const F = this.F, cnt = {};
+    if (F.exam === 'custom') {
+      const e = this.cur();
+      $('side').innerHTML = '<h2>Custom mock exams</h2><p class="note">Fixed exams made by your teacher, in the official B1 mix.</p><div class="chips">' +
+        this.EX.map(x => `<button class="chip" type="button" data-cx="${esc(x.id)}" aria-pressed="${x.id === F.custom}">${esc(x.title)}</button>`).join('') + '</div>' +
+        (e ? '<div class="row" style="margin-top:12px"><button class="btn go grow" id="go" type="button">Start</button><button class="btn alt" id="link" type="button">Copy link</button></div>' : '') +
+        '<div class="row" style="margin-top:8px"><button class="chip" id="noexam" type="button">Leave: build my own test</button></div><p class="note" id="msg"></p>';
+      return;
+    }
     if (F.exam) {                                        // mock exam: fixed content, only the language is free
       $('side').innerHTML = '<h2>Mock exam B1</h2><p class="note">EASA Part-66 Module 2, as in the official table: ' +
         `${F.n} questions, ${F.mins} minutes, pass mark ${Math.round(this.cfg.PASS * 100)} %.</p>` +
@@ -271,6 +294,22 @@ class TestApp {
     clearInterval(this.tick); this.R = null; $('main').className = '';
     const F = this.F, avail = this.pool(false).length, seen = Object.keys(this.st.d.q).length;
     const worst = Object.keys(this.st.d.t).sort((a, b) => this.st.d.t[b] - this.st.d.t[a]).slice(0, 3);
+    if (F.exam === 'custom') {
+      const e = this.cur();
+      if (!e) {
+        $('stage').innerHTML = '<h2>Custom mock exams</h2><p>Each exam has fixed questions, so the whole class gets the same paper and you can go through it together afterwards. ' +
+          `${this.cfg.EXAM_B1.minutes} minutes, explanations at the end, pass mark ${Math.round(this.cfg.PASS * 100)} %.</p>` +
+          (this.EX.length ? this.EX.map(x => `<div class="tb"><span><b>${esc(x.title)}</b></span><span class="note">${x.questions.length} questions · ${x.minutes} min</span><button class="btn go" type="button" data-cx="${esc(x.id)}">Open</button></div>`).join('') : '<p class="note">No custom exams yet.</p>');
+        return;
+      }
+      const per = {}; e.questions.forEach(q => { per[q.sec] = (per[q.sec] || 0) + 1; });
+      $('stage').innerHTML = `<h2>${esc(e.title)}</h2>` +
+        `<p>${e.questions.length} questions in ${e.minutes} minutes, three options each, explanations at the end. Pass mark ${Math.round(this.cfg.PASS * 100)} %.</p>` +
+        '<div class="blk"><h2>Questions per syllabus section</h2>' +
+        Object.keys(per).map(k => `<div class="tb"><span>${esc(k)}</span><span></span><span>${per[k]}</span></div>`).join('') + '</div>' +
+        '<div class="row"><button class="btn go" id="go2" type="button">Start</button><button class="btn alt" type="button" data-cx="">All custom exams</button></div>';
+      return;
+    }
     if (F.exam) {
       const E = this.cfg.EXAM_B1;
       $('stage').innerHTML = '<h2>Mock exam: Module 2, category B1</h2>' +
@@ -302,7 +341,8 @@ class TestApp {
       else if (b.id === 'all') F.topics = new Set(this.topics);
       else if (b.id === 'none') F.topics = new Set();
       else if (b.id === 'alltpl') F.tpl = null;
-      else if (b.id === 'noexam') { this.setExam(false); F.n = 20; F.mode = 'practice'; }
+      else if (b.dataset.cx !== undefined) this.setCustom(b.dataset.cx);
+      else if (b.id === 'noexam') { this.setExam(false); F.custom = null; F.n = 20; F.mode = 'practice'; }
       else if (b.id === 'go') return this.start();
       else if (b.id === 'link') return this.copyLink();
       else return;
@@ -319,11 +359,16 @@ class TestApp {
     $('stage').onclick = e => {
       const b = e.target.closest('button'); if (!b) return;
       if (b.id === 'go2') this.start();
+      else if (b.dataset.cx !== undefined) { this.setCustom(b.dataset.cx); this.side(); this.idle(); }
       else if (b.id === 'reset') { this.st.reset(); this.side(); this.idle(); }
     };
   }
 
   copyLink() {
+    if (this.F.exam === 'custom') {
+      const url = location.href.split('#')[0] + '#custom=' + (this.F.custom || ''), msg = $('msg');
+      return (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(() => { if (msg) msg.textContent = 'Link copied.'; }, () => { if (msg) msg.textContent = url; });
+    }
     const F = this.F, p = new URLSearchParams({topic: [...F.topics].join(','), units: F.units, d: [...F.d].join(','), n: F.n, mode: F.mode, mins: F.mins, lang: F.lang, only: F.only});
     if (F.tpl) p.set('tpl', F.tpl.join(','));
     if (F.exam) p.set('exam', F.exam);
@@ -336,7 +381,10 @@ class TestApp {
   start() {
     const F = this.F, by = {};
     let qs = [], secs = null;
-    if (F.exam) {
+    if (F.exam === 'custom') {
+      const e = this.cur(); if (!e) return;
+      qs = e.questions.slice(); secs = qs.map(q => q.sec);       // fixed order, as on the printed paper
+    } else if (F.exam) {
       const ex = this.examQuestions(); qs = ex.map(x => x.q); secs = ex.map(x => x.sec);
     } else {
       if (F.tpl) {                                         // from a simulation: spread over its question types
@@ -383,7 +431,7 @@ class TestApp {
       why = `<div class="expl"><p><b>${ok ? 'Correct.' : 'Not quite. The answer is ' + 'ABC'[q.a] + '.'}</b></p>` + (m ? '<p>' + this.txt(m) + '</p>' : '') + '<p>' + this.txt(q.x) + '</p></div>';
     }
     const good = R.ans.reduce((s, v, k) => s + (v === R.qs[k].a ? 1 : 0), 0);
-    const head = `<div class="top"><div><div class="meta">${esc(this.tname(q.topic))} · ${q.units}</div><div class="meta">Question ${i + 1} of ${n}${practice ? ' · correct ' + good : ''}</div></div>` +
+    const head = `<div class="top"><div><div class="meta">${esc(q.sec || this.tname(q.topic))}${q.units ? ' · ' + q.units : ''}</div><div class="meta">Question ${i + 1} of ${n}${practice ? ' · correct ' + good : ''}</div></div>` +
       (R.end ? `<div class="clock" id="clock">${mmss(Math.ceil((R.end - Date.now()) / 1000))}</div>` : '') + '</div>' +
       `<div class="prog"><i style="width:${Math.round((i + (shown ? 1 : 0)) / n * 100)}%"></i></div>`;
     let nav;
@@ -437,7 +485,7 @@ class TestApp {
       `<p>${ok} of ${n} correct. Pass mark ${Math.round(this.cfg.PASS * 100)} %: ${pass ? 'passed.' : 'not yet.'}</p><p class="note" id="sbmsg"></p>` +
       `<div class="blk"><h2>${R.secs ? 'By syllabus section' : 'By chapter'}</h2>${rows}</div>` +
       (tl ? `<div class="blk"><h2>Mistakes you made</h2><div class="expl">${tl}</div></div>` : '') +
-      '<div class="blk nav"><button class="btn go" id="again" type="button">New test, same filters</button><button class="btn alt" id="back" type="button">Change filters</button><button class="chip" id="wo" type="button" aria-pressed="false">Wrong answers only</button></div><div id="rev"></div>';
+      `<div class="blk nav"><button class="btn go" id="again" type="button">${F.exam === 'custom' ? 'Take it again' : 'New test, same filters'}</button><button class="btn alt" id="back" type="button">${F.exam === 'custom' ? 'Back' : 'Change filters'}</button><button class="chip" id="wo" type="button" aria-pressed="false">Wrong answers only</button></div><div id="rev"></div>`;
     this.review();
     $('stage').onclick = e => {
       const b = e.target.closest('button'); if (!b) return;
@@ -479,6 +527,7 @@ class TestApp {
 }
 
 const app = new TestApp(window.M2_BANK, board, CONFIG);
+addEventListener('hashchange', () => location.reload());
 app.init();
 // Leaving a practice session half way (Home, Profile, closing the tab) still saves the answers given so far.
 addEventListener('pagehide', () => { if (app.R && !app.R.done && app.F.mode === 'practice') app.sendStats(); });
