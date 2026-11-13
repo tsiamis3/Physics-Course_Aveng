@@ -433,10 +433,12 @@ class TestApp {
     if (!qs.length) return;
     this.R = {qs, secs, cur: 0, ans: [], flag: [], done: false, confirm: false, t0: Date.now(), used: 0,
               end: F.mode === 'test' && F.mins > 0 ? Date.now() + F.mins * 60000 : 0, onlyWrong: false};
+    // Custom mock exams do not stop at the time limit: the clock goes on as overtime (+mm:ss) and the result shows it.
+    this.R.overtime = F.exam === 'custom';
     if (this.R.end) this.tick = setInterval(() => {
       const c = $('clock'), r = Math.ceil((this.R.end - Date.now()) / 1000);
-      if (c) { c.textContent = mmss(r); c.className = 'clock' + (r <= 60 ? ' low' : ''); }
-      if (r <= 0) this.finish();
+      if (c) { c.textContent = this.clockText(); c.className = 'clock' + (r <= 60 ? ' low' : ''); c.title = r <= 0 ? 'Time is up: you can still finish the paper' : ''; }
+      if (r <= 0 && !this.R.overtime) this.finish();
     }, 500);
     $('main').className = 'running';
     this.run();
@@ -456,7 +458,7 @@ class TestApp {
     }
     const good = R.ans.reduce((s, v, k) => s + (v === R.qs[k].a ? 1 : 0), 0);
     const head = `<div class="top"><div><div class="meta">${esc(q.sec || this.tname(q.topic))}${q.units ? ' · ' + q.units : ''}</div><div class="meta">Question ${i + 1} of ${n}${practice ? ' · correct ' + good : ''}</div></div>` +
-      (R.end ? `<div class="clock" id="clock">${mmss(Math.ceil((R.end - Date.now()) / 1000))}</div>` : '') + '</div>' +
+      (R.end ? `<div class="clock" id="clock">${this.clockText()}</div>` : '') + '</div>' +
       `<div class="prog"><i style="width:${Math.round((i + (shown ? 1 : 0)) / n * 100)}%"></i></div>`;
     let nav;
     if (practice) {
@@ -489,6 +491,12 @@ class TestApp {
     };
   }
 
+  // Time left, or the overtime as +mm:ss once the limit has passed (custom mock exams only).
+  clockText() {
+    const r = Math.ceil((this.R.end - Date.now()) / 1000);
+    return r >= 0 ? mmss(r) : '+' + mmss(-r);
+  }
+
   finish() {
     const R = this.R, F = this.F; if (R.done) return;
     R.done = true; clearInterval(this.tick); R.used = Math.round((Date.now() - R.t0) / 1000);
@@ -505,7 +513,7 @@ class TestApp {
     const rows = order.map(t => `<div class="tb"><span>${esc(R.secs ? t : this.tname(t))}</span><div class="bar"><i style="width:${Math.round(per[t].c / per[t].n * 100)}%"></i></div><span>${per[t].c}/${per[t].n}</span></div>`).join('');
     const tl = Object.keys(tags).sort((a, b) => tags[b] - tags[a]).map(t => `<p><b>${tags[t]}×</b> ${this.txt(this.mist(t) || {el: t, en: t})}</p>`).join('');
     $('stage').innerHTML =
-      `<div class="meta">Result · ${mmss(R.used)}</div><div id="result" class="${pass ? 'pass' : 'fail'}">${pct} %</div>` +
+      `<div class="meta">Result · ${mmss(R.used)}${R.end && R.used > (R.end - R.t0) / 1000 ? ` (${mmss(Math.round(R.used - (R.end - R.t0) / 1000))} over the time limit)` : ''}</div><div id="result" class="${pass ? 'pass' : 'fail'}">${pct} %</div>` +
       `<p>${ok} of ${n} correct. Pass mark ${Math.round(this.cfg.PASS * 100)} %: ${pass ? 'passed.' : 'not yet.'}</p><p class="note" id="sbmsg"></p>` +
       `<div class="blk"><h2>${R.secs ? 'By syllabus section' : 'By chapter'}</h2>${rows}</div>` +
       (tl ? `<div class="blk"><h2>Mistakes you made</h2><div class="expl">${tl}</div></div>` : '') +
