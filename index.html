@@ -92,7 +92,7 @@ const CONFIG = {
     {label: 'Doppler & Mach', href: 'sound.html'},
     {label: 'Beats', href: 'beats.html'}
   ],
-  TEACHER: 'Maevius',   // only this logged-in account sees the worked solutions of the SOS questions
+  TEACHER: 'Maevius',   // this logged-in account sees the SOS explanations without answering first
   TOOLS: [
     {title: 'Formula sheet', note: 'Imperial units first, SI in brackets.', href: 'formula.html'},
     {title: 'Unit conversions', note: 'Converter and conversion tables from the course sheet.', href: 'units.html'}
@@ -147,8 +147,8 @@ class HomePage {
   }
 }
 
-// SOS questions: the student taps an option and then sees which answer is correct.
-// The worked solutions are shown only to the teacher account (checked by the server, as for the custom mock exams).
+// SOS questions: the student taps an option and then sees which answer is correct and why.
+// The teacher account (checked by the server) sees every explanation without answering first.
 class SosTab {
   constructor(sets, teacher) {
     this.sets = sets.map(s => ({...s, questions: s.questions.map(q => ({...q, ...SosTab.unhide(q.k)}))}));
@@ -177,7 +177,7 @@ class SosTab {
   render() {
     const s = this.set();
     if (!s) { $('sos').innerHTML = '<h2>SOS questions</h2><p class="note">No SOS questions yet.</p>'; return; }
-    $('sos').innerHTML = '<h2>SOS questions</h2><p>The questions you must be able to answer before the exam. Tap an answer to see if it is right.</p>' +
+    $('sos').innerHTML = '<h2>SOS questions</h2><p>The questions you must be able to answer before the exam. Tap an answer to see if it is right and why.</p>' +
       '<div class="chips">' + this.sets.map(x => `<button class="chip" type="button" data-set="${esc(x.id)}" aria-pressed="${x.id === this.cur}">${esc(x.title)} <small>${x.questions.length}</small></button>`).join('') + '</div>' +
       '<p class="meta" id="sosmeta" style="margin-top:10px"></p>' +
       s.questions.map((q, i) => this.card(q, i)).join('');
@@ -199,7 +199,7 @@ class SosTab {
   meta() {
     const s = this.set(), ids = Object.keys(this.ans), good = ids.filter(i => this.ans[i] === s.questions[i].a).length;
     $('sosmeta').innerHTML = (ids.length ? `${good} of ${ids.length} answered correctly · ` : '') + `${s.questions.length} questions` +
-      (ids.length ? ' · <button class="chip" type="button" id="sosreset">Start again</button>' : '') + (this.teacher ? ' · teacher view: solutions shown' : '');
+      (ids.length ? ' · <button class="chip" type="button" id="sosreset">Start again</button>' : '') + (this.teacher ? ' · teacher view: all explanations shown' : '');
   }
 
   card(q, i) {
@@ -209,8 +209,8 @@ class SosTab {
       return `<button class="${c}" type="button" data-q="${i}" data-o="${k}"${shown ? ' disabled' : ''}><b>${'ABC'[k]})</b><span>${esc(o)}</span></button>`;
     }).join('');
     const mark = shown ? `<div class="mk ${a === q.a ? 'ok' : 'bad'}">${a === q.a ? 'Correct' : 'Wrong: the correct answer is ' + 'ABC'[q.a]}</div>` : '';
-    const sol = this.teacher && q.x ? `<div class="expl">${esc(q.x)}</div>` : '';
-    return `<article class="sosq"><div class="meta">${i + 1} · ${esc(q.sec)}</div><p class="q">${esc(q.q)}</p>${opts}${mark}${shown || this.teacher ? sol : ''}</article>`;
+    const sol = (shown || this.teacher) && q.x ? `<div class="expl">${esc(q.x)}</div>` : '';
+    return `<article class="sosq"><div class="meta">${i + 1} · ${esc(q.sec)}</div><p class="q">${esc(q.q)}</p>${opts}${mark}${sol}</article>`;
   }
 }
 
