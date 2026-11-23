@@ -37,6 +37,17 @@ li{margin-bottom:4px}
 input{font:inherit;padding:8px;border:1px solid var(--line);border-radius:4px;background:#fff;color:inherit;width:100%;max-width:200px}
 .board{list-style:none;margin:8px 0;padding:0}
 .board li{display:flex;gap:10px;padding:5px 0;border-bottom:1px solid var(--line)}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.sosq{border-top:1px solid var(--line);padding:12px 0}
+.sosq .q{font-size:18px;font-weight:600;margin:0 0 10px}
+.opt{display:flex;gap:10px;width:100%;text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 10px;margin-bottom:8px;cursor:pointer;font:inherit;color:inherit}
+.opt b{flex:none;font-family:ui-monospace,Consolas,monospace}
+.opt.ok{background:#e3f3ea;border-color:#1f7a4d}
+.opt.bad{background:#fbe6e4;border-color:#b3261e}
+.opt.dim{opacity:.55}
+.opt:disabled{cursor:default}
+.mk{font-weight:700;font-size:14px}.mk.ok{color:var(--ok,#1f7a4d)}.mk.bad{color:var(--bad,#b3261e)}
+.expl{margin:6px 0 0;padding:8px 10px;border-left:4px solid var(--amber);background:#fff7e0}
 .board .rk{width:1.6em;color:var(--mute)}.board .nm{flex:1}.board .pt small{color:var(--mute)}.board .me{font-weight:700}
 </style>
 <link rel="stylesheet" href="assets/theme.css">
@@ -49,19 +60,24 @@ input{font:inherit;padding:8px;border:1px solid var(--line);border-radius:4px;ba
 </header>
 <main>
   <div>
-    <section id="builder"></section>
-    <section id="tools"></section>
+    <div class="tabs" id="tabs" role="tablist"></div>
+    <div id="home">
+      <section id="builder"></section>
+      <section id="tools"></section>
+    </div>
+    <section id="sos" hidden></section>
   </div>
 </main>
 <script src="m2meta.js"></script>
 <script src="scoreboard.js"></script>
+<script src="sos.js"></script>
 <script>
 // ---- Configuration: edit the header links and the tool links here ----
 const CONFIG = {
   LINKS: [
     {label: 'Test builder', href: 'test.html'},
     {label: 'Custom mock exams', href: 'test.html#custom'},
-    {label: 'SOS questions', href: 'test.html#sos'},
+    {label: 'SOS questions', href: 'index.html#sos'},
     {label: 'Formula sheet', href: 'formula.html'},
     {label: 'Unit conversions', href: 'units.html'},
     {label: 'My profile', href: 'profile.html'},
@@ -76,6 +92,7 @@ const CONFIG = {
     {label: 'Doppler & Mach', href: 'sound.html'},
     {label: 'Beats', href: 'beats.html'}
   ],
+  TEACHER: 'Maevius',   // only this logged-in account sees the worked solutions of the SOS questions
   TOOLS: [
     {title: 'Formula sheet', note: 'Imperial units first, SI in brackets.', href: 'formula.html'},
     {title: 'Unit conversions', note: 'Converter and conversion tables from the course sheet.', href: 'units.html'}
@@ -101,7 +118,6 @@ class HomePage {
       `<div class="cta"><a class="btn go" href="${esc(test({n: 20, mode: 'practice'}))}">Practice, 20 questions</a>` +
       `<a class="btn" href="${esc(test({exam: 'b1'}))}">Mock exam B1, 52 in 65 min</a>` +
       '<a class="btn" href="test.html#custom">Custom mock exams</a>' +
-      '<a class="btn go" href="test.html#sos">SOS questions</a>' +
       '<a class="btn" href="test.html">Choose filters</a></div>' +
       '<h3>Practice one chapter</h3>' +
       `<div class="chips">${Object.keys(m.topics).map(t => `<a class="chip" href="${esc(test({topic: t, n: 15, mode: 'practice'}))}">${esc(m.topics[t].en)}</a>`).join('')}</div>`;
@@ -115,6 +131,86 @@ class HomePage {
   init() {
     $('links').innerHTML = this.cfg.LINKS.map(l => `<a href="${esc(l.href)}">${esc(l.label)}</a>`).join('');
     this.renderBuilder(); this.renderTools();
+    this.sos = new SosTab(window.M2_SOS || [], this.cfg.TEACHER);
+    this.renderTabs();
+    addEventListener('hashchange', () => this.renderTabs());
+  }
+
+  // Two tabs: the test builder (home) and the SOS questions. #sos opens the second one.
+  renderTabs() {
+    const sos = location.hash === '#sos' || location.hash.startsWith('#sos=');
+    $('tabs').innerHTML = [['home', 'Test builder'], ['sos', 'SOS questions']].map(([k, l]) =>
+      `<button class="chip" type="button" role="tab" data-tab="${k}" aria-pressed="${(k === 'sos') === sos}">${l}</button>`).join('');
+    $('tabs').onclick = e => { const b = e.target.closest('button'); if (b) location.hash = b.dataset.tab === 'sos' ? 'sos' : ''; };
+    $('home').hidden = sos; $('sos').hidden = !sos;
+    if (sos) this.sos.render();
+  }
+}
+
+// SOS questions: the student taps an option and then sees which answer is correct.
+// The worked solutions are shown only to the teacher account (checked by the server, as for the custom mock exams).
+class SosTab {
+  constructor(sets, teacher) {
+    this.sets = sets.map(s => ({...s, questions: s.questions.map(q => ({...q, ...SosTab.unhide(q.k)}))}));
+    this.cur = this.sets.length ? this.sets[0].id : null;
+    this.ans = {};                 // question index -> chosen option, for the open set
+    this.teacher = false;
+    this.checkTeacher(teacher);
+  }
+
+  // sos.js keeps [answer, solution] as base64 of the reversed UTF-8 JSON, like exams.js.
+  static unhide(k) {
+    const b = Uint8Array.from(atob(k), c => c.charCodeAt(0)).reverse(), [a, x] = JSON.parse(new TextDecoder().decode(b));
+    return {a, x};
+  }
+
+  async checkTeacher(t) {
+    t = (t || '').toLowerCase();
+    if (!t || !board.loggedIn || board.nick.toLowerCase() !== t) return;
+    const r = await board.me();
+    this.teacher = r.ok && String(r.data.nick || '').toLowerCase() === t;
+    if (this.teacher && !$('sos').hidden) this.render();
+  }
+
+  set() { return this.sets.find(s => s.id === this.cur); }
+
+  render() {
+    const s = this.set();
+    if (!s) { $('sos').innerHTML = '<h2>SOS questions</h2><p class="note">No SOS questions yet.</p>'; return; }
+    $('sos').innerHTML = '<h2>SOS questions</h2><p>The questions you must be able to answer before the exam. Tap an answer to see if it is right.</p>' +
+      '<div class="chips">' + this.sets.map(x => `<button class="chip" type="button" data-set="${esc(x.id)}" aria-pressed="${x.id === this.cur}">${esc(x.title)} <small>${x.questions.length}</small></button>`).join('') + '</div>' +
+      '<p class="meta" id="sosmeta" style="margin-top:10px"></p>' +
+      s.questions.map((q, i) => this.card(q, i)).join('');
+    $('sos').onclick = e => {
+      const b = e.target.closest('button'); if (!b) return;
+      if (b.dataset.set) { this.cur = b.dataset.set; this.ans = {}; this.render(); }
+      else if (b.id === 'sosreset') { this.ans = {}; this.render(); }
+      else if (b.dataset.o !== undefined) {
+        const i = +b.dataset.q; if (this.ans[i] !== undefined) return;
+        this.ans[i] = +b.dataset.o;
+        b.closest('.sosq').outerHTML = this.card(s.questions[i], i);
+        this.meta();
+      }
+    };
+    this.meta();
+  }
+
+  // Score line of the open set.
+  meta() {
+    const s = this.set(), ids = Object.keys(this.ans), good = ids.filter(i => this.ans[i] === s.questions[i].a).length;
+    $('sosmeta').innerHTML = (ids.length ? `${good} of ${ids.length} answered correctly · ` : '') + `${s.questions.length} questions` +
+      (ids.length ? ' · <button class="chip" type="button" id="sosreset">Start again</button>' : '') + (this.teacher ? ' · teacher view: solutions shown' : '');
+  }
+
+  card(q, i) {
+    const a = this.ans[i], shown = a !== undefined;
+    const opts = q.o.map((o, k) => {
+      const c = 'opt' + (shown ? (k === q.a ? ' ok' : k === a ? ' bad' : ' dim') : '');
+      return `<button class="${c}" type="button" data-q="${i}" data-o="${k}"${shown ? ' disabled' : ''}><b>${'ABC'[k]})</b><span>${esc(o)}</span></button>`;
+    }).join('');
+    const mark = shown ? `<div class="mk ${a === q.a ? 'ok' : 'bad'}">${a === q.a ? 'Correct' : 'Wrong: the correct answer is ' + 'ABC'[q.a]}</div>` : '';
+    const sol = this.teacher && q.x ? `<div class="expl">${esc(q.x)}</div>` : '';
+    return `<article class="sosq"><div class="meta">${i + 1} · ${esc(q.sec)}</div><p class="q">${esc(q.q)}</p>${opts}${mark}${shown || this.teacher ? sol : ''}</article>`;
   }
 }
 
