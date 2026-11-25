@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hydraulic Accumulator</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600&display=swap">
+<link rel="stylesheet" href="assets/sim.css">
+<link rel="stylesheet" href="assets/theme.css">
+<link rel="stylesheet" href="assets/dock.css">
+<style>
+/* Page-only bits: action buttons, the status box and the flow animation on the pipes. */
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 4px 14px}
+.acts .btn{width:100%;min-height:44px}
+.acts .btn[aria-pressed="true"]{background:linear-gradient(#e3b232,#b98912);color:#0b0a09}
+.sub-h{font:700 13px var(--f-display);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:14px 4px 8px}
+.msg{margin:0 4px;padding:12px 14px;border-left:3px solid var(--accent);background:var(--accent-soft);font-size:16px}
+.msg.bad{border-color:var(--bad);background:rgba(229,83,75,.12)}
+.msg.ok{border-color:var(--ok);background:rgba(98,184,134,.12)}
+.msg b{color:var(--accent)}
+.law{font:15px/1.7 var(--f-mono);margin:10px 4px 0;padding-left:10px;border-left:3px solid var(--line)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted);margin:6px 4px 0}
+.legend i{display:inline-block;width:14px;height:10px;margin-right:6px;vertical-align:middle}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="h1"></h1>
+  <p id="sub"></p>
+  <nav><a href="index.html">← Home</a><a href="index.html#sos=accumulator">SOS: accumulator</a><a href="cycles.html">Thermodynamic Cycles</a><a href="formula.html">Formula sheet</a><a href="units.html">Unit conversions</a></nav>
+</header>
+<main>
+<div class="wrap">
+  <div class="topbar">
+    <p class="title" id="title"></p>
+    <div class="tools">
+      <div class="grp"><small id="g-units"></small><div class="seg" role="group" id="units">
+        <button type="button" data-u="imp">psi · in³</button><button type="button" data-u="si">bar · L</button></div></div>
+      <div class="grp"><small>&nbsp;</small><div class="seg" role="group" aria-label="Language">
+        <button id="lang-el" type="button">ΕΛ</button><button id="lang-en" type="button">EN</button></div></div>
+    </div>
+  </div>
+
+  <div class="dock">
+    <div class="dock-viz">
+      <section class="card dock-fig">
+        <div class="fig"><svg id="view" viewBox="0 0 1000 475" role="img" aria-label="Hydraulic accumulator diagram"></svg></div>
+      </section>
+      <div class="dock-cap">
+        <div class="legend" id="legend"></div>
+      </div>
+    </div>
+    <section class="card dock-ctl">
+      <h2 id="ctl-h"></h2>
+      <div class="acts">
+        <button class="btn" id="b-pump" type="button"></button>
+        <button class="btn alt" id="b-brake" type="button"></button>
+        <button class="btn alt" id="b-bleed" type="button"></button>
+        <button class="btn alt" id="b-leak" type="button"></button>
+      </div>
+      <div id="sliders"></div>
+      <div class="row"><button class="btn alt" id="b-reset" type="button"></button></div>
+    </section>
+  </div>
+
+  <section class="card"><p class="msg" id="msg"></p></section>
+
+  <div class="lower">
+    <section class="card">
+      <h2 id="pv-h"></h2>
+      <svg id="pv" viewBox="0 0 600 380" role="img" aria-label="p–V diagram of the nitrogen"></svg>
+      <p class="note" id="pv-note" style="margin:6px 4px 0"></p>
+    </section>
+    <section class="card">
+      <h2 id="calc-h"></h2>
+      <div class="scroll"><table class="calc" id="calc"></table></div>
+      <div class="law" id="law"></div>
+    </section>
+  </div>
+
+  <section class="card quiz" id="quiz"></section>
+  <p class="note" id="foot"></p>
+</div>
+</main>
+
+<script src="assets/sim.js"></script>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const {SimPage, Quiz, esc, pick} = Sim;
+
+/* ============================ units ============================
+   Inside the page everything is in psi, litres and °C; conversion happens only for display. */
+const PSI_BAR = 0.0689476, L_IN3 = 61.0237, PSI_PA = 6894.76, J_FTLB = 0.737562, T0C = 20;
+const K = c => c + 273.15;
+
+/* ============================ texts ============================ */
+const T = {
+ el: {
+  h1: 'Υδραυλικός συσσωρευτής (Accumulator)',
+  sub: 'Ένα «ελατήριο αζώτου» για το υδραυλικό: φόρτισέ το με την αντλία, σβήσ\' την και πάτα φρένα, δες τι δείχνουν τα όργανα.',
+  title: 'Diaphragm accumulator', gUnits: 'Μονάδες', ctl: 'Χειρισμοί',
+  pumpOn: 'Αντλία: ON', pumpOff: 'Αντλία: OFF', brake: 'Πάτα φρένο', bleed: 'Μηδένισε υδραυλικό', leak: 'Διαρροή N₂ −10%', reset: 'Επαναφορά',
+  setH: 'Ρυθμίσεις',
+  s: {p0: 'Προφόρτιση N₂ (στους 20 °C)', pset: 'Πίεση συστήματος (αντλία)', pmin: 'Ελάχιστη πίεση φρένων', v0: 'Όγκος accumulator', dv: 'Λάδι ανά φρενάρισμα', t: 'Θερμοκρασία αερίου'},
+  lbl: {gas: 'N₂', oil: 'Λάδι', res: 'Reservoir', resP: 'ατμοσφ. πίεση', pump: 'Αντλία', brake: 'Φρένο', bleed: 'Βαλβίδα εκτόνωσης', gasG: 'Όργανο N₂', sysG: 'Όργανο συστήματος', poppetC: 'poppet κλειστό', chk: 'check valve'},
+  legend: [['#5B9BEF', 'Άζωτο (N₂)'], ['#c2412f', 'Υδραυλικό λάδι υπό πίεση'], ['#6b3a2e', 'Λάδι χωρίς πίεση']],
+  pvH: 'Διάγραμμα p–V του αζώτου', calcH: 'Τιμές',
+  pvNote: 'Η καμπύλη είναι η ισόθερμη pV = σταθ. Το σκιασμένο εμβαδόν είναι η ενέργεια που έχει αποθηκευτεί στο αέριο.',
+  rows: {ps: 'Πίεση συστήματος', pg: 'Πίεση N₂ (όργανο αερίου)', p0: 'Πραγματική προφόρτιση (20 °C)', vg: 'Όγκος N₂', vo: 'Λάδι μέσα στον accumulator', e: 'Αποθηκευμένη ενέργεια', n: 'Φρεναρίσματα που απομένουν'},
+  nUnit: 'πάνω από',
+  ax: {p: 'p', v: 'V αερίου'}, pset: 'p συστήματος', pmin: 'p ελάχ.', now: 'τώρα',
+  m: {
+   tooHigh: (a, b) => `Η προφόρτιση (${a}) είναι <b>μεγαλύτερη</b> από την πίεση της αντλίας (${b}): το λάδι δεν μπαίνει ποτέ, ο accumulator δεν αποθηκεύει τίποτα.`,
+   charged: (p, f, g0) => `Λάδι και άζωτο ισορροπούν στα <b>${p}</b>. Το δοχείο είναι ${f} λάδι. Το όργανο του N₂ δείχνει ${p}, <b>όχι</b> την προφόρτιση (${g0}). Για έλεγχο προφόρτισης μηδένισε πρώτα το υδραυλικό.`,
+   discharging: (p, n) => `Αντλία σβηστή: το άζωτο εκτονώνεται και σπρώχνει λάδι στο σύστημα. Πίεση τώρα <b>${p}</b>, απομένουν <b>${n}</b> φρεναρίσματα πάνω από την ελάχιστη πίεση.`,
+   weak: (p, m) => `Η πίεση (${p}) είναι κάτω από την ελάχιστη για τα φρένα (${m}): υπάρχει ακόμα λάδι, αλλά το φρενάρισμα είναι αδύναμο.`,
+   emptyLine: p => `Ο accumulator άδειασε (poppet κλειστό). Στη γραμμή έχουν μείνει ${p}, αλλά με το επόμενο φρενάρισμα η πίεση μηδενίζεται.`,
+   lost: 'Μηδενική υδραυλική πίεση με την αντλία σβηστή: <b>δεν υπάρχουν φρένα</b>. Άναψε την αντλία.',
+   zero: (g, t, ok) => `Υδραυλικό στο μηδέν, δεν υπάρχει λάδι στο δοχείο: το όργανο του N₂ δείχνει την <b>πραγματική προφόρτιση</b>, ${g} στους ${t} °C.` + (ok ? '' : ' (Η θερμοκρασία δεν είναι 20 °C: η ένδειξη διορθώνεται με p/T = σταθ.)'),
+   zeroNoGas: 'Δεν υπάρχει καθόλου άζωτο: ο accumulator θα γεμίσει με λάδι και δεν θα δώσει τίποτα πίσω.'
+  },
+  brakeOk: 'φρενάρισμα OK', brakeWeak: 'αδύναμο φρενάρισμα', brakeNone: 'καθόλου φρένα',
+  foot: 'Μοντέλο: ιδανικό αέριο, pV/T = σταθ. (ισόθερμα σε κάθε θερμοκρασία), ασυμπίεστο λάδι, χωρίς τριβές. Οι τιμές είναι ενδεικτικές, όχι από εγχειρίδιο αεροσκάφους.'
+ },
+ en: {
+  h1: 'Hydraulic Accumulator',
+  sub: 'A "nitrogen spring" for the hydraulic system: charge it with the pump, switch the pump off and apply the brakes, and watch the gauges.',
+  title: 'Diaphragm accumulator', gUnits: 'Units', ctl: 'Controls',
+  pumpOn: 'Pump: ON', pumpOff: 'Pump: OFF', brake: 'Apply brakes', bleed: 'Bleed hydraulics', leak: 'N₂ leak −10%', reset: 'Reset',
+  setH: 'Settings',
+  s: {p0: 'N₂ pre-charge (at 20 °C)', pset: 'System pressure (pump)', pmin: 'Minimum brake pressure', v0: 'Accumulator volume', dv: 'Fluid per brake application', t: 'Gas temperature'},
+  lbl: {gas: 'N₂', oil: 'Oil', res: 'Reservoir', resP: 'atmospheric', pump: 'Pump', brake: 'Brake', bleed: 'Bleed valve', gasG: 'N₂ gauge', sysG: 'System gauge', poppetC: 'poppet closed', chk: 'check valve'},
+  legend: [['#5B9BEF', 'Nitrogen (N₂)'], ['#c2412f', 'Hydraulic fluid under pressure'], ['#6b3a2e', 'Fluid, no pressure']],
+  pvH: 'p–V diagram of the nitrogen', calcH: 'Values',
+  pvNote: 'The curve is the isotherm pV = const. The shaded area is the energy stored in the gas.',
+  rows: {ps: 'System pressure', pg: 'N₂ pressure (gas gauge)', p0: 'True pre-charge (20 °C)', vg: 'N₂ volume', vo: 'Fluid in the accumulator', e: 'Stored energy', n: 'Brake applications left'},
+  nUnit: 'above',
+  ax: {p: 'p', v: 'gas V'}, pset: 'system p', pmin: 'min p', now: 'now',
+  m: {
+   tooHigh: (a, b) => `The pre-charge (${a}) is <b>higher</b> than the pump pressure (${b}): no fluid ever enters, the accumulator stores nothing.`,
+   charged: (p, f, g0) => `Fluid and nitrogen balance at <b>${p}</b>. The accumulator is ${f} full of fluid. The N₂ gauge reads ${p}, <b>not</b> the pre-charge (${g0}). To check the pre-charge, bleed the hydraulic pressure to zero first.`,
+   discharging: (p, n) => `Pump off: the nitrogen expands and pushes fluid into the system. Pressure now <b>${p}</b>, <b>${n}</b> brake applications left above the minimum pressure.`,
+   weak: (p, m) => `The pressure (${p}) is below the minimum for the brakes (${m}): there is still fluid, but braking is weak.`,
+   emptyLine: p => `The accumulator is empty (poppet closed). ${p} is trapped in the line, but the next brake application drops it to zero.`,
+   lost: 'Zero hydraulic pressure with the pump off: <b>no brakes</b>. Switch the pump on.',
+   zero: (g, t, ok) => `Hydraulics at zero, no fluid in the accumulator: the N₂ gauge shows the <b>true pre-charge</b>, ${g} at ${t} °C.` + (ok ? '' : ' (Not at 20 °C: correct the reading with p/T = const.)'),
+   zeroNoGas: 'There is no nitrogen at all: the accumulator will fill with fluid and give nothing back.'
+  },
+  brakeOk: 'brakes OK', brakeWeak: 'weak braking', brakeNone: 'no brakes',
+  foot: 'Model: ideal gas, pV/T = const. (isothermal at each temperature), incompressible fluid, no friction. The values are illustrative, not from an aircraft manual.'
+ }
+};
+const page = new SimPage(T);
+
+/* ============================ model ============================ */
+// The nitrogen is described by C = p·V/T (psi·L/K), fixed unless the gas is recharged or leaks.
+class Accumulator {
+  constructor() { this.reset(); }
+  reset() {
+    this.V0 = 2; this.pset = 3000; this.pmin = 1000; this.dv = 0.15; this.tC = T0C;
+    this.setPrecharge(1000);
+    this.pump = true; this.oil = 0; this.ps = 0; this.flash = null;
+    this.settle();
+  }
+  get p0() { return this.C * K(T0C) / this.V0; }                  // pre-charge referred to 20 °C
+  setPrecharge(p) { this.C = p * this.V0 / K(T0C); }
+  get Vg() { return this.V0 - this.oil; }
+  get pg() { return this.C <= 1e-12 ? 0 : this.C * K(this.tC) / this.Vg; }   // gas pressure (equals ps while fluid is inside)
+  // Bring the state to equilibrium after any change.
+  settle() {
+    if (this.pump) {
+      this.ps = this.pset;
+      const vg = this.C * K(this.tC) / this.pset;
+      this.oil = Math.max(0, this.V0 - vg);
+    } else if (this.oil > 1e-9) {
+      this.ps = this.pg;
+    }
+  }
+  // Pressure the brakes would see now.
+  brakeEffect() { return this.ps >= this.pmin - 1e-6 ? 'ok' : this.ps > 0 ? 'weak' : 'none'; }
+  applyBrake() {
+    const eff = this.brakeEffect();
+    if (this.pump) { this.flash = {type: 'brake', t: performance.now()}; return eff; }   // pump refills at once
+    if (this.oil > 1e-9) {
+      this.oil = Math.max(0, this.oil - this.dv);
+      if (this.oil > 1e-9) this.ps = this.pg; else this.ps = Math.min(this.ps, this.C * K(this.tC) / this.V0);
+    } else this.ps = 0;                              // nothing left to push the fluid
+    this.flash = {type: 'brake', t: performance.now()};
+    return eff;
+  }
+  bleed() { this.pump = false; this.oil = 0; this.ps = 0; this.flash = {type: 'bleed', t: performance.now()}; }
+  leak() { this.C *= 0.9; if (!this.pump && this.oil > 1e-9) this.ps = this.pg; this.settle(); }
+  // Brake applications left with at least pmin before each one (pump off).
+  left() { return this.count(this.oil); }   // with the pump on: what you would get if it stopped now
+  count(oil) {
+    let n = 0;
+    if (this.C <= 1e-12) return 0;
+    for (let k = 0; k < 500 && oil > 1e-9; k++) {
+      const p = this.C * K(this.tC) / (this.V0 - oil);
+      if (p < this.pmin - 1e-6) break;
+      n++; oil -= this.dv;
+    }
+    return n;
+  }
+  energy() {   // J, isothermal compression from V0 to Vg
+    if (this.oil <= 1e-9 || this.C <= 1e-12) return 0;
+    return this.pg * PSI_PA * this.Vg * 1e-3 * Math.log(this.V0 / this.Vg);
+  }
+}
+
+/* ============================ page ============================ */
+class AccPage {
+  static still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  constructor() {
+    this.m = new Accumulator();
+    this.units = 'imp';
+    this.d = {oil: 0, ps: 0, pg: this.m.pg};   // displayed values, eased towards the model
+    this.lastBrake = null;
+    this.buildSliders();
+    page.bindLang($('lang-el'), $('lang-en'));
+    page.onLang(() => this.renderStatic());
+    $('units').onclick = e => { const b = e.target.closest('button'); if (b) { this.units = b.dataset.u; this.renderStatic(); } };
+    $('b-pump').onclick = () => { this.m.pump = !this.m.pump; this.m.settle(); this.lastBrake = null; this.update(); };
+    $('b-brake').onclick = () => { this.lastBrake = this.m.applyBrake(); this.update(); };
+    $('b-bleed').onclick = () => { this.m.bleed(); this.lastBrake = null; this.update(); };
+    $('b-leak').onclick = () => { this.m.leak(); this.update(); };
+    $('b-reset').onclick = () => { this.m.reset(); this.lastBrake = null; this.update(); };
+    this.renderStatic();
+    this.loop = this.loop.bind(this); requestAnimationFrame(this.loop);
+  }
+
+  /* ---------- number formatting in the chosen units ---------- */
+  P(psi) { return this.units === 'imp' ? page.fmt(psi, 0) + ' psi' : page.fmt(psi * PSI_BAR, 1) + ' bar'; }
+  V(L) { return this.units === 'imp' ? page.fmt(L * L_IN3, 1) + ' in³' : page.fmt(L, 2) + ' L'; }
+  E(J) { return this.units === 'imp' ? page.fmt(J * J_FTLB, 0) + ' ft·lbf' : page.fmt(J, 0) + ' J'; }
+
+  /* ---------- sliders: value always stored in psi / L / °C ---------- */
+  buildSliders() {
+    this.S = [
+      {k: 'p0', min: 0, max: 3500, step: 50, get: () => this.m.p0, set: v => { this.m.setPrecharge(v); }, f: v => this.P(v)},
+      {k: 'pset', min: 1500, max: 3500, step: 50, get: () => this.m.pset, set: v => { this.m.pset = v; }, f: v => this.P(v)},
+      {k: 'pmin', min: 300, max: 2500, step: 50, get: () => this.m.pmin, set: v => { this.m.pmin = v; }, f: v => this.P(v)},
+      {k: 'v0', min: 0.5, max: 5, step: 0.1, get: () => this.m.V0, set: v => { const p0 = this.m.p0, f = this.m.oil / this.m.V0; this.m.V0 = v; this.m.setPrecharge(p0); this.m.oil = f * v; }, f: v => this.V(v)},
+      {k: 'dv', min: 0.05, max: 0.5, step: 0.01, get: () => this.m.dv, set: v => { this.m.dv = v; }, f: v => this.V(v)},
+      {k: 't', min: -40, max: 70, step: 1, get: () => this.m.tC, set: v => { this.m.tC = v; }, f: v => page.fmt(v, 0) + ' °C'}
+    ];
+    $('sliders').innerHTML = '<p class="sub-h" id="set-h"></p>' + this.S.map(s =>
+      `<div class="row"><label for="s-${s.k}" id="l-${s.k}"></label><input type="range" id="s-${s.k}" min="${s.min}" max="${s.max}" step="${s.step}"><output id="o-${s.k}"></output></div>`).join('');
+    this.S.forEach(s => {
+      $('s-' + s.k).addEventListener('input', e => {
+        s.set(+e.target.value);
+        if (!this.m.pump && this.m.oil > 1e-9) this.m.ps = this.m.pg;
+        this.m.settle(); this.update(false);
+      });
+    });
+  }
+
+  renderStatic() {
+    const t = page.t;
+    document.title = t.h1;
+    $('h1').textContent = t.h1; $('sub').textContent = t.sub; $('title').textContent = t.title;
+    $('g-units').textContent = t.gUnits; $('ctl-h').textContent = t.ctl; $('set-h').textContent = t.setH;
+    $('b-brake').textContent = t.brake; $('b-bleed').textContent = t.bleed; $('b-leak').textContent = t.leak; $('b-reset').textContent = t.reset;
+    $('pv-h').textContent = t.pvH; $('calc-h').textContent = t.calcH; $('pv-note').textContent = t.pvNote; $('foot').textContent = t.foot;
+    $('legend').innerHTML = t.legend.map(([c, l]) => `<span><i style="background:${c}"></i>${esc(l)}</span>`).join('');
+    this.S.forEach(s => { $('l-' + s.k).textContent = t.s[s.k]; });
+    [...$('units').children].forEach(b => b.setAttribute('aria-pressed', b.dataset.u === this.units));
+    this.update(false);
+  }
+
+  // Model changed: refresh controls, text and table (the drawing follows in the animation loop).
+  update(syncSliders = true) {
+    const m = this.m, t = page.t;
+    this.S.forEach(s => {
+      const v = s.get(); if (syncSliders || document.activeElement !== $('s-' + s.k)) $('s-' + s.k).value = v;
+      $('o-' + s.k).textContent = s.f(v);
+    });
+    $('b-pump').textContent = m.pump ? t.pumpOn : t.pumpOff;
+    $('b-pump').setAttribute('aria-pressed', m.pump);
+    $('b-pump').className = m.pump ? 'btn' : 'btn alt';
+    this.renderMsg(); this.renderTable();
+  }
+
+  renderMsg() {
+    const m = this.m, t = page.t, M = t.m, box = $('msg');
+    let cls = '', html;
+    if (m.C <= 1e-9) { html = M.zeroNoGas; cls = 'bad'; }
+    else if (m.pump && m.oil <= 1e-9) { html = M.tooHigh(this.P(m.p0), this.P(m.pset)); cls = 'bad'; }
+    else if (m.pump) html = M.charged(this.P(m.ps), Math.round(100 * m.oil / m.V0) + '%', this.P(m.p0));
+    else if (m.oil > 1e-9) {
+      if (m.ps < m.pmin - 1e-6) { html = M.weak(this.P(m.ps), this.P(m.pmin)); cls = 'bad'; }
+      else html = M.discharging(this.P(m.ps), m.left());
+    }
+    else if (m.ps > 0) { html = M.emptyLine(this.P(m.ps)); cls = 'bad'; }
+    else if (this.lastBrake !== null) { html = M.lost; cls = 'bad'; }
+    else { html = M.zero(this.P(m.pg), page.fmt(m.tC, 0), m.tC === T0C); cls = 'ok'; }
+    if (this.lastBrake) html = `<b>${this.lastBrake === 'ok' ? '✔ ' + t.brakeOk : this.lastBrake === 'weak' ? '⚠ ' + t.brakeWeak : '✖ ' + t.brakeNone}.</b> ` + html;
+    box.className = 'msg ' + cls; box.innerHTML = html;
+  }
+
+  renderTable() {
+    const m = this.m, r = page.t.rows;
+    const rows = [
+      [r.ps, this.P(m.ps)], [r.pg, this.P(m.pg)], [r.p0, this.P(m.p0)],
+      [r.vg, this.V(m.Vg)], [r.vo, this.V(m.oil)], [r.e, this.E(m.energy())],
+      [r.n, `${m.left()} (${page.t.nUnit} ${this.P(m.pmin)})`]
+    ];
+    $('calc').innerHTML = rows.map(([a, b]) => `<tr><td>${esc(a)}</td><td>${esc(b)}</td></tr>`).join('');
+    const pa = m.p0, va = m.V0, pb = m.pg, vb = m.Vg;
+    const law = this.units === 'imp'
+      ? `p₀·V₀/T₀ = p·V/T<br>${page.fmt(pa, 0)}×${page.fmt(va * L_IN3, 1)} / ${page.fmt(K(T0C), 0)} K = ${page.fmt(pb, 0)}×${page.fmt(vb * L_IN3, 1)} / ${page.fmt(K(m.tC), 0)} K`
+      : `p₀·V₀/T₀ = p·V/T<br>${page.fmt(pa * PSI_BAR, 1)}×${page.fmt(va, 2)} / ${page.fmt(K(T0C), 0)} K = ${page.fmt(pb * PSI_BAR, 1)}×${page.fmt(vb, 2)} / ${page.fmt(K(m.tC), 0)} K`;
+    $('law').innerHTML = law + `<br>${esc(page.t.rows.vo)} = V₀ − V = ${this.V(m.oil)}`;
+  }
+
+  /* ---------- animation: displayed values ease towards the model ---------- */
+  loop(now) {
+    const m = this.m, d = this.d, a = 0.12;
+    const prevOil = d.oil;
+    d.oil += (m.oil - d.oil) * a; d.ps += (m.ps - d.ps) * a; d.pg += (m.pg - d.pg) * a;
+    if (Math.abs(m.oil - d.oil) < 1e-4) d.oil = m.oil;
+    // pump on + brake: show a short dip and the refill
+    let dip = 0;
+    if (m.flash && m.pump && m.flash.type === 'brake') {
+      const u = (now - m.flash.t) / 900; if (u < 1) dip = Math.sin(Math.PI * u); else m.flash = null;
+    }
+    const flowIn = d.oil - prevOil > 1e-5 || (dip > 0 && dip < .9 && (now - m.flash.t) > 450);
+    const flowOut = prevOil - d.oil > 1e-5 || (dip > 0 && (now - m.flash.t) <= 450);
+    const toBleed = m.flash && m.flash.type === 'bleed' && now - m.flash.t < 1200;
+    const toBrake = m.flash && m.flash.type === 'brake' && now - m.flash.t < 900;
+    this.draw(d.oil - dip * Math.min(m.dv, m.oil) * 0.6, d.ps * (1 - 0.25 * dip), d.pg * (1 - 0.25 * dip), {flowIn, flowOut, toBleed, toBrake});
+    this.drawPV(d.oil, d.pg);
+    requestAnimationFrame(this.loop);
+  }
+
+  /* ---------- schematic ---------- */
+  gauge(cx, cy, r, psi, label, hot) {
+    const val = this.units === 'imp' ? psi : psi * PSI_BAR, top = this.units === 'imp' ? 4000 : 280;
+    const ang = v => (-210 + 240 * Math.min(Math.max(v, 0), top) / top) * Math.PI / 180;
+    let ticks = '';
+    for (let i = 0; i <= 8; i++) {
+      const v = top * i / 8, A = ang(v), c = Math.cos(A), s = Math.sin(A);
+      ticks += `<line x1="${cx + c * (r - 9)}" y1="${cy + s * (r - 9)}" x2="${cx + c * (r - 2)}" y2="${cy + s * (r - 2)}" stroke="#a09882" stroke-width="${i % 2 ? 1 : 2}"/>`;
+      if (i % 2 === 0) ticks += `<text x="${cx + c * (r - 20)}" y="${cy + s * (r - 20) + 4}" font-size="10" fill="#a09882" text-anchor="middle">${Math.round(v / (this.units === 'imp' ? 1000 : 1))}${this.units === 'imp' ? 'k' : ''}</text>`;
+    }
+    const A = ang(val);
+    return `<g><circle cx="${cx}" cy="${cy}" r="${r}" fill="#0d0c0a" stroke="${hot ? '#d9a521' : '#7a6c50'}" stroke-width="3"/>${ticks}
+      <line x1="${cx}" y1="${cy}" x2="${cx + Math.cos(A) * (r - 12)}" y2="${cy + Math.sin(A) * (r - 12)}" stroke="#F2704A" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="${cx}" cy="${cy}" r="4" fill="#cfc6ae"/>
+      <text x="${cx}" y="${cy + r + 20}" font-size="15" fill="#e8e2d0" text-anchor="middle" font-family="Share Tech Mono,monospace">${esc(this.P(psi))}</text>
+      <text x="${cx}" y="${cy - r - 8}" font-size="13" fill="#a09882" text-anchor="middle">${esc(label)}</text></g>`;
+  }
+
+  // Height of the fluid (from the bottom of a sphere of radius R) that fills fraction f of its volume.
+  static capH(f, R) {
+    let lo = 0, hi = 2 * R;
+    for (let i = 0; i < 40; i++) { const h = (lo + hi) / 2, v = h * h * (3 * R - h) / (4 * R ** 3); if (v < f) lo = h; else hi = h; }
+    return (lo + hi) / 2;
+  }
+
+  draw(oil, ps, pg, fl) {
+    const m = this.m, t = page.t, L = t.lbl;
+    const cx = 330, cy = 200, R = 120;
+    const f = Math.min(Math.max(oil / m.V0, 0), 1), h = AccPage.capH(f, R), yLvl = cy + R - h;
+    const pressOil = ps > 1 ? '#c2412f' : '#6b3a2e', gasA = 0.25 + 0.55 * Math.min(pg / 4000, 1);
+    const half = Math.sqrt(Math.max(R * R - (yLvl - cy) ** 2, 0)), bow = 10 * (1 - Math.abs(2 * f - 1));
+    // The whole drawing is rebuilt every frame, so motion comes from the clock, not from CSS animations.
+    const now = AccPage.still ? 0 : performance.now(), off = (now / 25) % 20;
+    const lineY = 390, pipe = (d, hot, cls = '') => `<path d="${d}" fill="none" stroke="${hot ? '#c2412f' : '#6b3a2e'}" stroke-width="10" stroke-linecap="round"/>` +
+      (cls ? `<path d="${d}" fill="none" stroke="#f3d38a" stroke-width="3" stroke-dasharray="10 10" stroke-dashoffset="${cls === 'rev' ? off : -off}" opacity=".85"/>` : '');
+    const hot = ps > 1;
+    let s = '';
+    // ---- reservoir and pump (left) ----
+    s += `<rect x="40" y="235" width="120" height="95" fill="#0d0c0a" stroke="#7a6c50" stroke-width="3"/>
+      <rect x="43" y="262" width="114" height="65" fill="#6b3a2e"/>
+      <text x="100" y="226" font-size="14" fill="#e8e2d0" text-anchor="middle">${esc(L.res)}</text>
+      <text x="100" y="300" font-size="12" fill="#e8e2d0" text-anchor="middle">${esc(L.resP)}</text>`;
+    s += pipe(`M100 330 L100 358`, false, fl.flowIn && m.pump ? 'fwd' : '');
+    const pumpOn = m.pump;
+    s += `<g transform="translate(100 ${lineY})"><circle r="30" fill="#14120f" stroke="${pumpOn ? '#d9a521' : '#7a6c50'}" stroke-width="3"/>
+      <g transform="rotate(${pumpOn ? (now * 0.36) % 360 : 0})">${[0, 120, 240].map(a => `<path d="M0 0 L${22 * Math.cos(a * Math.PI / 180)} ${22 * Math.sin(a * Math.PI / 180)}" stroke="${pumpOn ? '#d9a521' : '#7a6c50'}" stroke-width="5" stroke-linecap="round"/>`).join('')}</g>
+      <text y="52" font-size="13" fill="${pumpOn ? '#d9a521' : '#a09882'}" text-anchor="middle">${esc(L.pump)} ${pumpOn ? 'ON' : 'OFF'}</text></g>`;
+    // ---- main line ----
+    s += pipe(`M130 ${lineY} L190 ${lineY}`, hot, fl.flowIn && m.pump ? 'fwd' : '');
+    s += `<g transform="translate(205 ${lineY})"><path d="M-14 -14 L-14 14 L10 0 Z" fill="#14120f" stroke="#a09882" stroke-width="2"/><line x1="12" y1="-14" x2="12" y2="14" stroke="#a09882" stroke-width="3"/>
+      <text y="-22" font-size="11" fill="#a09882" text-anchor="middle">${esc(L.chk)}</text></g>`;
+    s += pipe(`M220 ${lineY} L${cx} ${lineY}`, hot, fl.flowIn && m.pump ? 'fwd' : '');
+    s += pipe(`M${cx} ${lineY} L860 ${lineY}`, hot, fl.toBrake ? 'fwd' : fl.toBleed ? 'fwd' : '');
+    // port from accumulator down to the line
+    const portCls = fl.flowIn ? 'rev' : fl.flowOut ? 'fwd' : '';
+    s += pipe(`M${cx} ${cy + R + 6} L${cx} ${lineY}`, hot, portCls);
+    // ---- accumulator ----
+    s += `<defs><clipPath id="sph"><circle cx="${cx}" cy="${cy}" r="${R}"/></clipPath>
+      <radialGradient id="shine" cx="35%" cy="30%" r="80%"><stop offset="0" stop-color="#fff" stop-opacity=".18"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>`;
+    s += `<g clip-path="url(#sph)"><rect x="${cx - R}" y="${cy - R}" width="${2 * R}" height="${2 * R}" fill="#5B9BEF" opacity="${gasA}"/>`;
+    if (f > 0.001) s += `<path d="M${cx - R - 5} ${yLvl} Q${cx} ${yLvl - bow} ${cx + R + 5} ${yLvl} L${cx + R + 5} ${cy + R + 5} L${cx - R - 5} ${cy + R + 5} Z" fill="${pressOil}"/>`;
+    s += `</g>`;
+    // diaphragm
+    const dy = f > 0.001 ? yLvl : cy + R - 4;
+    s += f > 0.001
+      ? `<path d="M${cx - half} ${yLvl} Q${cx} ${yLvl - 2 * bow} ${cx + half} ${yLvl}" fill="none" stroke="#e8e2d0" stroke-width="4"/>`
+      : `<path d="M${cx - 60} ${cy + R - 18} Q${cx} ${cy + R + 4} ${cx + 60} ${cy + R - 18}" fill="none" stroke="#e8e2d0" stroke-width="4"/>`;
+    s += `<circle cx="${cx}" cy="${cy}" r="${R}" fill="url(#shine)" stroke="#7a6c50" stroke-width="7"/>`;
+    // gas & oil labels
+    const gy = f < 0.9 ? Math.min(cy - 10, (cy - R + dy) / 2 + 6) : cy - R + 26;
+    s += `<text x="${cx}" y="${gy}" font-size="18" font-weight="700" fill="#e8e2d0" text-anchor="middle">${esc(L.gas)}</text>
+      <text x="${cx}" y="${gy + 20}" font-size="13" fill="#e8e2d0" text-anchor="middle" font-family="Share Tech Mono,monospace">${esc(this.V(m.V0 - oil))}</text>`;
+    if (f > 0.12) s += `<text x="${cx}" y="${(dy + cy + R) / 2 + 6}" font-size="16" font-weight="700" fill="#fff" text-anchor="middle">${esc(L.oil)} ${esc(this.V(oil))}</text>`;
+    // poppet + port
+    s += `<rect x="${cx - 16}" y="${cy + R - 2}" width="32" height="14" fill="#4f4636" stroke="#7a6c50"/>`;
+    if (f <= 0.001) s += `<text x="${cx + 26}" y="${cy + R + 20}" font-size="11" fill="#a09882">${esc(L.poppetC)}</text>`;
+    // charging valve + gas gauge
+    s += `<rect x="${cx - 12}" y="${cy - R - 30}" width="24" height="32" fill="#4f4636" stroke="#7a6c50" stroke-width="2"/>
+      <path d="M${cx} ${cy - R - 22} L${cx + 140} ${cy - R - 22} L${cx + 140} ${cy - 85}" fill="none" stroke="#5B9BEF" stroke-width="5" opacity=".7"/>`;
+    s += this.gauge(cx + 190, cy - 85, 50, pg, L.gasG, !hot || f <= 0.001);
+    // system gauge
+    s += `<line x1="650" y1="${lineY}" x2="650" y2="${lineY - 60}" stroke="${hot ? '#c2412f' : '#6b3a2e'}" stroke-width="6"/>`;
+    s += this.gauge(650, lineY - 140, 50, ps, L.sysG, false);
+    // bleed valve
+    const bx = 720;
+    s += `<line x1="${bx}" y1="${lineY}" x2="${bx}" y2="${lineY + 26}" stroke="${hot ? '#c2412f' : '#6b3a2e'}" stroke-width="6"/>
+      <g transform="translate(${bx} ${lineY + 36})"><path d="M-14 -10 L14 10 L14 -10 L-14 10 Z" fill="${fl.toBleed ? '#d9a521' : '#14120f'}" stroke="#a09882" stroke-width="2"/></g>
+      <text x="${bx}" y="${lineY + 64}" font-size="12" fill="#a09882" text-anchor="middle">${esc(L.bleed)} → ${esc(L.res)}</text>`;
+    // brake actuator + disc
+    const br = this.lastBrake, brCol = br === 'ok' ? '#62b886' : br === 'weak' ? '#d9a521' : br === 'none' ? '#e5534b' : '#7a6c50';
+    const push = fl.toBrake ? 10 : 0;
+    s += `<rect x="860" y="${lineY - 26}" width="70" height="52" fill="#14120f" stroke="#7a6c50" stroke-width="3"/>
+      <rect x="862" y="${lineY - 23}" width="${20 + push}" height="46" fill="${hot ? '#c2412f' : '#6b3a2e'}"/>
+      <rect x="${882 + push}" y="${lineY - 23}" width="10" height="46" fill="#cfc6ae"/>
+      <rect x="${892 + push}" y="${lineY - 5}" width="${40 - push}" height="10" fill="#cfc6ae"/>
+      <rect x="945" y="${lineY - 70}" width="14" height="140" fill="#4f4636" stroke="${brCol}" stroke-width="3"/>
+      <text x="905" y="${lineY - 40}" font-size="13" fill="#e8e2d0" text-anchor="middle">${esc(L.brake)}</text>`;
+    // pressure in the line, big readout
+    s += `<text x="20" y="40" font-size="13" fill="#a09882">${esc(page.t.rows.ps)}</text>
+      <text x="20" y="72" font-size="30" fill="${hot ? '#F2704A' : '#a09882'}" font-family="Rajdhani,Barlow Condensed,sans-serif" font-weight="700">${esc(this.P(ps))}</text>`;
+    $('view').innerHTML = s;
+  }
+
+  /* ---------- p–V diagram of the gas ---------- */
+  drawPV(oil, pg) {
+    const m = this.m, t = page.t, W = 600, H = 380, x0 = 70, y0 = 330, x1 = 575, y1 = 25;
+    const Vmax = m.V0, Pmax = Math.max(4000, m.pset * 1.15, m.p0 * 1.15);
+    const X = v => x0 + (x1 - x0) * v / Vmax, Y = p => y0 - (y0 - y1) * Math.min(p, Pmax) / Pmax;
+    const CT = m.C * K(m.tC), Vg = m.V0 - oil;
+    const pd = p => this.units === 'imp' ? page.fmt(p, 0) : page.fmt(p * PSI_BAR, 0);
+    const vd = v => this.units === 'imp' ? page.fmt(v * L_IN3, 0) : page.fmt(v, 1);
+    let s = '';
+    // grid & axes
+    for (let i = 0; i <= 4; i++) {
+      const p = Pmax * i / 4, v = Vmax * i / 4;
+      s += `<line x1="${x0}" y1="${Y(p)}" x2="${x1}" y2="${Y(p)}" stroke="#2d2618"/><text x="${x0 - 8}" y="${Y(p) + 4}" font-size="12" fill="#a09882" text-anchor="end">${pd(p)}</text>`;
+      s += `<line x1="${X(v)}" y1="${y0}" x2="${X(v)}" y2="${y1}" stroke="#2d2618"/><text x="${X(v)}" y="${y0 + 18}" font-size="12" fill="#a09882" text-anchor="middle">${vd(v)}</text>`;
+    }
+    s += `<text x="${x0 - 8}" y="${y1 - 8}" font-size="13" fill="#e8e2d0" text-anchor="end">${t.ax.p} (${this.units === 'imp' ? 'psi' : 'bar'})</text>
+      <text x="${x1}" y="${y0 + 40}" font-size="13" fill="#e8e2d0" text-anchor="end">${esc(t.ax.v)} (${this.units === 'imp' ? 'in³' : 'L'})</text>`;
+    if (CT > 1e-9) {
+      // shaded energy area under the isotherm between Vg and V0
+      if (oil > 1e-6) {
+        let a = `M${X(Vg)} ${y0}`;
+        for (let i = 0; i <= 40; i++) { const v = Vg + (m.V0 - Vg) * i / 40; a += ` L${X(v)} ${Y(CT / v)}`; }
+        s += `<path d="${a} L${X(m.V0)} ${y0} Z" fill="#d9a521" opacity=".22"/>`;
+      }
+      // isotherm
+      let c = '';
+      const vmin = Math.max(CT / Pmax, Vmax * 0.02);
+      for (let i = 0; i <= 80; i++) { const v = vmin + (Vmax - vmin) * i / 80; c += (i ? ' L' : 'M') + X(v) + ' ' + Y(CT / v); }
+      s += `<path d="${c}" fill="none" stroke="#5B9BEF" stroke-width="3"/>`;
+    }
+    // pressure lines
+    s += `<line x1="${x0}" y1="${Y(m.pset)}" x2="${x1}" y2="${Y(m.pset)}" stroke="#F2704A" stroke-dasharray="6 5" stroke-width="2"/><text x="${x1 - 4}" y="${Y(m.pset) - 6}" font-size="12" fill="#F2704A" text-anchor="end">${esc(t.pset)}</text>`;
+    s += `<line x1="${x0}" y1="${Y(m.pmin)}" x2="${x1}" y2="${Y(m.pmin)}" stroke="#a09882" stroke-dasharray="3 5" stroke-width="2"/><text x="${x1 - 4}" y="${Y(m.pmin) - 6}" font-size="12" fill="#a09882" text-anchor="end">${esc(t.pmin)}</text>`;
+    s += `<line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y0}" stroke="#7a6c50" stroke-width="2"/><line x1="${x0}" y1="${y0}" x2="${x0}" y2="${y1}" stroke="#7a6c50" stroke-width="2"/>`;
+    // current point
+    if (CT > 1e-9) s += `<circle cx="${X(Vg)}" cy="${Y(pg)}" r="8" fill="#d9a521" stroke="#0b0a09" stroke-width="2"/><text x="${X(Vg) + 12}" y="${Y(pg) - 10}" font-size="13" fill="#d9a521">${esc(t.now)}</text>`;
+    $('pv').innerHTML = s;
+  }
+}
+
+/* ============================ "Solve it" questions ============================ */
+const Q = (el, en) => ({el, en});
+const V2 = (x, unit, d = 2) => ({el: page.fmtIn(x, d, 'el') + ' ' + unit, en: page.fmtIn(x, d, 'en') + ' ' + unit});
+const IMP = () => Math.random() < 0.5;
+// pick numbers in both unit systems; apply() loads them into the simulation
+function setup(imp) {
+  return imp
+    ? {p0: pick([500, 750, 1000, 1200, 1500]), ps: pick([2000, 2500, 3000]), V0: pick([40, 60, 80, 100, 120]), pu: 'psi', vu: 'in³', toPsi: x => x, toL: x => x / L_IN3}
+    : {p0: pick([40, 50, 70, 100]), ps: pick([150, 200, 210]), V0: pick([1, 2, 3, 4]), pu: 'bar', vu: 'L', toPsi: x => x / PSI_BAR, toL: x => x};
+}
+function load(o) {   // o: {p0psi, pset, V0L, pump, tC, oil}
+  const m = app.m; m.reset();
+  if (o.V0L !== undefined) m.V0 = o.V0L;
+  if (o.pset !== undefined) m.pset = o.pset;
+  m.tC = o.tC !== undefined ? o.tC : T0C;
+  m.C = o.p0psi * m.V0 / K(o.t0 !== undefined ? o.t0 : T0C);
+  m.pump = o.pump !== undefined ? o.pump : true;
+  m.settle();
+  if (o.bleed) { m.pump = false; m.oil = 0; m.ps = 0; }
+  app.lastBrake = null; app.units = o.imp ? 'imp' : 'si'; app.renderStatic();
+}
+const QUIZ = [
+  // fluid volume in the charged accumulator (Boyle)
+  () => {
+    const imp = IMP(), u = setup(imp), vg = u.V0 * u.p0 / u.ps, oil = u.V0 - vg;
+    return {
+      q: Q(`Accumulator ${u.V0} ${u.vu} με προφόρτιση ${u.p0} ${u.pu}. Η αντλία φέρνει το σύστημα στα ${u.ps} ${u.pu} (σταθερή θερμοκρασία). Πόσο λάδι έχει μπει στον accumulator;`,
+           `A ${u.V0} ${u.vu} accumulator is pre-charged to ${u.p0} ${u.pu}. The pump brings the system to ${u.ps} ${u.pu} (constant temperature). How much fluid has entered the accumulator?`),
+      o: [V2(oil, u.vu), V2(vg, u.vu), V2(u.V0 * u.ps / u.p0, u.vu)], a: 0,
+      x: Q(`Boyle: V αερίου = ${u.V0}×${u.p0}/${u.ps} = ${page.fmtIn(vg, 2, 'el')} ${u.vu}. Λάδι = ${u.V0} − ${page.fmtIn(vg, 2, 'el')} = ${page.fmtIn(oil, 2, 'el')} ${u.vu}.`,
+           `Boyle: gas V = ${u.V0}×${u.p0}/${u.ps} = ${page.fmtIn(vg, 2, 'en')} ${u.vu}. Fluid = ${u.V0} − ${page.fmtIn(vg, 2, 'en')} = ${page.fmtIn(oil, 2, 'en')} ${u.vu}.`),
+      apply: () => load({imp, p0psi: u.toPsi(u.p0), pset: u.toPsi(u.ps), V0L: u.toL(u.V0)})
+    };
+  },
+  // gauge reading
+  () => {
+    const imp = IMP(), u = setup(imp);
+    return {
+      q: Q(`Accumulator με προφόρτιση αζώτου ${u.p0} ${u.pu}. Η αντλία ανεβάζει την πίεση του συστήματος στα ${u.ps} ${u.pu}. Το όργανο πίεσης του συστήματος δείχνει:`,
+           `An accumulator has a nitrogen pre-charge of ${u.p0} ${u.pu}. The pump raises system pressure to ${u.ps} ${u.pu}. The system pressure gauge reads:`),
+      o: [V2(u.ps, u.pu, 0), V2(u.p0, u.pu, 0), V2(u.p0 + u.ps, u.pu, 0)], a: 0,
+      x: Q(`Οι πιέσεις δεν προστίθενται: σε ισορροπία άζωτο και λάδι έχουν την ίδια πίεση, ${u.ps} ${u.pu}.`,
+           `Pressures do not add: in equilibrium nitrogen and fluid are at the same pressure, ${u.ps} ${u.pu}.`),
+      apply: () => load({imp, p0psi: u.toPsi(u.p0), pset: u.toPsi(u.ps)})
+    };
+  },
+  // pre-charge check with pressure still on
+  () => {
+    const imp = IMP(), u = setup(imp);
+    return {
+      q: Q(`Accumulator με πραγματική προφόρτιση ${u.p0} ${u.pu}. Κάποιος διαβάζει το όργανο του αζώτου ενώ το σύστημα είναι ακόμα στα ${u.ps} ${u.pu}. Τι διαβάζει;`,
+           `An accumulator has a true pre-charge of ${u.p0} ${u.pu}. Someone reads the nitrogen gauge while the system is still at ${u.ps} ${u.pu}. The reading is:`),
+      o: [V2(u.ps, u.pu, 0), V2(u.p0, u.pu, 0), V2(0, u.pu, 0)], a: 0,
+      x: Q(`Το λάδι έχει συμπιέσει το άζωτο μέχρι την πίεση του συστήματος, άρα η ένδειξη είναι ${u.ps} ${u.pu}: ψευδώς μεγάλη. Η προφόρτιση ελέγχεται με υδραυλικό στο μηδέν.`,
+           `The fluid has compressed the nitrogen to system pressure, so it reads ${u.ps} ${u.pu}: a false, higher reading. Check the pre-charge with the hydraulics at zero.`),
+      apply: () => load({imp, p0psi: u.toPsi(u.p0), pset: u.toPsi(u.ps)})
+    };
+  },
+  // temperature correction
+  () => {
+    const imp = IMP(), u = setup(imp), t1 = pick([10, 15, 20]), t2 = pick([35, 40, 45, 50]);
+    const p2 = u.p0 * K(t2) / K(t1);
+    return {
+      q: Q(`Accumulator χωρίς λάδι έχει προφόρτιση ${u.p0} ${u.pu} στους ${t1} °C. Στους ${t2} °C (ίδιος όγκος) η πίεση του αζώτου είναι περίπου:`,
+           `An accumulator with no fluid inside is pre-charged to ${u.p0} ${u.pu} at ${t1} °C. At ${t2} °C (same volume) the nitrogen pressure is about:`),
+      o: [V2(p2, u.pu, 0), V2(u.p0 * t2 / t1, u.pu, 0), V2(u.p0 * K(t1) / K(t2), u.pu, 0)], a: 0,
+      x: Q(`p/T = σταθ. με απόλυτη θερμοκρασία: p = ${u.p0}×${page.fmtIn(K(t2), 0, 'el')}/${page.fmtIn(K(t1), 0, 'el')} ≈ ${page.fmtIn(p2, 0, 'el')} ${u.pu}.`,
+           `p/T = const. with absolute temperature: p = ${u.p0}×${page.fmtIn(K(t2), 0, 'en')}/${page.fmtIn(K(t1), 0, 'en')} ≈ ${page.fmtIn(p2, 0, 'en')} ${u.pu}.`),
+      apply: () => load({imp, p0psi: u.toPsi(u.p0), t0: t1, tC: t2, pump: false, bleed: true})
+    };
+  },
+  // fluid delivered when pressure falls
+  () => {
+    const imp = IMP(), u = setup(imp), p2 = imp ? pick([1500, 1800]) : pick([100, 120]);
+    if (p2 <= u.p0) return QUIZ[0]();
+    const v1 = u.V0 * u.p0 / u.ps, v2 = u.V0 * u.p0 / p2, dV = v2 - v1;
+    return {
+      q: Q(`Accumulator ${u.V0} ${u.vu}, προφόρτιση ${u.p0} ${u.pu}, φορτισμένος στα ${u.ps} ${u.pu}. Η αντλία σταματά. Πόσο λάδι δίνει ο accumulator μέχρι η πίεση να πέσει στα ${p2} ${u.pu};`,
+           `A ${u.V0} ${u.vu} accumulator, pre-charged to ${u.p0} ${u.pu}, is charged to ${u.ps} ${u.pu}. The pump stops. How much fluid does it deliver until pressure falls to ${p2} ${u.pu}?`),
+      o: [V2(dV, u.vu), V2(v2, u.vu), V2(u.V0 - v1, u.vu)], a: 0,
+      x: Q(`V αερίου στα ${u.ps}: ${page.fmtIn(v1, 2, 'el')}· στα ${p2}: ${page.fmtIn(v2, 2, 'el')}. Λάδι που δόθηκε = ${page.fmtIn(dV, 2, 'el')} ${u.vu}.`,
+           `Gas V at ${u.ps}: ${page.fmtIn(v1, 2, 'en')}; at ${p2}: ${page.fmtIn(v2, 2, 'en')}. Fluid delivered = ${page.fmtIn(dV, 2, 'en')} ${u.vu}.`),
+      apply: () => load({imp, p0psi: u.toPsi(u.p0), pset: u.toPsi(u.ps), V0L: u.toL(u.V0)})
+    };
+  },
+  // pre-charge above system pressure
+  () => {
+    const imp = IMP(), u = setup(imp), p0 = Math.round(u.ps * 1.2);
+    return {
+      q: Q(`Η προφόρτιση ενός accumulator είναι ${p0} ${u.pu} και η αντλία δίνει ${u.ps} ${u.pu}. Τότε:`,
+           `An accumulator is pre-charged to ${p0} ${u.pu} and the pump delivers ${u.ps} ${u.pu}. Then:`),
+      o: [Q('δεν μπαίνει λάδι και ο accumulator δεν κάνει τίποτα', 'no fluid enters and the accumulator is ineffective'),
+          Q('ο accumulator γεμίζει τελείως με λάδι', 'the accumulator fills completely with fluid'),
+          Q(`το όργανο δείχνει ${p0 + u.ps} ${u.pu}`, `the gauge reads ${p0 + u.ps} ${u.pu}`)], a: 0,
+      x: Q('Το λάδι δεν νικά ποτέ την πίεση του αερίου: η προφόρτιση πρέπει να είναι μικρότερη από την πίεση του συστήματος.',
+           'The fluid never overcomes the gas pressure: the pre-charge must be lower than system pressure.'),
+      apply: () => load({imp, p0psi: u.toPsi(p0), pset: u.toPsi(u.ps)})
+    };
+  }
+];
+
+const app = new AccPage();
+app.quiz = new Quiz(page, $('quiz'), QUIZ, null);
+app.quiz.next();
+</script>
+<script src="assets/landscape.js"></script>
+</body>
+</html>

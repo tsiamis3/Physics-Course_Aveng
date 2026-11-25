@@ -90,7 +90,8 @@ const CONFIG = {
     {label: 'Ramp, Loop & Collision', href: 'ramp.html'},
     {label: 'Waves', href: 'waves.html'},
     {label: 'Doppler & Mach', href: 'sound.html'},
-    {label: 'Beats', href: 'beats.html'}
+    {label: 'Beats', href: 'beats.html'},
+    {label: 'Hydraulic Accumulator', href: 'accumulator.html'}
   ],
   TEACHER: 'Maevius',   // this logged-in account sees the SOS explanations without answering first
   TOOLS: [
@@ -152,7 +153,8 @@ class HomePage {
 class SosTab {
   constructor(sets, teacher) {
     this.sets = sets.map(s => ({...s, questions: s.questions.map(q => ({...q, ...SosTab.unhide(q.k)}))}));
-    this.cur = this.sets.length ? this.sets[0].id : null;
+    const h = location.hash.match(/^#sos=(.+)$/);   // #sos=<set id> opens that set
+    this.cur = h && this.sets.some(s => s.id === h[1]) ? h[1] : this.sets.length ? this.sets[0].id : null;
     this.ans = {};                 // question index -> chosen option, for the open set
     this.teacher = false;
     this.checkTeacher(teacher);
